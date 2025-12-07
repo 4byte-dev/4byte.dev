@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Scout\Searchable;
+use Packages\Article\Database\Factories\ArticleFactory;
 use Packages\Category\Models\Category;
 use Packages\React\Traits\HasComments;
 use Packages\React\Traits\HasDislikes;
@@ -221,5 +222,13 @@ class Article extends Model implements HasMedia
             'id'    => (int) $this->id,
             'title' => $this->title,
         ];
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): ArticleFactory
+    {
+        return ArticleFactory::new();
     }
 }

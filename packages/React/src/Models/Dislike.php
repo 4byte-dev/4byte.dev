@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Packages\React\Database\Factories\DislikeFactory;
 
 /**
  * @property int $user_id
@@ -56,5 +57,13 @@ class Dislike extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): DislikeFactory
+    {
+        return DislikeFactory::new();
     }
 }

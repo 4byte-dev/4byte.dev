@@ -5,6 +5,7 @@ namespace Packages\Category\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Packages\Category\Database\Factories\CategoryProfileFactory;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -60,5 +61,13 @@ class CategoryProfile extends Model
             ->logOnly(['description', 'color'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): CategoryProfileFactory
+    {
+        return CategoryProfileFactory::new();
     }
 }

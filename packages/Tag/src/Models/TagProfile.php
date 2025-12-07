@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Packages\Category\Models\Category;
+use Packages\Tag\Database\Factories\TagProfileFactory;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -72,5 +73,13 @@ class TagProfile extends Model
             ->logOnly(['description', 'color'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): TagProfileFactory
+    {
+        return TagProfileFactory::new();
     }
 }
