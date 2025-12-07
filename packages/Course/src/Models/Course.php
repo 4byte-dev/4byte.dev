@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Scout\Searchable;
 use Packages\Category\Models\Category;
+use Packages\Course\Database\Factories\CourseFactory;
 use Packages\React\Traits\HasComments;
 use Packages\React\Traits\HasDislikes;
 use Packages\React\Traits\HasLikes;
@@ -236,5 +237,13 @@ class Course extends Model implements HasMedia
             'id'    => (int) $this->id,
             'title' => $this->title,
         ];
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): CourseFactory
+    {
+        return CourseFactory::new();
     }
 }

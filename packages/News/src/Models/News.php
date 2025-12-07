@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Packages\Category\Models\Category;
+use Packages\News\Database\Factories\NewsFactory;
 use Packages\Tag\Models\Tag;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -172,5 +173,13 @@ class News extends Model implements HasMedia
             ->logOnly(['title', 'slug', 'excerpt', 'content'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): NewsFactory
+    {
+        return NewsFactory::new();
     }
 }

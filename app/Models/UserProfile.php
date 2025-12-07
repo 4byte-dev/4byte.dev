@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\UserProfileFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -134,5 +135,13 @@ class UserProfile extends Model implements HasMedia
             ->logOnly(['role', 'bio', 'location', 'website', 'socials'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): UserProfileFactory
+    {
+        return UserProfileFactory::new();
     }
 }

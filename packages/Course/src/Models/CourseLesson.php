@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Scout\Searchable;
+use Packages\Course\Database\Factories\CourseLessonFactory;
 use Packages\React\Traits\HasComments;
 use Packages\React\Traits\HasSaves;
 use Spatie\Activitylog\LogOptions;
@@ -60,7 +61,7 @@ class CourseLesson extends Model implements HasMedia
 {
     use HasComments;
 
-    /** @use HasFactory<\Packages\Course\Database\Factories\CourseFactory> */
+    /** @use HasFactory<\Packages\Course\Database\Factories\CourseLessonFactory> */
     use HasFactory;
 
     use HasSaves;
@@ -157,5 +158,13 @@ class CourseLesson extends Model implements HasMedia
             'chapter_id' => (int) $this->chapter_id,
             'title'      => $this->title,
         ];
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): CourseLessonFactory
+    {
+        return CourseLessonFactory::new();
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Packages\Article\Models\Article;
 use Packages\React\Traits\HasFollowers;
+use Packages\Tag\Database\Factories\TagFactory;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -74,5 +75,13 @@ class Tag extends Model
             ->logOnly(['name', 'slug'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): TagFactory
+    {
+        return TagFactory::new();
     }
 }

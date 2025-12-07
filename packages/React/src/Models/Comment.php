@@ -6,7 +6,9 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Packages\React\Database\Factories\CommentFactory;
 use Packages\React\Services\ReactService;
 use Packages\React\Traits\HasLikes;
 use Spatie\Activitylog\LogOptions;
@@ -85,6 +87,14 @@ class Comment extends Model
     }
 
     /**
+     * @return HasMany<Comment, $this>
+     */
+    public function replies(): HasMany
+    {
+        return $this->hasMany(Comment::class, 'parent_id');
+    }
+
+    /**
      * Returns the number of replies for a specific comment.
      */
     public function repliesCount(): int
@@ -103,5 +113,13 @@ class Comment extends Model
             ->logOnly(['content'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): CommentFactory
+    {
+        return CommentFactory::new();
     }
 }

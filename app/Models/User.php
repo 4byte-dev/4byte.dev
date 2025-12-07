@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -204,6 +205,14 @@ class User extends Authenticatable implements FilamentUser, HasMedia, HasAvatar
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
         return $this->can('view-panel');
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): UserFactory
+    {
+        return UserFactory::new();
     }
 
     /**
