@@ -16,10 +16,10 @@ class SearchController extends Controller
 
     protected SeoService $seoService;
 
-    public function __construct()
+    public function __construct(SearchService $searchService, SeoService $seoService)
     {
-        $this->searchService = app(SearchService::class);
-        $this->seoService    = app(SeoService::class);
+        $this->searchService = $searchService;
+        $this->seoService    = $seoService;
     }
 
     /**

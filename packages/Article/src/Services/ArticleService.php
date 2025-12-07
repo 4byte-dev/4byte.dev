@@ -11,9 +11,9 @@ class ArticleService
 {
     protected UserService $userService;
 
-    public function __construct()
+    public function __construct(UserService $userService)
     {
-        $this->userService = app(UserService::class);
+        $this->userService = $userService;
     }
 
     /**

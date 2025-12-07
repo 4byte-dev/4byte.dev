@@ -15,10 +15,10 @@ class TagController extends Controller
 
     protected SeoService $seoService;
 
-    public function __construct()
+    public function __construct(TagService $tagService, SeoService $seoService)
     {
-        $this->tagService      = app(TagService::class);
-        $this->seoService      = app(SeoService::class);
+        $this->tagService      = $tagService;
+        $this->seoService      = $seoService;
     }
 
     /**

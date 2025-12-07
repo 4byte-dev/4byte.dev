@@ -32,12 +32,12 @@ class FeedService
 
     protected CategoryService $categoryService;
 
-    public function __construct()
+    public function __construct(GorseService $gorseService, ArticleService $articleService, TagService $tagService, CategoryService $categoryService)
     {
-        $this->gorseService    = app(GorseService::class);
-        $this->articleService  = app(ArticleService::class);
-        $this->tagService      = app(TagService::class);
-        $this->categoryService = app(CategoryService::class);
+        $this->gorseService    = $gorseService;
+        $this->articleService  = $articleService;
+        $this->tagService      = $tagService;
+        $this->categoryService = $categoryService;
     }
 
     /**

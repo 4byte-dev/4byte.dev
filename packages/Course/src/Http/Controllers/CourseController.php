@@ -15,10 +15,10 @@ class CourseController extends Controller
 
     protected SeoService $seoService;
 
-    public function __construct()
+    public function __construct(CourseService $courseService, SeoService $seoService)
     {
-        $this->courseService = app(CourseService::class);
-        $this->seoService    = app(SeoService::class);
+        $this->courseService = $courseService;
+        $this->seoService    = $seoService;
     }
 
     /**

@@ -14,9 +14,9 @@ class ReactController extends Controller
 {
     protected ReactService $reactService;
 
-    public function __construct()
+    public function __construct(ReactService $reactService)
     {
-        $this->reactService = app(ReactService::class);
+        $this->reactService = $reactService;
     }
 
     /**
@@ -101,7 +101,7 @@ class ReactController extends Controller
             $this->reactService->insertSave($baseClass, $itemId, $userId);
         }
 
-        return response()->noContent();
+        return response()->noContent(200);
     }
 
     /**

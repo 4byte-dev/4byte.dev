@@ -18,11 +18,11 @@ class EntryController extends Controller
 
     protected FeedService $feedService;
 
-    public function __construct()
+    public function __construct(EntryService $entryService, SeoService $seoService, FeedService $feedService)
     {
-        $this->entryService = app(EntryService::class);
-        $this->seoService   = app(SeoService::class);
-        $this->feedService  = app(FeedService::class);
+        $this->entryService = $entryService;
+        $this->seoService   = $seoService;
+        $this->feedService  = $feedService;
     }
 
     /**
