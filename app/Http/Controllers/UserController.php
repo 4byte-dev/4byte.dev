@@ -35,11 +35,11 @@ class UserController extends Controller
 
     protected SeoService $seoService;
 
-    public function __construct()
+    public function __construct(UserService $userService, SeoService $seoService)
     {
         $this->securitySettings = SettingsService::getSecuritySettings();
-        $this->userService      = app(UserService::class);
-        $this->seoService       = app(SeoService::class);
+        $this->userService      = $userService;
+        $this->seoService       = $seoService;
     }
 
     /**

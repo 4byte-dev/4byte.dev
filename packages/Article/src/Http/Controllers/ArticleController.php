@@ -18,11 +18,11 @@ class ArticleController extends Controller
 
     protected FeedService $feedService;
 
-    public function __construct()
+    public function __construct(ArticleService $articleService, SeoService $seoService, FeedService $feedService)
     {
-        $this->articleService = app(ArticleService::class);
-        $this->seoService     = app(SeoService::class);
-        $this->feedService    = app(FeedService::class);
+        $this->articleService = $articleService;
+        $this->seoService     = $seoService;
+        $this->feedService    = $feedService;
     }
 
     /**

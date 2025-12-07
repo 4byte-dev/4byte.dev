@@ -10,9 +10,9 @@ class FollowObserver
 {
     protected GorseService $gorse;
 
-    public function __construct()
+    public function __construct(GorseService $gorse)
     {
-        $this->gorse = app(GorseService::class);
+        $this->gorse = $gorse;
     }
 
     /**

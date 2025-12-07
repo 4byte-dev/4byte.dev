@@ -15,10 +15,10 @@ class CategoryController extends Controller
 
     protected SeoService $seoService;
 
-    public function __construct()
+    public function __construct(CategoryService $categoryService, SeoService $seoService)
     {
-        $this->categoryService = app(CategoryService::class);
-        $this->seoService      = app(SeoService::class);
+        $this->categoryService = $categoryService;
+        $this->seoService      = $seoService;
     }
 
     /**
