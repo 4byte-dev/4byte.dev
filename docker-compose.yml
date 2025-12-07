@@ -104,7 +104,7 @@ services:
         security_opt:
             - no-new-privileges:true
         environment:
-            - MASTER_KEY='${MEILISEARCH_KEY}'
+            - MEILI_MASTER_KEY='${MEILISEARCH_KEY}'
         networks:
             - stack
         healthcheck:
@@ -176,7 +176,7 @@ services:
         depends_on:
             - gorse-master
         ports:
-            - 8089:8089
+            - 127.0.0.1:8089:8089
         command: >
             --master-host gorse-master --master-port 8086 
             --http-host 0.0.0.0 --http-port 8089
@@ -199,7 +199,7 @@ services:
         depends_on:
             - gorse-master
         ports:
-            - 8087:8087
+            - 127.0.0.1:8087:8087
         command: >
             --master-host gorse-master --master-port 8086
             --http-host 0.0.0.0 --http-port 8087
@@ -223,8 +223,8 @@ services:
             - mysql
             - redis
         ports:
-            - 8086:8086
-            - 8088:8088
+            - 127.0.0.1:8086:8086
+            - 0.0.0.0:8088:8088
         environment:
             GORSE_CACHE_STORE: "redis://:${REDIS_PASSWORD}@redis:6379"
             GORSE_DATA_STORE: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(mysql:3306)/${MYSQL_DATABASE}"
