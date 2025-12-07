@@ -12,6 +12,9 @@ class CategoryObserver
      */
     public function updated(Category $category): void
     {
+        if ($category->isDirty('slug')) {
+            Cache::forget("category:{$category->getOriginal('slug')}:id");
+        }
         Cache::forget("category:{$category->id}");
     }
 
