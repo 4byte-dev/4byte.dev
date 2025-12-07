@@ -12,6 +12,9 @@ class TagObserver
      */
     public function updated(Tag $tag): void
     {
+        if ($tag->isDirty('slug')) {
+            Cache::forget("tag:{$tag->getOriginal('slug')}:id");
+        }
         Cache::forget("tag:{$tag->id}");
     }
 
