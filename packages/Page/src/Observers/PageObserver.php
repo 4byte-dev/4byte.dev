@@ -27,6 +27,9 @@ class PageObserver
      */
     public function updated(Page $page): void
     {
+        if ($page->isDirty('slug')) {
+            Cache::forget("page:{$page->getOriginal('slug')}:id");
+        }
         Cache::forget("page:{$page->id}");
     }
 
