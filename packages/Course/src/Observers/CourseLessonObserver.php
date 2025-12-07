@@ -25,12 +25,10 @@ class CourseLessonObserver
 
     protected function clearCourseCache(CourseLesson $courseLesson): void
     {
-        if ($courseLesson->chapter && $courseLesson->chapter->course_id) {
-            $courseId = $courseLesson->chapter->course_id;
-            Cache::forget("course:{$courseId}");
-            Cache::forget("course:{$courseId}:cirriculum");
-            Cache::forget("course:{$courseId}:lesson:{$courseLesson->id}");
-            Cache::forget("course:{$courseId}:lesson:{$courseLesson->slug}:id");
-        }
+        $courseId = $courseLesson->chapter->course_id;
+        Cache::forget("course:{$courseId}");
+        Cache::forget("course:{$courseId}:cirriculum");
+        Cache::forget("course:{$courseId}:lesson:{$courseLesson->id}");
+        Cache::forget("course:{$courseId}:lesson:{$courseLesson->slug}:id");
     }
 }
