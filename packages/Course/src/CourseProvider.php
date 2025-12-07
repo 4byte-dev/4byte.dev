@@ -15,6 +15,8 @@ use Packages\Course\Listeners\LessonPublishedListener;
 use Packages\Course\Models\Course;
 use Packages\Course\Models\CourseChapter;
 use Packages\Course\Models\CourseLesson;
+use Packages\Course\Observers\CourseChapterObserver;
+use Packages\Course\Observers\CourseLessonObserver;
 use Packages\Course\Observers\CourseObserver;
 use Packages\Course\Policies\CourseChapterPolicy;
 use Packages\Course\Policies\CourseLessonPolicy;
@@ -53,6 +55,8 @@ class CourseProvider extends ServiceProvider
     public function loadObservers(): void
     {
         Course::observe(CourseObserver::class);
+        CourseLesson::observe(CourseLessonObserver::class);
+        CourseChapter::observe(CourseChapterObserver::class);
     }
 
     public function loadEvents(): void
