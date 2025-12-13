@@ -89,7 +89,7 @@ class TagProfileTest extends TestCase
             'tag_id'      => $tag->id,
         ]);
 
-        $activity = Activity::find(2);
+        $activity = Activity::orderBy('id', 'desc')->first();
 
         $this->assertSame('tag_profile', $activity->log_name);
         $this->assertSame('created', $activity->description);
@@ -112,7 +112,7 @@ class TagProfileTest extends TestCase
             'description' => 'New',
         ]);
 
-        $activity = Activity::find(3);
+        $activity = Activity::orderBy('id', 'desc')->first();
 
         $this->assertSame('tag_profile', $activity->log_name);
         $this->assertSame('updated', $activity->description);

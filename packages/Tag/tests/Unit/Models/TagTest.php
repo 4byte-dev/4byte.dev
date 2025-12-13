@@ -91,7 +91,7 @@ class TagTest extends TestCase
 
         $tag->update(['name' => 'New']);
 
-        $activity = Activity::find(2);
+        $activity = Activity::orderBy('id', 'desc')->first();
 
         $this->assertSame('updated', $activity->description);
         $this->assertArrayHasKey('name', $activity->properties['attributes']);
