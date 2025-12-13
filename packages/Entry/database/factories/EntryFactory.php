@@ -26,7 +26,7 @@ class EntryFactory extends Factory
         return [
             'slug'    => Str::slug($title) . '-' . $this->faker->unique()->numberBetween(1, 9999),
             'content' => $this->faker->paragraphs(rand(2, 5), true),
-            'user_id' => User::inRandomOrder()->first()->id,
+            'user_id' => User::factory(),
         ];
     }
 }

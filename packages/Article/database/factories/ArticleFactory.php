@@ -36,7 +36,7 @@ class ArticleFactory extends Factory
                 ];
             })->toArray(),
             'published_at' => $this->faker->optional()->dateTimeBetween('-1 year', 'now'),
-            'user_id'      => User::inRandomOrder()->first()->id,
+            'user_id'      => User::factory(),
         ];
     }
 }

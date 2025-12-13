@@ -28,9 +28,9 @@ class PageFactory extends Factory
             'slug'         => Str::slug($title) . '-' . $this->faker->unique()->numberBetween(1, 9999),
             'excerpt'      => $this->faker->paragraph(2),
             'content'      => $this->faker->paragraphs(5, true),
-            'status'       => $this->faker->randomElement(['draft', 'published', 'archived']),
+            'status'       => $this->faker->randomElement(['DRAFT', 'PENDING', 'PUBLISHED']),
             'published_at' => $this->faker->optional()->dateTimeBetween('-1 year', 'now'),
-            'user_id'      => User::inRandomOrder()->first()->id,
+            'user_id'      => User::factory(),
         ];
     }
 }
