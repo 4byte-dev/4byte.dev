@@ -45,7 +45,10 @@ test: ## Run tests using pgsql and redis
 		-p 6379:6379 \
 		redis:alpine
 
+	@sleep 5
+
 	cp .env.ci .env
+	@$(MAKE) migrate
 	php artisan test
 	@docker stop test-pgsql test-redis
 
