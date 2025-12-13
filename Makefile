@@ -27,15 +27,28 @@ help: ## Show this help
 
 migrate: ## Run all migrations
 	php artisan migrate
-	php artisan migrate --path=/packages/Article/database/migrations
-	php artisan migrate --path=/packages/Category/database/migrations
-	php artisan migrate --path=/packages/Entry/database/migrations
-	php artisan migrate --path=/packages/News/database/migrations
-	php artisan migrate --path=/packages/Page/database/migrations
-	php artisan migrate --path=/packages/React/database/migrations
-	php artisan migrate --path=/packages/Recommend/database/migrations
-	php artisan migrate --path=/packages/Search/database/migrations
-	php artisan migrate --path=/packages/Tag/database/migrations
+	@for dir in $(PACKAGE_DIRS); do \
+		php artisan migrate --path=/$$dir; \
+	done
+
+test: ## Run tests using pgsql and redis
+	@docker run -d --rm \
+		--name test-pgsql \
+		-e POSTGRES_USER=4byte \
+		-e POSTGRES_PASSWORD=4byte \
+		-e POSTGRES_DB=4byte \
+		-p 5432:5432 \
+		postgres:17.0-alpine
+
+	@docker run -d --rm \
+		--name test-redis \
+		-p 6379:6379 \
+		redis:alpine \
+		redis-server --requirepass 4byte
+
+	cp .env.ci .env
+	php artisan test
+	@docker stop test-pgsql test-redis
 
 seed: ## Run all seeders with fake data
 	php artisan db:seed
