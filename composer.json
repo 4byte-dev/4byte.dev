@@ -48,6 +48,7 @@
         "nunomaduro/collision": "^8.6",
         "nunomaduro/phpinsights": "^2.13",
         "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-mockery": "^2.0",
         "phpunit/phpunit": "^11.5.3"
     },
     "autoload": {
@@ -89,7 +90,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Packages\\Tag\\Tests\\": "packages/Tag/tests/"
         }
     },
     "scripts": {
