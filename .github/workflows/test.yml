@@ -14,7 +14,7 @@ jobs:
 
     services:
       pgsql:
-          image: postgres:16.0
+          image: postgres:17.0-alpine
           ports:
               - 5432:5432
           env:
@@ -26,6 +26,17 @@ jobs:
             --health-interval 10s
             --health-timeout 5s
             --health-retries 5
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli -a 4byte ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        command: >
+          redis-server --requirepass 4byte
 
     steps:
       - name: Checkout code
