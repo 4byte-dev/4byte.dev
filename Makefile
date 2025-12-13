@@ -43,8 +43,7 @@ test: ## Run tests using pgsql and redis
 	@docker run -d --rm \
 		--name test-redis \
 		-p 6379:6379 \
-		redis:alpine \
-		redis-server --requirepass 4byte
+		redis:alpine
 
 	cp .env.ci .env
 	php artisan test
