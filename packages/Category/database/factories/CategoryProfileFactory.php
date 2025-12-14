@@ -23,7 +23,7 @@ class CategoryProfileFactory extends Factory
         return [
             'description' => $this->faker->paragraph(),
             'color'       => $this->faker->hexColor(),
-            'category_id' => Category::inRandomOrder()->first()->id,
+            'category_id' => Category::factory(),
         ];
     }
 }
