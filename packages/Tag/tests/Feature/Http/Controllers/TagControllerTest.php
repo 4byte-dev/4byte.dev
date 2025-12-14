@@ -99,6 +99,9 @@ class TagControllerTest extends TestCase
             ->where('news', 5)
 
             ->has('tags', 1)
+            ->where('tags.0.id', $tagId)
+            ->where('tags.0.name', 'Test Tag')
+            ->where('tags.0.slug', 'test-tag')
         );
 
         $this->assertArrayHasKey('seo', $response->original->getData());
