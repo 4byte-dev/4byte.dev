@@ -49,7 +49,7 @@ test: ## Run tests using pgsql and redis
 
 	cp .env.ci .env
 	@$(MAKE) migrate
-	php artisan test
+	php artisan test || (docker stop test-pgsql test-redis && exit 1)
 	@docker stop test-pgsql test-redis
 
 seed: ## Run all seeders with fake data
