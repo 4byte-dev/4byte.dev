@@ -15,10 +15,10 @@ class PageController extends Controller
 
     protected SeoService $seoService;
 
-    public function __construct()
+    public function __construct(PageService $pageService, SeoService $seoService)
     {
-        $this->pageService = app(PageService::class);
-        $this->seoService  = app(SeoService::class);
+        $this->pageService = $pageService;
+        $this->seoService  = $seoService;
     }
 
     /**

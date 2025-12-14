@@ -1,0 +1,14 @@
+{
+    "editor.formatOnSave": true,
+
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+
+    "[php]": {
+        "editor.defaultFormatter": "junstyle.php-cs-fixer"
+    },
+    "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
+    "php-cs-fixer.config": "${workspaceFolder}/.php-cs-fixer.php",
+    "php-cs-fixer.allowRisky": false,
+}

@@ -23,7 +23,7 @@ class CommentFactory extends Factory
     {
         return [
             'content'          => $this->faker->paragraph(3),
-            'user_id'          => User::inRandomOrder()->first()->id,
+            'user_id'          => User::factory(),
             'parent_id'        => null,
             'commentable_id'   => null,
             'commentable_type' => null,

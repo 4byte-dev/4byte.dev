@@ -12,9 +12,9 @@ class FeedController extends Controller
 {
     protected FeedService $feedService;
 
-    public function __construct()
+    public function __construct(FeedService $feedService)
     {
-        $this->feedService = app(FeedService::class);
+        $this->feedService = $feedService;
     }
 
     /**

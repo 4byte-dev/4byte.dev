@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Packages\Course\Database\Factories\CourseChapterFactory;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -35,7 +36,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class CourseChapter extends Model
 {
-    /** @use HasFactory<\Packages\Course\Database\Factories\CourseFactory> */
+    /** @use HasFactory<\Packages\Course\Database\Factories\CourseChapterFactory> */
     use HasFactory;
 
     use LogsActivity;
@@ -72,5 +73,13 @@ class CourseChapter extends Model
             ->logOnly(['title'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): CourseChapterFactory
+    {
+        return CourseChapterFactory::new();
     }
 }

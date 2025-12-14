@@ -37,8 +37,8 @@ class NewsProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../database/seeders' => database_path('seeders/packages/category'),
-            ], 'category-seeders');
+                __DIR__ . '/../database/seeders' => database_path('seeders/packages/news'),
+            ], 'news-seeders');
         }
     }
 

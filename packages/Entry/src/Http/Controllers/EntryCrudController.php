@@ -14,9 +14,9 @@ class EntryCrudController extends Controller
 {
     protected EntryService $entryService;
 
-    public function __construct()
+    public function __construct(EntryService $entryService)
     {
-        $this->entryService = app(EntryService::class);
+        $this->entryService = $entryService;
     }
 
     /**

@@ -30,7 +30,7 @@ class NewsFactory extends Factory
             'content'      => $this->faker->paragraphs(5, true),
             'status'       => $this->faker->randomElement(['DRAFT', 'PUBLISHED', 'PENDING']),
             'published_at' => $this->faker->optional()->dateTimeBetween('-1 year', 'now'),
-            'user_id'      => User::inRandomOrder()->first()->id,
+            'user_id'      => User::factory(),
         ];
     }
 }

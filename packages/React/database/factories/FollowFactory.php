@@ -22,7 +22,7 @@ class FollowFactory extends Factory
     public function definition(): array
     {
         return [
-            'follower_id'     => User::inRandomOrder()->first()->id,
+            'follower_id'     => User::factory(),
             'followable_id'   => null,
             'followable_type' => null,
         ];

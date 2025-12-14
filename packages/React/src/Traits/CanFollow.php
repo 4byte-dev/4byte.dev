@@ -40,9 +40,9 @@ trait CanFollow
                 'followable_type' => $target::class,
             ]);
 
-            Cache::increment(Helpers::cacheKey($this, 'followers'));
+            Cache::increment(Helpers::cacheKey($target, 'followers'));
             Cache::increment(Helpers::cacheKey($this, 'followings'));
-            Cache::forever(Helpers::cacheKey($this, $this->id, 'followed'), true);
+            Cache::forever(Helpers::cacheKey($target, $this->id, 'followed'), true);
         }
     }
 
@@ -58,9 +58,9 @@ trait CanFollow
             ->where('followable_type', $target::class)
             ->delete();
 
-        Cache::decrement(Helpers::cacheKey($this, 'followers'));
+        Cache::decrement(Helpers::cacheKey($target, 'followers'));
         Cache::decrement(Helpers::cacheKey($this, 'followings'));
-        Cache::forget(Helpers::cacheKey($this, $this->id, 'followed'));
+        Cache::forget(Helpers::cacheKey($target, $this->id, 'followed'));
     }
 
     /**
@@ -71,7 +71,7 @@ trait CanFollow
     public function isFollowing($target): bool
     {
         return Cache::rememberForever(
-            Helpers::cacheKey($this, $this->id, 'followed'),
+            Helpers::cacheKey($target, $this->id, 'followed'),
             function () use ($target) {
                 return $this->followings()
                     ->where('followable_id', $target->id)

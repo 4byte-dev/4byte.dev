@@ -22,7 +22,7 @@ class LikeFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id'       => User::inRandomOrder()->first()->id,
+            'user_id'       => User::factory(),
             'likeable_id'   => null,
             'likeable_type' => null,
         ];

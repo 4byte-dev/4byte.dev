@@ -1,13 +1,13 @@
 x-logging: &default-logging
-  driver: 'json-file'
-  options:
-    max-size: "50m"
-    max-file: "10"
-    compress: "true"
+    driver: "json-file"
+    options:
+        max-size: "50m"
+        max-file: "10"
+        compress: "true"
 x-healthcheck: &default-healthcheck
-  interval: 20s
-  retries: 5
-  timeout: 3s
+    interval: 20s
+    retries: 5
+    timeout: 3s
 services:
     app:
         profiles:
@@ -30,9 +30,9 @@ services:
         ports:
             - 80:8000
         volumes:
-            - './.env:/var/www/html/.env'
-            - './storage/app/public:/var/www/html/storage/app/public'
-            - './storage/logs:/var/www/html/storage/logs'
+            - "./.env:/var/www/html/.env"
+            - "./storage/app/public:/var/www/html/storage/app/public"
+            - "./storage/logs:/var/www/html/storage/logs"
         ulimits:
             nofile:
                 soft: 65536
@@ -66,16 +66,23 @@ services:
             nofile:
                 soft: 65536
                 hard: 65536
-        command: [
-            "redis-server",
-            "/usr/local/etc/redis/redis.conf",
-            "--requirepass", "${REDIS_PASSWORD}",
-            "--maxmemory", "${REDIS_MAXMEMORY:-2gb}",
-            "--maxmemory-policy", "allkeys-lru",
-            "--save", "900 1",
-            "--save", "300 10",
-            "--save", "60 10000"
-        ]
+        command:
+            [
+                "redis-server",
+                "/usr/local/etc/redis/redis.conf",
+                "--requirepass",
+                "${REDIS_PASSWORD}",
+                "--maxmemory",
+                "${REDIS_MAXMEMORY:-2gb}",
+                "--maxmemory-policy",
+                "allkeys-lru",
+                "--save",
+                "900 1",
+                "--save",
+                "300 10",
+                "--save",
+                "60 10000",
+            ]
         security_opt:
             - no-new-privileges:true
         networks:
@@ -89,10 +96,10 @@ services:
         deploy:
             resources:
                 limits:
-                    memory: '${REDIS_MAXMEMORY:-2gb}'
+                    memory: "${REDIS_MAXMEMORY:-2gb}"
     meilisearch:
         profiles:
-          - production
+            - production
         container_name: meilisearch
         image: getmeili/meilisearch:latest
         volumes:
@@ -104,7 +111,7 @@ services:
         security_opt:
             - no-new-privileges:true
         environment:
-            - MASTER_KEY='${MEILISEARCH_KEY}'
+            - MEILI_MASTER_KEY='${MEILISEARCH_KEY}'
         networks:
             - stack
         healthcheck:
@@ -115,7 +122,7 @@ services:
             - app
             - development
         container_name: pgsql
-        image: 'postgres:${DB_VERSION:-17}-alpine'
+        image: "postgres:${DB_VERSION:-17}-alpine"
         volumes:
             - stack-pgsql:/var/lib/postgresql/data
         ulimits:
@@ -125,13 +132,14 @@ services:
         security_opt:
             - no-new-privileges:true
         environment:
-            POSTGRES_DB: '${DB_DATABASE}'
-            POSTGRES_USER: '${DB_USERNAME}'
-            POSTGRES_PASSWORD: '${DB_PASSWORD}'
+            POSTGRES_DB: "${DB_DATABASE}"
+            POSTGRES_USER: "${DB_USERNAME}"
+            POSTGRES_PASSWORD: "${DB_PASSWORD}"
         networks:
             - stack
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+            test:
+                ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
             <<: *default-healthcheck
         logging:
             <<: *default-logging
@@ -141,7 +149,7 @@ services:
             docker-volume-backup.archive-pre: /bin/sh -c 'pg_dump -U ${DB_USERNAME} -F t ${DB_DATABASE} > /backup/${DB_DATABASE}-database.tar'
     mysql:
         profiles:
-          - production
+            - production
         container_name: gorse-mysql
         image: mysql/mysql-server:${MYSQL_VERSION:-8.0}
         volumes:
@@ -153,14 +161,18 @@ services:
         security_opt:
             - no-new-privileges:true
         environment:
-            MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
-            MYSQL_DATABASE: '${MYSQL_DATABASE}'
-            MYSQL_USER: '${MYSQL_USER}'
-            MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+            MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+            MYSQL_DATABASE: "${MYSQL_DATABASE}"
+            MYSQL_USER: "${MYSQL_USER}"
+            MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
         networks:
             - stack
         healthcheck:
-            test: ["CMD-SHELL", "mysqladmin ping -h localhost -u ${MYSQL_USER} -p${MYSQL_PASSWORD}"]
+            test:
+                [
+                    "CMD-SHELL",
+                    "mysqladmin ping -h localhost -u ${MYSQL_USER} -p${MYSQL_PASSWORD}",
+                ]
             <<: *default-healthcheck
         logging:
             <<: *default-logging
@@ -170,13 +182,13 @@ services:
             docker-volume-backup.archive-pre: /bin/sh -c 'mysqldump -u ${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} > /backup/${MYSQL_DATABASE}-database.sql'
     gorse-worker:
         profiles:
-          - production
+            - production
         container_name: gorse-worker
         image: zhenghaoz/gorse-worker:0.4.16
         depends_on:
             - gorse-master
         ports:
-            - 8089:8089
+            - 127.0.0.1:8089:8089
         command: >
             --master-host gorse-master --master-port 8086 
             --http-host 0.0.0.0 --http-port 8089
@@ -193,13 +205,13 @@ services:
         restart: unless-stopped
     gorse-server:
         profiles:
-          - production
+            - production
         container_name: gorse-server
         image: zhenghaoz/gorse-server:0.4.16
         depends_on:
             - gorse-master
         ports:
-            - 8087:8087
+            - 127.0.0.1:8087:8087
         command: >
             --master-host gorse-master --master-port 8086
             --http-host 0.0.0.0 --http-port 8087
@@ -216,15 +228,15 @@ services:
         restart: unless-stopped
     gorse-master:
         profiles:
-          - production
+            - production
         container_name: gorse-master
         image: zhenghaoz/gorse-master:0.4.16
         depends_on:
             - mysql
             - redis
         ports:
-            - 8086:8086
-            - 8088:8088
+            - 127.0.0.1:8086:8086
+            - 0.0.0.0:8088:8088
         environment:
             GORSE_CACHE_STORE: "redis://:${REDIS_PASSWORD}@redis:6379"
             GORSE_DATA_STORE: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(mysql:3306)/${MYSQL_DATABASE}"
@@ -251,11 +263,11 @@ services:
             BACKUP_FILENAME: backup-%Y-%m-%dT%H-%M-%S.tar.gz
             BACKUP_PRUNING_PREFIX: backup-
             BACKUP_CRON_EXPRESSION: "0 2 * * *" # run every day at 2am
-            BACKUP_RETENTION_DAYS: '7'
-            AWS_ACCESS_KEY_ID: '${STORAGE_ACCESS_KEY_ID}'
-            AWS_SECRET_ACCESS_KEY: '${STORAGE_SECRET_ACCESS_KEY}'
-            AWS_S3_BUCKET_NAME: '${STORAGE_BUCKET}'
-            STORAGE_ENDPOINT: '${STORAGE_ENDPOINT}'
+            BACKUP_RETENTION_DAYS: "7"
+            AWS_ACCESS_KEY_ID: "${STORAGE_ACCESS_KEY_ID}"
+            AWS_SECRET_ACCESS_KEY: "${STORAGE_SECRET_ACCESS_KEY}"
+            AWS_S3_BUCKET_NAME: "${STORAGE_BUCKET}"
+            STORAGE_ENDPOINT: "${STORAGE_ENDPOINT}"
         entrypoint: >
             sh -c "
             export AWS_ENDPOINT=$${STORAGE_ENDPOINT#https://} &&
@@ -280,16 +292,16 @@ services:
         restart: unless-stopped
 
 volumes:
-  stack-redis:
-  stack-pgsql:
-  stack-meilisearch:
-  stack-mysql:
-  stack-gorse-worker:
-  stack-gorse-server:
-  stack-gorse-master:
+    stack-redis:
+    stack-pgsql:
+    stack-meilisearch:
+    stack-mysql:
+    stack-gorse-worker:
+    stack-gorse-server:
+    stack-gorse-master:
 
 networks:
-  stack:
-    driver: bridge
-    driver_opts:
-      com.docker.network.driver.mtu: 1450
+    stack:
+        driver: bridge
+        driver_opts:
+            com.docker.network.driver.mtu: 1450

@@ -21,10 +21,10 @@ class ArticleCrudController extends Controller
 
     protected FeedService $feedService;
 
-    public function __construct()
+    public function __construct(SeoService $seoService, FeedService $feedService)
     {
-        $this->seoService     = app(SeoService::class);
-        $this->feedService    = app(FeedService::class);
+        $this->seoService     = $seoService;
+        $this->feedService    = $feedService;
     }
 
     /**

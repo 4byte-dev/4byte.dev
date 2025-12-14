@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Packages\Entry\Database\Factories\EntryFactory;
 use Packages\React\Traits\HasComments;
 use Packages\React\Traits\HasDislikes;
 use Packages\React\Traits\HasLikes;
@@ -138,5 +139,13 @@ class Entry extends Model implements HasMedia
             ->logOnly(['content'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): EntryFactory
+    {
+        return EntryFactory::new();
     }
 }

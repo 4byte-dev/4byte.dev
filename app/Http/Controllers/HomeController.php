@@ -10,9 +10,9 @@ class HomeController extends Controller
 {
     protected SeoService $seoService;
 
-    public function __construct()
+    public function __construct(SeoService $seoService)
     {
-        $this->seoService = app(SeoService::class);
+        $this->seoService = $seoService;
     }
 
     /**
