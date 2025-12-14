@@ -91,7 +91,8 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/",
-            "Packages\\Tag\\Tests\\": "packages/Tag/tests/"
+            "Packages\\Tag\\Tests\\": "packages/Tag/tests/",
+            "Packages\\Category\\Tests\\": "packages/Category/tests/"
         }
     },
     "scripts": {
