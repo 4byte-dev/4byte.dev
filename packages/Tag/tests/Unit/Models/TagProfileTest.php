@@ -127,7 +127,7 @@ class TagProfileTest extends TestCase
 
         $initialCount = Activity::count();
 
-        $tag->update(['name' => $tag->name]);
+        $tag->update(['description' => $tag->description]);
 
         $this->assertSame($initialCount, Activity::count());
     }
