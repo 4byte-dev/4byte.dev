@@ -120,4 +120,15 @@ class TagProfileTest extends TestCase
         $this->assertSame('New', $activity->properties['attributes']['description']);
         $this->assertSame('Old', $activity->properties['old']['description']);
     }
+
+    public function test_it_does_not_log_when_nothing_changes(): void
+    {
+        $tag = TagProfile::factory()->create();
+
+        $initialCount = Activity::count();
+
+        $tag->update(['description' => $tag->description]);
+
+        $this->assertSame($initialCount, Activity::count());
+    }
 }
