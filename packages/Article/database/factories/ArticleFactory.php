@@ -25,7 +25,7 @@ class ArticleFactory extends Factory
 
         return [
             'title'   => $title,
-            'slug'    => Str::slug($title) . '-' . $this->faker->unique()->numberBetween(1, 9999),
+            'slug'    => Str::slug($title),
             'excerpt' => $this->faker->paragraph(2),
             'content' => $this->faker->paragraphs(5, true),
             'status'  => $this->faker->randomElement(['DRAFT', 'PUBLISHED', 'PENDING']),
