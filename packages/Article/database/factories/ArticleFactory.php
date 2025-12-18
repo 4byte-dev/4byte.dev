@@ -3,6 +3,7 @@
 namespace Packages\Article\Database\Factories;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 use Packages\Article\Models\Article;
@@ -31,8 +32,10 @@ class ArticleFactory extends Factory
             'status'  => $this->faker->randomElement(['DRAFT', 'PUBLISHED', 'PENDING']),
             'sources' => collect(range(0, rand(0, 5)))->map(function () {
                 return [
-                    'url'  => $this->faker->domainName(),
-                    'date' => $this->faker->dateTimeBetween('-6 months', '+6 months'),
+                    'url'  => $this->faker->url(),
+                    'date' => Carbon::instance(
+                        $this->faker->dateTimeBetween('-6 months', '+6 months')
+                    )->toDateTimeString(),
                 ];
             })->toArray(),
             'published_at' => $this->faker->optional()->dateTimeBetween('-1 year', 'now'),
