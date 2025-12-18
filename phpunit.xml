@@ -8,6 +8,7 @@
         <testsuite name="Packages">
             <directory>packages/Tag/tests</directory>
             <directory>packages/Category/tests</directory>
+            <directory>packages/Article/tests</directory>
         </testsuite>
     </testsuites>
     <source>
