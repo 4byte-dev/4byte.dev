@@ -69,7 +69,7 @@ class ArticleTest extends TestCase
 
     public function test_it_logs_activity_on_create(): void
     {
-        $article = Article::factory()->create([
+        Article::factory()->create([
             'title' => 'New Article',
         ]);
 

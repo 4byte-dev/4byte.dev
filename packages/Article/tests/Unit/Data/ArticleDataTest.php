@@ -4,6 +4,7 @@ namespace Packages\Article\Tests\Unit\Data;
 
 use App\Data\UserData;
 use App\Models\User;
+use Carbon\Carbon;
 use Mockery;
 use Mockery\MockInterface;
 use Packages\Article\Data\ArticleData;
@@ -91,7 +92,7 @@ class ArticleDataTest extends TestCase
         $this->assertFalse($articleData->canUpdate);
         $this->assertFalse($articleData->canDelete);
 
-        $this->assertInstanceOf(\Carbon\Carbon::class, $articleData->published_at);
+        $this->assertInstanceOf(Carbon::class, $articleData->published_at);
         $this->assertInstanceOf(UserData::class, $articleData->user);
 
         $this->assertSame(10, $articleData->user->id);
@@ -103,7 +104,7 @@ class ArticleDataTest extends TestCase
         $this->assertSame(3, $articleData->user->followings);
         $this->assertTrue($articleData->user->isFollowing);
 
-        $this->assertInstanceOf(\Carbon\Carbon::class, $articleData->user->created_at);
+        $this->assertInstanceOf(Carbon::class, $articleData->user->created_at);
 
         $this->assertCount(1, $articleData->categories);
         $this->assertSame('Category Test', $articleData->categories[0]->name);
@@ -115,7 +116,8 @@ class ArticleDataTest extends TestCase
 
         $this->assertCount(1, $articleData->sources);
         $this->assertSame('https://4byte.dev', $articleData->sources[0]['url']);
-        $this->assertInstanceOf(\Carbon\Carbon::class, $articleData->sources[0]['date']);
+        $this->assertTrue($this->isValidUrl($articleData->sources[0]['url']));
+        $this->assertTrue($this->isValidDate($articleData->sources[0]['date']));
 
         $this->assertSame('article', $articleData->type);
     }

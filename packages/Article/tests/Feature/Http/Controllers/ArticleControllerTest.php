@@ -136,6 +136,8 @@ class ArticleControllerTest extends TestCase
 
                 ->has('article.sources', 1)
                 ->where('article.sources.0.url', 'https://4byte.dev')
+                ->where('article.sources.0.url', fn ($url) => $this->isValidUrl($url))
+                ->where('article.sources.0.date', fn ($date) => $this->isValidDate($date))
 
                 ->where('article.likes', 5)
                 ->where('article.dislikes', 7)

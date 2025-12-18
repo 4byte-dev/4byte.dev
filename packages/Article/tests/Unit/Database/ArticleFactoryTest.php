@@ -18,6 +18,8 @@ class ArticleFactoryTest extends TestCase
         $this->assertNotNull($article->content);
         $this->assertContains($article->status, ['DRAFT', 'PUBLISHED', 'PENDING']);
         $this->assertIsArray($article->sources);
+        $this->assertTrue($this->isValidUrl($article->sources[0]['url']));
+        $this->assertTrue($this->isValidDate($article->sources[0]['date']));
     }
 
     public function test_it_creates_article_linked_to_user(): void
