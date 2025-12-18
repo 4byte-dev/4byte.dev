@@ -9,7 +9,7 @@ use Packages\Article\Models\Article;
 Route::middleware([HandleInertiaRequests::class])->prefix('makale')->name('article.')->group(function () {
     Route::controller(ArticleCrudController::class)->middleware('auth')->name('crud.')->group(function () {
         Route::get('/yaz', 'createView')->name('create.view')->can('create', Article::class);
-        Route::get('/{article:slug}/duzenle', 'editView')->name('edit.view')->can('view,article');
+        Route::get('/{article:slug}/duzenle', 'editView')->name('edit.view')->can('update,article');
     });
 
     Route::controller(ArticleController::class)->group(function () {
