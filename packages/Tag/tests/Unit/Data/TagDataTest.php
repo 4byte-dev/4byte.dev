@@ -4,6 +4,7 @@ namespace Packages\Tag\Tests\Unit\Data;
 
 use Illuminate\Support\Facades\Auth;
 use Mockery;
+use Mockery\MockInterface;
 use Packages\Tag\Data\TagData;
 use Packages\Tag\Models\Tag;
 use Packages\Tag\Tests\TestCase;
@@ -64,6 +65,7 @@ class TagDataTest extends TestCase
         $userId = 123;
         Auth::shouldReceive('id')->once()->andReturn($userId);
 
+        /** @var Tag|MockInterface $tag */
         $tag       = Mockery::mock(Tag::class)->makePartial();
         $tag->id   = 99;
         $tag->name = 'PHP';
@@ -89,6 +91,7 @@ class TagDataTest extends TestCase
     {
         Auth::shouldReceive('id')->once()->andReturn(null);
 
+        /** @var Tag|MockInterface $tag */
         $tag       = Mockery::mock(Tag::class)->makePartial();
         $tag->id   = 1;
         $tag->name = 'Guest';
