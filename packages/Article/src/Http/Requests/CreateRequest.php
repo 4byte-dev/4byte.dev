@@ -31,16 +31,16 @@ class CreateRequest extends FormRequest
 
         if (! $isDraft) {
             $rules = array_merge($rules, [
-                'excerpt'      => ['required', 'string', 'min:100'],
-                'content'      => ['required', 'string', 'min:500'],
-                'categories'   => ['required', 'array', 'min:1', 'max:3'],
-                'categories.*' => ['string'],
-                'tags'         => ['required', 'array', 'min:1', 'max:3'],
-                'tags.*'       => ['string'],
-                'image'        => ['required', 'file', 'image'],
-                'sources'      => ['required', 'array', 'min:1'],
-                'sources.url'  => ['required', 'string', 'url'],
-                'sources.date' => ['required', 'date'],
+                'excerpt'        => ['required', 'string', 'min:100'],
+                'content'        => ['required', 'string', 'min:500'],
+                'categories'     => ['required', 'array', 'min:1', 'max:3'],
+                'categories.*'   => ['string'],
+                'tags'           => ['required', 'array', 'min:1', 'max:3'],
+                'tags.*'         => ['string'],
+                'image'          => ['required', 'file', 'image'],
+                'sources'        => ['required', 'array', 'min:1'],
+                'sources.*.url'  => ['required', 'string', 'url'],
+                'sources.*.date' => ['required', 'date'],
             ]);
         }
 
