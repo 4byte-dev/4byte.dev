@@ -10,6 +10,7 @@ use App\Services\SettingsService;
 use App\Settings\SeoSettings;
 use App\Settings\SiteSettings;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Packages\React\Services\ReactService;
@@ -39,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
 
         register_shutdown_function(function () {
             if (memory_get_usage() > 100 * 1024 * 1024) {
-                logger()->warning('High memory usage: ' . memory_get_usage());
+                Log::warning('High memory usage: ' . memory_get_usage());
             }
         });
 
