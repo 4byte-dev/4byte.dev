@@ -23,6 +23,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, CourseLesson> $lessons
  * @property-read int|null $lessons_count
  *
+ * @method static \Packages\Course\Database\Factories\CourseChapterFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseChapter newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseChapter newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseChapter query()

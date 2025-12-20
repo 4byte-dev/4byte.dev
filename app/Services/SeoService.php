@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Data\UserData;
-use App\Data\UserProfileData;
 use App\Settings\SeoSettings;
 use App\Settings\SiteSettings;
 use Carbon\Carbon;
@@ -20,6 +18,8 @@ use Packages\News\Data\NewsData;
 use Packages\Page\Data\PageData;
 use Packages\Tag\Data\TagData;
 use Packages\Tag\Data\TagProfileData;
+use Packages\User\Data\UserData;
+use Packages\User\Data\UserProfileData;
 use Spatie\SchemaOrg\Schema;
 
 class SeoService

@@ -2,11 +2,11 @@
 
 namespace Packages\Entry\Data;
 
-use App\Data\UserData;
 use DateTime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Packages\Entry\Models\Entry;
+use Packages\User\Data\UserData;
 use Spatie\LaravelData\Data;
 
 class EntryData extends Data

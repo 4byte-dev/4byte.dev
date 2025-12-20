@@ -2,10 +2,10 @@
 
 namespace Packages\Article\Services;
 
-use App\Services\UserService;
 use Illuminate\Support\Facades\Cache;
 use Packages\Article\Data\ArticleData;
 use Packages\Article\Models\Article;
+use Packages\User\Services\UserService;
 
 class ArticleService
 {

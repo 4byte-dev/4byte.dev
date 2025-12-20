@@ -2,10 +2,10 @@
 
 namespace Packages\Entry\Services;
 
-use App\Services\UserService;
 use Illuminate\Support\Facades\Cache;
 use Packages\Entry\Data\EntryData;
 use Packages\Entry\Models\Entry;
+use Packages\User\Services\UserService;
 
 class EntryService
 {

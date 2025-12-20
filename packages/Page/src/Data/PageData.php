@@ -2,10 +2,10 @@
 
 namespace Packages\Page\Data;
 
-use App\Data\UserData;
 use DateTime;
 use Illuminate\Support\Facades\Gate;
 use Packages\Page\Models\Page;
+use Packages\User\Data\UserData;
 use Spatie\LaravelData\Data;
 
 class PageData extends Data
