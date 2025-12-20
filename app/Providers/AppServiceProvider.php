@@ -38,11 +38,13 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 6);
 
-        register_shutdown_function(function () {
-            if (memory_get_usage() > 100 * 1024 * 1024) {
-                Log::warning('High memory usage: ' . memory_get_usage());
-            }
-        });
+        if ($this->app->environment('testings')) {
+            register_shutdown_function(function () {
+                if (memory_get_usage() > 100 * 1024 * 1024) {
+                    Log::warning('High memory usage: ' . memory_get_usage());
+                }
+            });
+        }
 
         $this->loadObservers();
         $this->loadMacros();
