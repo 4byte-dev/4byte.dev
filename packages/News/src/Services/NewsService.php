@@ -2,10 +2,10 @@
 
 namespace Packages\News\Services;
 
-use App\Services\UserService;
 use Illuminate\Support\Facades\Cache;
 use Packages\News\Data\NewsData;
 use Packages\News\Models\News;
+use Packages\User\Services\UserService;
 
 class NewsService
 {

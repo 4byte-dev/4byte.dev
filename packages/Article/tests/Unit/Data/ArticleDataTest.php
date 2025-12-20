@@ -2,7 +2,6 @@
 
 namespace Packages\Article\Tests\Unit\Data;
 
-use App\Data\UserData;
 use App\Models\User;
 use Carbon\Carbon;
 use Mockery;
@@ -12,6 +11,7 @@ use Packages\Article\Models\Article;
 use Packages\Article\Tests\TestCase;
 use Packages\Category\Data\CategoryData;
 use Packages\Tag\Data\TagData;
+use Packages\User\Data\UserData;
 
 class ArticleDataTest extends TestCase
 {

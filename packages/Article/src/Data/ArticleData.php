@@ -2,13 +2,13 @@
 
 namespace Packages\Article\Data;
 
-use App\Data\UserData;
 use DateTime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Packages\Article\Models\Article;
 use Packages\Category\Data\CategoryData;
 use Packages\Tag\Data\TagData;
+use Packages\User\Data\UserData;
 use Spatie\LaravelData\Data;
 
 class ArticleData extends Data

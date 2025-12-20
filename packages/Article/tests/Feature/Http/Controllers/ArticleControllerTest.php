@@ -2,7 +2,6 @@
 
 namespace Packages\Article\Tests\Feature\Http\Controllers;
 
-use App\Data\UserData;
 use App\Services\SeoService;
 use Honeystone\Seo\Contracts\BuildsMetadata;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -12,6 +11,7 @@ use Packages\Article\Services\ArticleService;
 use Packages\Article\Tests\TestCase;
 use Packages\Category\Data\CategoryData;
 use Packages\Tag\Data\TagData;
+use Packages\User\Data\UserData;
 use Symfony\Component\HttpFoundation\Response;
 
 class ArticleControllerTest extends TestCase
