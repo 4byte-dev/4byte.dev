@@ -92,7 +92,8 @@
         "psr-4": {
             "Tests\\": "tests/",
             "Packages\\Tag\\Tests\\": "packages/Tag/tests/",
-            "Packages\\Category\\Tests\\": "packages/Category/tests/"
+            "Packages\\Category\\Tests\\": "packages/Category/tests/",
+            "Packages\\Article\\Tests\\": "packages/Article/tests/"
         }
     },
     "scripts": {
