@@ -83,7 +83,7 @@ class ArticleCrudControllerTest extends TestCase
 
         $payload = [
             'title'      => 'Published Title Updated',
-            'excerpt'    => $this->faker->paragraph(),
+            'excerpt'    => $this->faker->paragraph(10),
             'content'    => $this->faker->paragraph(20, true),
             'published'  => true,
             'categories' => [$category->slug],
@@ -193,7 +193,7 @@ class ArticleCrudControllerTest extends TestCase
 
         $payload = [
             'title'      => 'Published Title Updated',
-            'excerpt'    => $this->faker->paragraph(7),
+            'excerpt'    => $this->faker->paragraph(10),
             'content'    => $this->faker->paragraph(20, true),
             'published'  => true,
             'categories' => [$newCategory->slug],

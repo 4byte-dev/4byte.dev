@@ -29,8 +29,8 @@ class EditRequestTest extends TestCase
         $data = [
             'title'       => 'This is a valid article title',
             'published'   => true,
-            'excerpt'     => 'Short', // invalid (min 100)
-            'content'     => 'Content', // invalid (min 500)
+            'excerpt'     => 'Short',
+            'content'     => 'Content',
             'categories'  => [],
             'tags'        => [],
             'sources'     => [],
@@ -38,7 +38,7 @@ class EditRequestTest extends TestCase
 
         $request = EditRequest::create('/articles', 'POST', $data);
 
-        $validator = Validator::make($request->all(), (new EditRequest())->rules());
+        $validator = Validator::make($data, $request->rules());
 
         $this->assertTrue($validator->fails());
 
@@ -66,7 +66,7 @@ class EditRequestTest extends TestCase
 
     public function test_it_generates_unique_slug(): void
     {
-        Article::create([
+        Article::factory()->create([
             'title' => 'Test Article',
             'slug'  => 'test-article',
         ]);
@@ -82,7 +82,7 @@ class EditRequestTest extends TestCase
 
     public function test_it_ignores_given_id_when_generating_slug(): void
     {
-        $article = Article::create([
+        $article = Article::factory()->create([
             'title' => 'Test Article',
             'slug'  => 'test-article',
         ]);
@@ -243,11 +243,13 @@ class EditRequestTest extends TestCase
         $this->assertValidationError(
             data: $this->publishedBaseData([
                 'sources' => [
-                    'url'  => 'not-a-url',
-                    'date' => now()->toDateString(),
+                    [
+                        'url'  => 'not-a-url',
+                        'date' => now()->toDateString(),
+                    ],
                 ],
             ]),
-            field: 'sources.url'
+            field: 'sources.0.url'
         );
     }
 
@@ -256,11 +258,13 @@ class EditRequestTest extends TestCase
         $this->assertValidationError(
             data: $this->publishedBaseData([
                 'sources' => [
-                    'url'  => 'https://example.com',
-                    'date' => 'invalid-date',
+                    [
+                        'url'  => 'https://example.com',
+                        'date' => 'invalid-date',
+                    ],
                 ],
             ]),
-            field: 'sources.date'
+            field: 'sources.0.date'
         );
     }
 
@@ -281,8 +285,10 @@ class EditRequestTest extends TestCase
             'tags'        => ['laravel'],
             'image'       => UploadedFile::fake()->image('image.jpg'),
             'sources'     => [
-                'url'  => 'https://example.com',
-                'date' => now()->toDateString(),
+                [
+                    'url'  => 'https://example.com',
+                    'date' => now()->toDateString(),
+                ],
             ],
         ];
 
@@ -305,17 +311,10 @@ class EditRequestTest extends TestCase
             $request->files->set('image', $data['image']);
         }
 
-        $validator = Validator::make($request->all(), (new EditRequest())->rules());
+        $validator = Validator::make($request->all(), $request->rules());
 
-        $this->assertTrue(
-            $validator->fails(),
-            "Validation should fail for field: {$field}"
-        );
+        $this->assertTrue($validator->fails());
 
-        $this->assertArrayHasKey(
-            $field,
-            $validator->errors()->toArray(),
-            "Expected validation error for field: {$field}"
-        );
+        $this->assertArrayHasKey($field, $validator->errors()->toArray());
     }
 }
