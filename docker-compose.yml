@@ -184,7 +184,7 @@ services:
         profiles:
             - production
         container_name: gorse-worker
-        image: zhenghaoz/gorse-worker:0.4.16
+        image: zhenghaoz/gorse-worker:0.5.0
         depends_on:
             - gorse-master
         ports:
@@ -207,7 +207,7 @@ services:
         profiles:
             - production
         container_name: gorse-server
-        image: zhenghaoz/gorse-server:0.4.16
+        image: zhenghaoz/gorse-server:0.5.0
         depends_on:
             - gorse-master
         ports:
@@ -230,7 +230,7 @@ services:
         profiles:
             - production
         container_name: gorse-master
-        image: zhenghaoz/gorse-master:0.4.16
+        image: zhenghaoz/gorse-master:0.5.0
         depends_on:
             - mysql
             - redis
