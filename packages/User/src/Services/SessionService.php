@@ -36,7 +36,10 @@ class SessionService
             return false;
         }
 
-        Auth::logoutOtherDevices($password);
+        /** @var \Illuminate\Auth\SessionGuard $guard */
+        $guard = Auth::guard('web');
+
+        $guard->logoutOtherDevices($password);
 
         $driver = config('session.driver');
 
