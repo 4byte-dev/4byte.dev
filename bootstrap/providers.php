@@ -3,6 +3,7 @@
 return [
     App\Providers\AppServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
+    Packages\User\UserProvider::class,
     Packages\Article\ArticleProvider::class,
     Packages\Category\CategoryProvider::class,
     Packages\News\NewsProvider::class,

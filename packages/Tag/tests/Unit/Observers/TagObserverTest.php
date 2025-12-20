@@ -9,6 +9,14 @@ use Packages\Tag\Tests\TestCase;
 
 class TagObserverTest extends TestCase
 {
+    private TagObserver $observer;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->observer = new TagObserver();
+    }
+
     public function test_it_clears_old_slug_cache_when_slug_changes(): void
     {
         Cache::shouldReceive('forget')
@@ -26,7 +34,7 @@ class TagObserverTest extends TestCase
 
         $tag->slug = 'new-slug';
 
-        (new TagObserver())->updated($tag);
+        $this->observer->updated($tag);
     }
 
     public function test_it_does_not_clear_slug_cache_if_slug_not_changed(): void
@@ -44,7 +52,7 @@ class TagObserverTest extends TestCase
         $tag->slug = 'slug';
         $tag->syncOriginal();
 
-        (new TagObserver())->updated($tag);
+        $this->observer->updated($tag);
     }
 
     public function test_update_always_clears_id_cache(): void
@@ -58,7 +66,7 @@ class TagObserverTest extends TestCase
         $tag->slug = 'slug';
         $tag->syncOriginal();
 
-        (new TagObserver())->updated($tag);
+        $this->observer->updated($tag);
     }
 
     public function test_it_clears_all_related_cache_on_delete(): void
@@ -73,6 +81,6 @@ class TagObserverTest extends TestCase
         $tag->id   = 1;
         $tag->slug = 'slug';
 
-        (new TagObserver())->deleted($tag);
+        $this->observer->deleted($tag);
     }
 }

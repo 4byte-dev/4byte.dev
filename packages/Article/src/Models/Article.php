@@ -52,6 +52,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property-read int|null $tags_count
  * @property-read User $user
  *
+ * @method static \Packages\Article\Database\Factories\ArticleFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Article query()

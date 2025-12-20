@@ -2,11 +2,11 @@
 
 namespace Packages\React\Data;
 
-use App\Data\UserData;
-use App\Services\UserService;
 use DateTime;
 use Illuminate\Support\Facades\Auth;
 use Packages\React\Models\Comment;
+use Packages\User\Data\UserData;
+use Packages\User\Services\UserService;
 use Spatie\LaravelData\Data;
 
 class CommentData extends Data

@@ -21,6 +21,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property-read int|null $activities_count
  * @property-read Category $category
  *
+ * @method static \Packages\Category\Database\Factories\CategoryProfileFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryProfile newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryProfile newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CategoryProfile query()

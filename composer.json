@@ -56,6 +56,9 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
+            "Packages\\User\\": "packages/User/src/",
+            "Packages\\User\\Database\\Factories\\": "packages/User/database/factories/",
+            "Packages\\User\\Database\\Seeders\\": "packages/User/database/seeders/",
             "Packages\\Article\\": "packages/Article/src/",
             "Packages\\Article\\Database\\Factories\\": "packages/Article/database/factories/",
             "Packages\\Article\\Database\\Seeders\\": "packages/Article/database/seeders/",
@@ -92,7 +95,8 @@
         "psr-4": {
             "Tests\\": "tests/",
             "Packages\\Tag\\Tests\\": "packages/Tag/tests/",
-            "Packages\\Category\\Tests\\": "packages/Category/tests/"
+            "Packages\\Category\\Tests\\": "packages/Category/tests/",
+            "Packages\\Article\\Tests\\": "packages/Article/tests/"
         }
     },
     "scripts": {

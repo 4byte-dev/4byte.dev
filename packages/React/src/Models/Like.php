@@ -17,6 +17,7 @@ use Packages\React\Database\Factories\LikeFactory;
  * @property-read Model $likeable
  * @property-read User $user
  *
+ * @method static \Packages\React\Database\Factories\LikeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Like newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Like newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Like query()

@@ -40,6 +40,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property-read int|null $saves_count
  * @property-read User $user
  *
+ * @method static \Packages\Course\Database\Factories\CourseLessonFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseLesson newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseLesson newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CourseLesson query()

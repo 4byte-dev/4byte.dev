@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Packages\User\Database\Seeders\UserSeeder;
 
 class DatabaseSeeder extends Seeder
 {

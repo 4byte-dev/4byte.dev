@@ -2,13 +2,13 @@
 
 namespace Packages\Article\Data;
 
-use App\Data\UserData;
 use DateTime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Packages\Article\Models\Article;
 use Packages\Category\Data\CategoryData;
 use Packages\Tag\Data\TagData;
+use Packages\User\Data\UserData;
 use Spatie\LaravelData\Data;
 
 class ArticleData extends Data
@@ -17,7 +17,7 @@ class ArticleData extends Data
      * @param array{image: string, responsive: string|array<int, string>, srcset: string, thumb: string|null} $image
      * @param array<CategoryData> $categories
      * @param array<TagData> $tags
-     * @param array{url: string, date: string} $sources
+     * @param array<int, array{url: string, date: string}> $sources
      */
     public function __construct(
         public ?int $id,

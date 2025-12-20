@@ -17,6 +17,7 @@ use Packages\React\Database\Factories\SaveFactory;
  * @property-read Model $saveable
  * @property-read User $user
  *
+ * @method static \Packages\React\Database\Factories\SaveFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Save newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Save newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Save query()

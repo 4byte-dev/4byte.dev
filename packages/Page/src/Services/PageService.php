@@ -2,10 +2,10 @@
 
 namespace Packages\Page\Services;
 
-use App\Services\UserService;
 use Illuminate\Support\Facades\Cache;
 use Packages\Page\Data\PageData;
 use Packages\Page\Models\Page;
+use Packages\User\Services\UserService;
 
 class PageService
 {

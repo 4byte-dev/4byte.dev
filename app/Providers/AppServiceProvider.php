@@ -2,19 +2,13 @@
 
 namespace App\Providers;
 
-use App\Models\User;
-use App\Models\UserProfile;
-use App\Observers\UserObserver;
-use App\Observers\UserProfileObserver;
 use App\Services\SettingsService;
 use App\Settings\SeoSettings;
 use App\Settings\SiteSettings;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
-use Packages\React\Services\ReactService;
-use Packages\Recommend\Services\FeedService;
-use Packages\Search\Services\SearchService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,18 +31,15 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 6);
 
-        register_shutdown_function(function () {
-            if (memory_get_usage() > 100 * 1024 * 1024) {
-                logger()->warning('High memory usage: ' . memory_get_usage());
-            }
-        });
+        if ($this->app->environment('testings')) {
+            register_shutdown_function(function () {
+                if (memory_get_usage() > 100 * 1024 * 1024) {
+                    Log::warning('High memory usage: ' . memory_get_usage());
+                }
+            });
+        }
 
-        $this->loadObservers();
         $this->loadMacros();
-        $this->configureSearch();
-        $this->configureReact();
-        $this->configureSearch();
-        $this->configureFeed();
 
         try {
             $siteSettings = SettingsService::getSiteSettings();
@@ -118,12 +109,6 @@ class AppServiceProvider extends ServiceProvider
         }
     }
 
-    protected function loadObservers(): void
-    {
-        User::observe(UserObserver::class);
-        UserProfile::observe(UserProfileObserver::class);
-    }
-
     protected function loadMacros(): void
     {
         Builder::macro('existsOrFail', function ($message = '') {
@@ -133,34 +118,5 @@ class AppServiceProvider extends ServiceProvider
 
             return $this;
         });
-    }
-
-    protected function configureSearch(): void
-    {
-        SearchService::registerHandler(
-            index: 'users',
-            callback: fn ($hit) => app(\App\Services\UserService::class)->getData($hit['id']),
-            searchableAttributes: ['name', 'username'],
-            filterableAttributes: ['id'],
-            sortableAttributes: ['created_at']
-        );
-    }
-
-    protected function configureReact(): void
-    {
-        ReactService::registerHandler(
-            name: 'user',
-            class: User::class,
-            callback: fn ($slug) => app(\App\Services\UserService::class)->getId($slug)
-        );
-    }
-
-    protected function configureFeed(): void
-    {
-        FeedService::registerHandler(
-            name: 'user',
-            isFilter: true,
-            callback: fn ($slug) => app(\App\Services\UserService::class)->getId($slug)
-        );
     }
 }

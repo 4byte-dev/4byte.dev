@@ -2,13 +2,13 @@
 
 namespace Packages\Course\Data;
 
-use App\Data\UserData;
 use DateTime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Packages\Category\Data\CategoryData;
 use Packages\Course\Models\Course;
 use Packages\Tag\Data\TagData;
+use Packages\User\Data\UserData;
 use Spatie\LaravelData\Data;
 
 class CourseData extends Data

@@ -4,6 +4,7 @@ namespace Packages\Category\Tests\Unit\Data;
 
 use Illuminate\Support\Facades\Auth;
 use Mockery;
+use Mockery\MockInterface;
 use Packages\Category\Data\CategoryData;
 use Packages\Category\Models\Category;
 use Packages\Category\Tests\TestCase;
@@ -64,6 +65,7 @@ class CategoryDataTest extends TestCase
         $userId = 123;
         Auth::shouldReceive('id')->once()->andReturn($userId);
 
+        /** @var Category|MockInterface $category */
         $category       = Mockery::mock(Category::class)->makePartial();
         $category->id   = 99;
         $category->name = 'PHP';
@@ -89,6 +91,7 @@ class CategoryDataTest extends TestCase
     {
         Auth::shouldReceive('id')->once()->andReturn(null);
 
+        /** @var Category|MockInterface $category */
         $category       = Mockery::mock(Category::class)->makePartial();
         $category->id   = 1;
         $category->name = 'Guest';

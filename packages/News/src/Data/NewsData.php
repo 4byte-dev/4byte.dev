@@ -2,13 +2,13 @@
 
 namespace Packages\News\Data;
 
-use App\Data\UserData;
-use App\Services\UserService;
 use DateTime;
 use Illuminate\Support\Facades\Gate;
 use Packages\Category\Data\CategoryData;
 use Packages\News\Models\News;
 use Packages\Tag\Data\TagData;
+use Packages\User\Data\UserData;
+use Packages\User\Services\UserService;
 use Spatie\LaravelData\Data;
 
 class NewsData extends Data

@@ -2,13 +2,13 @@
 
 namespace Packages\Course\Services;
 
-use App\Services\UserService;
 use Illuminate\Support\Facades\Cache;
 use Packages\Course\Data\CourseData;
 use Packages\Course\Data\CourseLessonData;
 use Packages\Course\Models\Course;
 use Packages\Course\Models\CourseChapter;
 use Packages\Course\Models\CourseLesson;
+use Packages\User\Services\UserService;
 
 class CourseService
 {
