@@ -39,6 +39,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property-read int|null $saves_count
  * @property-read User $user
  *
+ * @method static \Packages\Entry\Database\Factories\EntryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Entry newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Entry newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Entry query()

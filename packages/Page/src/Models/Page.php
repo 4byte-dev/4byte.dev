@@ -32,6 +32,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property-read int|null $media_count
  * @property-read User $user
  *
+ * @method static \Packages\Page\Database\Factories\PageFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Page newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Page newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Page query()

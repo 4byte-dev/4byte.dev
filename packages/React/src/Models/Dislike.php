@@ -17,6 +17,7 @@ use Packages\React\Database\Factories\DislikeFactory;
  * @property-read Model $dislikeable
  * @property-read User $user
  *
+ * @method static \Packages\React\Database\Factories\DislikeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Dislike newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Dislike newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Dislike query()

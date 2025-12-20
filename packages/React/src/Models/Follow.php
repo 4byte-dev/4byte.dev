@@ -17,6 +17,7 @@ use Packages\React\Database\Factories\FollowFactory;
  * @property-read Model $followable
  * @property-read User $follower
  *
+ * @method static \Packages\React\Database\Factories\FollowFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Follow query()

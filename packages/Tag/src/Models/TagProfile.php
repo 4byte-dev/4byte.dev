@@ -25,6 +25,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property-read int|null $categories_count
  * @property-read Tag $tag
  *
+ * @method static \Packages\Tag\Database\Factories\TagProfileFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagProfile newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagProfile newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagProfile query()
