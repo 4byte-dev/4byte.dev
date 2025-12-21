@@ -15,8 +15,6 @@ DC_RUN_ARGS = $(ENV_FILE) $(DC_PROFILES) $(DC_FILE)
 HOST_UID=$(shell id -u)
 HOST_GID=$(shell id -g)
 
-PACKAGE_DIRS := $(wildcard packages/*/database/migrations)
-
 .PHONY : help migrate up down shell\:app stop-all ps update build restart down-up images\:list images\:clean logs\:app logs containers\:health command\:app
 .DEFAULT_GOAL : help
 
@@ -27,9 +25,6 @@ help: ## Show this help
 
 migrate: ## Run all migrations
 	php artisan migrate
-	@for dir in $(PACKAGE_DIRS); do \
-		php artisan migrate --path=/$$dir; \
-	done
 
 test: ## Run tests using pgsql and redis
 	@docker run -d --rm \
