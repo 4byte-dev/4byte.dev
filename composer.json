@@ -13,6 +13,7 @@
         "aws/aws-sdk-php": "^3.356",
         "bezhansalleh/filament-language-switch": "^3.1",
         "bezhansalleh/filament-shield": "^3.3",
+        "coolsam/modules": "^4.2",
         "filament/filament": "^3.3",
         "guzzlehttp/guzzle": "^7.10",
         "honeystone/laravel-seo": "^2.0",

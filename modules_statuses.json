@@ -9,5 +9,6 @@
     "Recommend": true,
     "Search": true,
     "Tag": true,
-    "User": true
+    "User": true,
+    "Admin": true
 }

@@ -1,0 +1,15 @@
+{
+    "name": "Admin",
+    "alias": "admin",
+    "description": "Admin module for 4Byte",
+    "keywords": [
+        "4Byte",
+        "Admin"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\Admin\\Providers\\AdminServiceProvider",
+        "Modules\\Admin\\Providers\\AdminPanelProvider"
+    ],
+    "files": []
+}
