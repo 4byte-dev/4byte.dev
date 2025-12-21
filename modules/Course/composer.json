@@ -1,0 +1,28 @@
+{
+    "name": "4byte/course",
+    "description": "Course module for 4Byte",
+    "authors": [
+        {
+            "name": "4Byte",
+            "email": "info@4byte.dev"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Course\\": "app/",
+            "Modules\\Course\\Database\\Factories\\": "database/factories/",
+            "Modules\\Course\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Course\\Tests\\": "tests/"
+        }
+    }
+}

@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Resources\Resource;
-use Packages\React\Models\Like;
+use Modules\React\Models\Like;
 
 class LikeResource extends Resource
 {

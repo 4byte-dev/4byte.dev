@@ -5,7 +5,7 @@ namespace App\Filament\Resources\EntryResource\Widgets;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Packages\Entry\Models\Entry;
+use Modules\Entry\Models\Entry;
 
 class EntryStatsOverview extends BaseWidget
 {

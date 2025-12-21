@@ -11,7 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Packages\Entry\Models\Entry;
+use Modules\Entry\Models\Entry;
 use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class EntryResource extends Resource

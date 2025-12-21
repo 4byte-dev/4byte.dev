@@ -45,42 +45,42 @@ class GenerateSitemapJob implements ShouldQueue
                 ->setLastModificationDate($user->updated_at));
         }
 
-        foreach (\Packages\Article\Models\Article::where('status', 'PUBLISHED')->get() as $article) {
+        foreach (\Modules\Article\Models\Article::where('status', 'PUBLISHED')->get() as $article) {
             $totalItems += 1;
             $sitemap->add(Url::create(route('article.view', ['slug' => $article->slug]))
                 ->setPriority(0.7)
                 ->setLastModificationDate($article->updated_at));
         }
 
-        foreach (\Packages\Entry\Models\Entry::get() as $entry) {
+        foreach (\Modules\Entry\Models\Entry::get() as $entry) {
             $totalItems += 1;
             $sitemap->add(Url::create(route('entry.view', ['slug' => $entry->slug]))
                 ->setPriority(0.6)
                 ->setLastModificationDate($entry->created_at));
         }
 
-        foreach (\Packages\News\Models\News::where('status', 'PUBLISHED')->get() as $news) {
+        foreach (\Modules\News\Models\News::where('status', 'PUBLISHED')->get() as $news) {
             $totalItems += 1;
             $sitemap->add(Url::create(route('news.view', ['slug' => $news->slug]))
                 ->setPriority(0.6)
                 ->setLastModificationDate($news->updated_at));
         }
 
-        foreach (\Packages\Page\Models\Page::where('status', 'PUBLISHED')->get() as $page) {
+        foreach (\Modules\Page\Models\Page::where('status', 'PUBLISHED')->get() as $page) {
             $totalItems += 1;
             $sitemap->add(Url::create(route('page.view', ['slug' => $page->slug]))
                 ->setPriority(0.5)
                 ->setLastModificationDate($page->updated_at));
         }
 
-        foreach (\Packages\Tag\Models\Tag::all() as $tag) {
+        foreach (\Modules\Tag\Models\Tag::all() as $tag) {
             $totalItems += 1;
             $sitemap->add(Url::create(route('tag.view', ['slug' => $tag->slug]))
                 ->setPriority(0.4)
                 ->setLastModificationDate($tag->updated_at));
         }
 
-        foreach (\Packages\Category\Models\Category::all() as $cat) {
+        foreach (\Modules\Category\Models\Category::all() as $cat) {
             $totalItems += 1;
             $sitemap->add(Url::create(route('category.view', ['slug' => $cat->slug]))
                 ->setPriority(0.4)

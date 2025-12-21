@@ -5,7 +5,7 @@ namespace App\Filament\Resources\ArticleResource\Widgets;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Packages\Article\Models\Article;
+use Modules\Article\Models\Article;
 
 class ArticleStatsOverview extends BaseWidget
 {

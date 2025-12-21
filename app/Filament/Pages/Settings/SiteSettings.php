@@ -3,7 +3,7 @@
 namespace App\Filament\Pages\Settings;
 
 use Filament\Forms;
-use Packages\Page\Models\Page;
+use Modules\Page\Models\Page;
 use Spatie\Permission\Models\Role as SpatieRole;
 
 class SiteSettings

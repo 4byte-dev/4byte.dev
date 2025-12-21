@@ -1,0 +1,28 @@
+{
+    "name": "4byte/entry",
+    "description": "Entry module for 4Byte",
+    "authors": [
+        {
+            "name": "4Byte",
+            "email": "info@4byte.dev"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Entry\\": "app/",
+            "Modules\\Entry\\Database\\Factories\\": "database/factories/",
+            "Modules\\Entry\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Entry\\Tests\\": "tests/"
+        }
+    }
+}

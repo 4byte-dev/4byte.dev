@@ -1,0 +1,28 @@
+{
+    "name": "4byte/recommend",
+    "description": "Recommend module for 4Byte",
+    "authors": [
+        {
+            "name": "4Byte",
+            "email": "info@4byte.dev"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Recommend\\": "app/",
+            "Modules\\Recommend\\Database\\Factories\\": "database/factories/",
+            "Modules\\Recommend\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Recommend\\Tests\\": "tests/"
+        }
+    }
+}

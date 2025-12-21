@@ -14,7 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Packages\Course\Models\Course;
+use Modules\Course\Models\Course;
 
 class CourseResource extends Resource
 {

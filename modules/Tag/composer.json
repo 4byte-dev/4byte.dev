@@ -1,0 +1,28 @@
+{
+    "name": "4byte/tag",
+    "description": "Tag module for 4Byte",
+    "authors": [
+        {
+            "name": "4Byte",
+            "email": "info@4byte.dev"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Tag\\": "app/",
+            "Modules\\Tag\\Database\\Factories\\": "database/factories/",
+            "Modules\\Tag\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Tag\\Tests\\": "tests/"
+        }
+    }
+}

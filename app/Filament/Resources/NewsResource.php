@@ -13,7 +13,7 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
-use Packages\News\Models\News;
+use Modules\News\Models\News;
 use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class NewsResource extends Resource

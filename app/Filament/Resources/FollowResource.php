@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Resources\Resource;
-use Packages\React\Models\Follow;
+use Modules\React\Models\Follow;
 
 class FollowResource extends Resource
 {

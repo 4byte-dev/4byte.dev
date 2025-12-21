@@ -5,7 +5,7 @@ namespace App\Filament\Resources\CommentResource\Widgets;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Packages\React\Models\Comment;
+use Modules\React\Models\Comment;
 
 class CommentStatsOverview extends BaseWidget
 {

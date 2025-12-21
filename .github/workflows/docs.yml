@@ -44,4 +44,4 @@ jobs:
 
       - name: Generate PHPDocs
         run: |
-          php phpDocumentor.phar -d app,packages -t docs
+          php phpDocumentor.phar -d app,modules -t docs

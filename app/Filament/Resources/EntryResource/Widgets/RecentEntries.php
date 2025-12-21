@@ -7,7 +7,7 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Packages\Entry\Models\Entry;
+use Modules\Entry\Models\Entry;
 
 class RecentEntries extends BaseWidget
 {
