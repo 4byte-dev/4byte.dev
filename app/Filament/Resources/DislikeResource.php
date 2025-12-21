@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Filament\Resources\Resource;
-use Packages\React\Models\Dislike;
+use Modules\React\Models\Dislike;
 
 class DislikeResource extends Resource
 {

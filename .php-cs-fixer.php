@@ -4,7 +4,7 @@ use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
 $finder = Finder::create()
-    ->in(['app', 'routes', 'database', 'packages'])
+    ->in(['app', 'routes', 'database', 'modules'])
     ->name('*.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);
@@ -55,7 +55,7 @@ return (new Config())
         ],
         'cast_spaces' => true,
         'class_attributes_separation' => [
-            'elements' =>['const' => 'one', 'method' => 'one', 'property' => 'one', 'trait_import' => 'none', 'case' => 'none']
+            'elements' => ['const' => 'one', 'method' => 'one', 'property' => 'one', 'trait_import' => 'none', 'case' => 'none']
         ],
         'class_definition' => ['single_line' => false],
         'concat_space' => [

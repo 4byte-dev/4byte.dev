@@ -10,7 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Packages\React\Models\Comment;
+use Modules\React\Models\Comment;
 use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class CommentResource extends Resource

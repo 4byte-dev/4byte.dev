@@ -10,7 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Packages\Course\Models\CourseChapter;
+use Modules\Course\Models\CourseChapter;
 
 class CourseChapterResource extends Resource
 {

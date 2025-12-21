@@ -9,7 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Packages\Category\Models\Category;
+use Modules\Category\Models\Category;
 use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class CategoryResource extends Resource

@@ -1,0 +1,28 @@
+{
+    "name": "4byte/article",
+    "description": "Article module for 4Byte",
+    "authors": [
+        {
+            "name": "4Byte",
+            "email": "info@4byte.dev"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Article\\": "app/",
+            "Modules\\Article\\Database\\Factories\\": "database/factories/",
+            "Modules\\Article\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Article\\Tests\\": "tests/"
+        }
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "name": "Tag",
+    "alias": "tag",
+    "description": "Tag module for 4Byte",
+    "keywords": [
+        "4Byte",
+        "Tag"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\Tag\\Providers\\TagServiceProvider"
+    ],
+    "files": []
+}

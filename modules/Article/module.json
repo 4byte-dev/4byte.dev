@@ -1,0 +1,14 @@
+{
+    "name": "Article",
+    "alias": "article",
+    "description": "Article module for 4Byte",
+    "keywords": [
+        "4Byte",
+        "Article"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\Article\\Providers\\ArticleServiceProvider"
+    ],
+    "files": []
+}

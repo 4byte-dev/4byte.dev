@@ -13,7 +13,7 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
-use Packages\Page\Models\Page;
+use Modules\Page\Models\Page;
 use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
 
 class PageResource extends Resource

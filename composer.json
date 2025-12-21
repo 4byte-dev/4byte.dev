@@ -26,6 +26,7 @@
         "league/flysystem-aws-s3-v3": "^3.0",
         "marcogermani87/filament-cookie-consent": "^1.1",
         "meilisearch/meilisearch-php": "^1.16",
+        "nwidart/laravel-modules": "^12.0",
         "rmsramos/activitylog": "^2.0",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-data": "^4.17",
@@ -55,48 +56,12 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/",
-            "Packages\\User\\": "packages/User/src/",
-            "Packages\\User\\Database\\Factories\\": "packages/User/database/factories/",
-            "Packages\\User\\Database\\Seeders\\": "packages/User/database/seeders/",
-            "Packages\\Article\\": "packages/Article/src/",
-            "Packages\\Article\\Database\\Factories\\": "packages/Article/database/factories/",
-            "Packages\\Article\\Database\\Seeders\\": "packages/Article/database/seeders/",
-            "Packages\\Category\\": "packages/Category/src/",
-            "Packages\\Category\\Database\\Factories\\": "packages/Category/database/factories/",
-            "Packages\\Category\\Database\\Seeders\\": "packages/Category/database/seeders/",
-            "Packages\\Tag\\": "packages/Tag/src/",
-            "Packages\\Tag\\Database\\Factories\\": "packages/Tag/database/factories/",
-            "Packages\\Tag\\Database\\Seeders\\": "packages/Tag/database/seeders/",
-            "Packages\\Page\\": "packages/Page/src/",
-            "Packages\\Page\\Database\\Factories\\": "packages/Page/database/factories/",
-            "Packages\\Page\\Database\\Seeders\\": "packages/Page/database/seeders/",
-            "Packages\\News\\": "packages/News/src/",
-            "Packages\\News\\Database\\Factories\\": "packages/News/database/factories/",
-            "Packages\\News\\Database\\Seeders\\": "packages/News/database/seeders/",
-            "Packages\\Recommend\\": "packages/Recommend/src/",
-            "Packages\\Recommend\\Database\\Factories\\": "packages/Recommend/database/factories/",
-            "Packages\\Recommend\\Database\\Seeders\\": "packages/Recommend/database/seeders/",
-            "Packages\\Entry\\": "packages/Entry/src/",
-            "Packages\\Entry\\Database\\Factories\\": "packages/Entry/database/factories/",
-            "Packages\\Entry\\Database\\Seeders\\": "packages/Entry/database/seeders/",
-            "Packages\\React\\": "packages/React/src/",
-            "Packages\\React\\Database\\Factories\\": "packages/React/database/factories/",
-            "Packages\\React\\Database\\Seeders\\": "packages/React/database/seeders/",
-            "Packages\\Search\\": "packages/Search/src/",
-            "Packages\\Search\\Database\\Factories\\": "packages/Search/database/factories/",
-            "Packages\\Search\\Database\\Seeders\\": "packages/Search/database/seeders/",
-            "Packages\\Course\\": "packages/Course/src/",
-            "Packages\\Course\\Database\\Factories\\": "packages/Course/database/factories/",
-            "Packages\\Course\\Database\\Seeders\\": "packages/Course/database/seeders/"
+            "Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/",
-            "Packages\\Tag\\Tests\\": "packages/Tag/tests/",
-            "Packages\\Category\\Tests\\": "packages/Category/tests/",
-            "Packages\\Article\\Tests\\": "packages/Article/tests/"
+            "Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -138,6 +103,11 @@
                 "laravel/telescope",
                 "barryvdh/laravel-debugbar"
             ]
+        },
+        "merge-plugin": {
+            "include": [
+                "modules/*/composer.json"
+            ]
         }
     },
     "config": {
@@ -147,7 +117,8 @@
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "wikimedia/composer-merge-plugin": true
         }
     },
     "minimum-stability": "stable",

@@ -1,0 +1,14 @@
+{
+    "name": "Category",
+    "alias": "category",
+    "description": "Category module for 4Byte",
+    "keywords": [
+        "4Byte",
+        "Category"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\Category\\Providers\\CategoryServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,88 @@
+<?php
+
+namespace Modules\Category\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Modules\Article\Models\Article;
+use Modules\Category\Database\Factories\CategoryFactory;
+use Modules\React\Traits\HasFollowers;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Article> $articles
+ * @property-read int|null $articles_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Modules\React\Models\Follow> $followers
+ * @property-read int|null $followers_count
+ * @property-read CategoryProfile|null $profile
+ *
+ * @method static \Modules\Category\Database\Factories\CategoryFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereUpdatedAt($value)
+ *
+ * @mixin \Eloquent
+ */
+class Category extends Model
+{
+    /** @use HasFactory<\Modules\Category\Database\Factories\CategoryFactory> */
+    use HasFactory;
+
+    use HasFollowers;
+    use LogsActivity;
+
+    protected $fillable = ['name', 'slug'];
+
+    /**
+     * @return BelongsToMany<Article, $this, \Illuminate\Database\Eloquent\Relations\Pivot>
+     */
+    public function articles(): BelongsToMany
+    {
+        return $this->belongsToMany(Article::class, 'article_category');
+    }
+
+    /**
+     * @return HasOne<CategoryProfile, $this>
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(CategoryProfile::class);
+    }
+
+    /**
+     * Get the activity log options for Category model.
+     * Logs changes to the "name" and "slug" attributes.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('category')
+            ->logOnly(['name', 'slug'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): CategoryFactory
+    {
+        return CategoryFactory::new();
+    }
+}
