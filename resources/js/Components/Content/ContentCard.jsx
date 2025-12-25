@@ -1,9 +1,9 @@
-import { ArticleCard } from "./Card/ArticleCard";
-import { CommentCard } from "./Card/CommentCard";
-import { CourseCard } from "./Card/CourseCard";
-import { DraftCard } from "./Card/DraftCard";
-import { EntryCard } from "./Card/EntryCard";
-import { UserCard } from "./Card/UserCard";
+import { ArticleCard } from "@Article/Components/Card/ArticleCard";
+import { DraftCard } from "@Article/Components/Card/DraftCard";
+import { CommentCard } from "@React/Components/Card/CommentCard";
+import { CourseCard } from "@Course//Components/Cards/CourseCard";
+import { EntryCard } from "@Entry/Components/Card/EntryCard";
+import { UserCard } from "@User/Components/Card/UserCard";
 
 export function ContentCard({ ...props }) {
 	const { type } = props;

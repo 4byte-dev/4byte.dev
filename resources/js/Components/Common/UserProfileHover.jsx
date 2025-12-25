@@ -9,8 +9,8 @@ import { useAuthStore } from "@/Stores/AuthStore";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "@/Hooks/useToast";
 import { useMutation } from "@tanstack/react-query";
-import ReactApi from "@/Api/ReactApi";
-import UserApi from "@/Api/UserApi";
+import ReactApi from "@React/Api";
+import UserApi from "@User/Api";
 
 export function UserProfileHover({ username, children }) {
 	const [isFollowing, setIsFollowing] = useState(false);
