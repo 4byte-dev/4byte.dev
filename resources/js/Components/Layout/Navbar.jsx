@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next";
 import { SearchBar } from "./SearchBar";
 import { useSidebar } from "@/Contexts/SidebarContext";
 import { useMutation } from "@tanstack/react-query";
-import AuthApi from "@/Api/AuthApi";
+import UserApi from "@User/Api";
 
 export function Navbar() {
 	const { isVisible, toggleSidebar, isOpen } = useSidebar();
@@ -29,7 +29,7 @@ export function Navbar() {
 	const { t } = useTranslation();
 
 	const logoutMutation = useMutation({
-		mutationFn: () => AuthApi.logout(),
+		mutationFn: () => UserApi.logout(),
 		onSuccess: () => authStore.logout(),
 	});
 

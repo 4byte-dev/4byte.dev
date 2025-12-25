@@ -29,6 +29,18 @@ export default ({ mode }) => {
 		],
 		resolve: {
 			alias: {
+				"@": "/resources/js",
+				"@Modules": path.resolve(__dirname, "modules"),
+				"@Article": path.resolve(__dirname, "modules/Article/resources/js"),
+				"@Category": path.resolve(__dirname, "modules/Category/resources/js"),
+				"@Course": path.resolve(__dirname, "modules/Course/resources/js"),
+				"@Entry": path.resolve(__dirname, "modules/Entry/resources/js"),
+				"@Page": path.resolve(__dirname, "modules/Page/resources/js"),
+				"@React": path.resolve(__dirname, "modules/React/resources/js"),
+				"@Recommend": path.resolve(__dirname, "modules/Recommend/resources/js"),
+				"@Search": path.resolve(__dirname, "modules/Search/resources/js"),
+				"@Tag": path.resolve(__dirname, "modules/Tag/resources/js"),
+				"@User": path.resolve(__dirname, "modules/User/resources/js"),
 				"ziggy-js": path.resolve("vendor/tightenco/ziggy"),
 			},
 		},

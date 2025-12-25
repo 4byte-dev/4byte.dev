@@ -10,7 +10,7 @@ import { Badge } from "@/Components/Ui/Badge";
 import { ScrollArea } from "@/Components/Ui/ScrollArea";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import UserApi from "@/Api/UserApi";
+import NotificationApi from "@/Api/NotificationApi";
 
 export function NotificationDropdown() {
 	const { t } = useTranslation();
@@ -18,14 +18,14 @@ export function NotificationDropdown() {
 
 	const { data: notifications = [], isLoading } = useQuery({
 		queryKey: ["notifications"],
-		queryFn: () => UserApi.getNotifications(),
+		queryFn: () => NotificationApi.getNotifications(),
 		staleTime: 5 * 60 * 1000,
 	});
 
 	const notificationsCount = notifications.filter((n) => !n.read_at).length;
 
 	const markAsReadMutation = useMutation({
-		mutationFn: (id) => UserApi.readNotification({ id }),
+		mutationFn: (id) => NotificationApi.readNotification({ id }),
 		onSuccess: (_, id) => {
 			queryClient.setQueryData(["notifications"], (old) =>
 				old.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n)),
@@ -34,7 +34,7 @@ export function NotificationDropdown() {
 	});
 
 	const markAllAsReadMutation = useMutation({
-		mutationFn: () => UserApi.readNotifications(),
+		mutationFn: () => NotificationApi.readNotifications(),
 		onSuccess: () => {
 			queryClient.setQueryData(["notifications"], (old) =>
 				old.map((n) => ({ ...n, read_at: new Date().toISOString() })),

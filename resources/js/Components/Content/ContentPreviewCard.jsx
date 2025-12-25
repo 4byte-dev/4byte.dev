@@ -1,23 +1,23 @@
-import { ArticlePreviewCard } from "./PreviewCard/ArticlePreviewCard";
-import { UserPreviewCard } from "./PreviewCard/UserPreviewCard";
-import { TagPreviewCard } from "./PreviewCard/TagPreviewCard";
-import { CategoryPreviewCard } from "./PreviewCard/CategoryPreviewCard";
-import { CoursePreviewCard } from "./PreviewCard/CoursePreviewCard";
+import { ArticlePreview } from "@Article/Components/Preview/ArticlePreview";
+import { UserPreview } from "@User/Components/Preview/UserPreview";
+import { TagPreview } from "@Tag/Components/Preview/TagPreview";
+import { CategoryPreview } from "@Category/Components/Preview/CategoryPreview";
+import { CoursePreview } from "@Course/Components/Preview/CoursePreview";
 
 export function ContentPreviewCard({ item }) {
 	const { type } = item;
 
 	switch (type) {
 		case "article":
-			return <ArticlePreviewCard {...item} />;
+			return <ArticlePreview {...item} />;
 		case "user":
-			return <UserPreviewCard {...item} />;
+			return <UserPreview {...item} />;
 		case "tag":
-			return <TagPreviewCard {...item} />;
+			return <TagPreview {...item} />;
 		case "category":
-			return <CategoryPreviewCard {...item} />;
+			return <CategoryPreview {...item} />;
 		case "course":
-			return <CoursePreviewCard {...item} />;
+			return <CoursePreview {...item} />;
 
 		default:
 			break;
