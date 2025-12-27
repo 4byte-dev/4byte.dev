@@ -1,0 +1,14 @@
+{
+    "name": "Recommend",
+    "alias": "recommend",
+    "description": "Recommend module for 4Byte",
+    "keywords": [
+        "Recommend",
+        "4Byte"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\Recommend\\Providers\\RecommendServiceProvider"
+    ],
+    "files": []
+}

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Packages\User\Models\User as BaseUser;
+use Modules\User\Models\User as BaseUser;
 
 /**
  * @property int $id
@@ -21,9 +21,9 @@ use Packages\User\Models\User as BaseUser;
  * @property-read mixed $breezy_session
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Jeffgreco13\FilamentBreezy\Models\BreezySession> $breezySessions
  * @property-read int|null $breezy_sessions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Packages\React\Models\Follow> $followers
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Modules\React\Models\Follow> $followers
  * @property-read int|null $followers_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Packages\React\Models\Follow> $followings
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Modules\React\Models\Follow> $followings
  * @property-read int|null $followings_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
@@ -31,13 +31,13 @@ use Packages\User\Models\User as BaseUser;
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read int|null $permissions_count
- * @property-read \Packages\User\Models\UserProfile|null $profile
+ * @property-read \Modules\User\Models\UserProfile|null $profile
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read mixed $two_factor_recovery_codes
  * @property-read mixed $two_factor_secret
  *
- * @method static \Packages\User\Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static \Modules\User\Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User onlyTrashed()

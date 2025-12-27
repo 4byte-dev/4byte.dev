@@ -1,0 +1,14 @@
+{
+    "name": "Page",
+    "alias": "page",
+    "description": "Page module for 4Byte",
+    "keywords": [
+        "4Byte",
+        "Page"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\Page\\Providers\\PageServiceProvider"
+    ],
+    "files": []
+}

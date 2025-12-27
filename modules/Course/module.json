@@ -1,0 +1,11 @@
+{
+    "name": "Course",
+    "alias": "course",
+    "description": "Course module for 4Byte",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Course\\Providers\\CourseServiceProvider"
+    ],
+    "files": []
+}

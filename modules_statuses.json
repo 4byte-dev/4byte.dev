@@ -1,0 +1,14 @@
+{
+    "Article": true,
+    "Category": true,
+    "Course": true,
+    "Entry": true,
+    "News": true,
+    "Page": true,
+    "React": true,
+    "Recommend": true,
+    "Search": true,
+    "Tag": true,
+    "User": true,
+    "Admin": true
+}

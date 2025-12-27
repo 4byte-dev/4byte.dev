@@ -15,14 +15,14 @@ import { useAuthStore } from "@/Stores/AuthStore";
 import { Button } from "@/Components/Ui/Form/Button";
 import { ImageSlider } from "@/Components/Common/ImageSlider";
 import { toast } from "@/Hooks/useToast";
-import { createEntrySchema } from "@/Validation/ContentValidation";
+import { createEntrySchema } from "@Entry/Validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { Form, FormField, FormMessage } from "../Ui/Form/Form";
 import { FormTextareaInput } from "../Ui/Form/FormTextareaInput";
 import { Label } from "../Ui/Form/Label";
-import ContentApi from "@/Api/ContentApi";
+import EntryApi from "@Entry/Api";
 
 export function CreatorCard() {
 	const { t } = useTranslation();
@@ -51,7 +51,7 @@ export function CreatorCard() {
 				});
 			}
 
-			return ContentApi.createEntry(payload);
+			return EntryApi.createEntry(payload);
 		},
 		onSuccess: () => {
 			toast({

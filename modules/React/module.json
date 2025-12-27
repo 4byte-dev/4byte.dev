@@ -1,0 +1,14 @@
+{
+    "name": "React",
+    "alias": "react",
+    "description": "React module for 4Byte",
+    "keywords": [
+        "4Byte",
+        "React"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\React\\Providers\\ReactServiceProvider"
+    ],
+    "files": []
+}

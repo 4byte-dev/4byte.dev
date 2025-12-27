@@ -1,0 +1,14 @@
+{
+    "name": "News",
+    "alias": "news",
+    "description": "News module for 4Byte",
+    "keywords": [
+        "News",
+        "4Byte"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\News\\Providers\\NewsServiceProvider"
+    ],
+    "files": []
+}

@@ -5,10 +5,8 @@
          colors="true"
 >
     <testsuites>
-        <testsuite name="Packages">
-            <directory>packages/Tag/tests</directory>
-            <directory>packages/Category/tests</directory>
-            <directory>packages/Article/tests</directory>
+        <testsuite name="Modules">
+            <directory>Modules/**/tests</directory>
         </testsuite>
     </testsuites>
     <source>

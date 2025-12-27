@@ -5,23 +5,24 @@ namespace Tests;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Mockery;
-use Packages\Recommend\Services\GorseService;
+use Modules\Recommend\Services\GorseService;
 
 abstract class TestCase extends BaseTestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void {
+    protected function setUp(): void
+    {
         parent::setUp();
 
         $this->app->bind(GorseService::class, function () {
-            $userMock = Mockery::mock(\Packages\Recommend\Classes\GorseUser::class);
+            $userMock = Mockery::mock(\Modules\Recommend\Classes\GorseUser::class);
             $userMock->shouldIgnoreMissing();
 
-            $rowEffectedMock = Mockery::mock(\Packages\Recommend\Classes\RowAffected::class);
+            $rowEffectedMock = Mockery::mock(\Modules\Recommend\Classes\RowAffected::class);
             $rowEffectedMock->shouldIgnoreMissing();
 
-            $gorseItemMock = Mockery::mock(\Packages\Recommend\Classes\GorseItem::class);
+            $gorseItemMock = Mockery::mock(\Modules\Recommend\Classes\GorseItem::class);
             $gorseItemMock->shouldIgnoreMissing();
 
             $gorseServiceMock = Mockery::mock(GorseService::class);
