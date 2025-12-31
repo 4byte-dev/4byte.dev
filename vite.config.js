@@ -7,6 +7,11 @@ export default ({ mode }) => {
 	process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
 	return defineConfig({
+		server: {
+			watch: {
+				ignored: ["**/vendor/**", "**/node_modules/**"],
+			},
+		},
 		build: {
 			rollupOptions: {
 				output: {
@@ -41,6 +46,7 @@ export default ({ mode }) => {
 				"@Search": path.resolve(__dirname, "modules/Search/resources/js"),
 				"@Tag": path.resolve(__dirname, "modules/Tag/resources/js"),
 				"@User": path.resolve(__dirname, "modules/User/resources/js"),
+				"@CodeSpace": path.resolve(__dirname, "modules/CodeSpace/resources/js"),
 				"ziggy-js": path.resolve("vendor/tightenco/ziggy"),
 			},
 		},
