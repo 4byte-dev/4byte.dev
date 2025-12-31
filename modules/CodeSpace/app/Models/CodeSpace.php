@@ -5,6 +5,7 @@ namespace Modules\CodeSpace\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\CodeSpace\Database\Factories\CodeSpaceFactory;
 use Modules\User\Models\User;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -68,9 +69,17 @@ class CodeSpace extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->useLogName('code')
+            ->useLogName('codespace')
             ->logOnly(['name'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): CodeSpaceFactory
+    {
+        return CodeSpaceFactory::new();
     }
 }
