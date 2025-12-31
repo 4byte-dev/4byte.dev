@@ -60,7 +60,19 @@ const DropdownMenuTrigger = React.forwardRef(
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
 
 const DropdownMenuContent = React.forwardRef(
-	({ className, children, isOpen, onClose, align = "center", ...props }, ref) => {
+	(
+		{
+			className,
+			children,
+			isOpen,
+			onClose,
+			align = "center",
+			side = "bottom",
+			sideOffset = 4,
+			...props
+		},
+		ref,
+	) => {
 		if (!isOpen) return null;
 
 		const alignmentClasses = {
@@ -69,14 +81,48 @@ const DropdownMenuContent = React.forwardRef(
 			end: "right-0",
 		};
 
+		const sideClasses = {
+			bottom: "top-full mt-1",
+			right: "left-full ml-1",
+			left: "right-full mr-1",
+			top: "bottom-full mb-1",
+		};
+
+		const sideAlignmentClasses = {
+			start: "top-0",
+			center: "top-1/2 transform -translate-y-1/2",
+			end: "bottom-0",
+		};
+
+		let positionClass = "";
+		if (side === "bottom" || side === "top") {
+			positionClass = cn(sideClasses[side], alignmentClasses[align]);
+		} else {
+			positionClass = cn(sideClasses[side], sideAlignmentClasses[align]);
+		}
+
+		const style = {};
+
+		const marginProp = {
+			bottom: "marginTop",
+			top: "marginBottom",
+			right: "marginLeft",
+			left: "marginRight",
+		}[side];
+
+		if (sideOffset) {
+			style[marginProp] = `${sideOffset}px`;
+		}
+
 		return (
 			<div
 				ref={ref}
 				className={cn(
-					"absolute top-full z-50 mt-1 min-w-[8rem] overflow-visible rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
-					alignmentClasses[align],
+					"absolute z-50 min-w-[8rem] overflow-visible rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95",
+					positionClass,
 					className,
 				)}
+				style={style}
 				{...props}
 			>
 				{React.Children.map(children, (child) => {

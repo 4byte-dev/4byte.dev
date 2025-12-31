@@ -1,4 +1,4 @@
-import { Compass } from "lucide-react";
+import { Compass, Terminal } from "lucide-react";
 import { Button } from "@/Components/Ui/Form/Button";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { Link } from "@inertiajs/react";
@@ -14,6 +14,11 @@ export function FeedSidebar() {
 			title: t("Discover"),
 			icon: Compass,
 			href: route("home.view"),
+		},
+		{
+			title: t("Code Space"),
+			icon: Terminal,
+			href: route("codespace.view"),
 		},
 	];
 
