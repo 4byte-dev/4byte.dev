@@ -157,13 +157,13 @@ export default function TutorialPage({ course, cirriculum }) {
 	const getLessonTypeLabel = (type) => {
 		switch (type) {
 			case "video":
-				return "Video";
+				return t("Video");
 			case "article":
-				return "Article";
+				return t("Article");
 			case "exercise":
-				return "Exercise";
+				return t("Exercise");
 			default:
-				return "Lesson";
+				return t("Lesson");
 		}
 	};
 
@@ -276,7 +276,7 @@ export default function TutorialPage({ course, cirriculum }) {
 								</UserProfileHover>
 
 								<div className="text-center">
-									<div className="text-2xl font-bold mb-2">Free</div>
+									<div className="text-2xl font-bold mb-2">{t("Free")}</div>
 									<Button className="w-full" size="lg" type="button">
 										{firstLesson && (
 											<Link
@@ -286,7 +286,7 @@ export default function TutorialPage({ course, cirriculum }) {
 													page: firstLesson.slug,
 												})}
 											>
-												{"Start Course"}
+												{t("Start Course")}
 											</Link>
 										)}
 									</Button>
@@ -297,8 +297,8 @@ export default function TutorialPage({ course, cirriculum }) {
 				</div>
 				<Tabs defaultValue="overview" className="w-full">
 					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="overview">Course Overview</TabsTrigger>
-						<TabsTrigger value="curriculum">Curriculum</TabsTrigger>
+						<TabsTrigger value="overview">{t("Course Overview")}</TabsTrigger>
+						<TabsTrigger value="curriculum">{t("Curriculum")}</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="overview" className="mt-6">

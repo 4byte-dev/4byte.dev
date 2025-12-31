@@ -1,0 +1,13 @@
+{
+    "Replying to comment": "Yoruma yanıt veriliyor",
+    "In response to:": "Şuna yanıt olarak:",
+    "System error. Please try again.": "Sistem hatası. Lütfen tekrar deneyin.",
+    "Post Comment": "Yorum Gönder",
+    "Share your thoughts...": "Düşüncelerinizi paylaşın...",
+    "Error": "Hata",
+    "You can react to the same comment once a day": "Aynı yoruma günde bir kez tepki verebilirsiniz",
+    "Reply": "Yanıtla",
+    "comments": "<0>{{count}}</0> Yorum",
+    "replies": "{{count}} Yanıt",
+    "Comment must be at least 20 characters": "Yorum en az 20 karater olmalıdır"
+}

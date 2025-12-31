@@ -46,7 +46,7 @@ export default function VerifyPage() {
 			setErrors({});
 		},
 		onError: (error) => {
-			setErrors(error.errors || { general: "Please try again later." });
+			setErrors(error.errors || { general: t("Please try again later.") });
 		},
 	});
 

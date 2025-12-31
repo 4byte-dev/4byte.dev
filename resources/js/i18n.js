@@ -1,18 +1,42 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import en from "@/Lang/en.json";
-import tr from "@/Lang/tr.json";
 
-const resources = {
-	en: { translation: en },
-	tr: { translation: tr },
-};
+const globalLangs = import.meta.glob("/resources/js/Lang/*.json", { eager: true });
+
+const moduleLangs = import.meta.glob("/modules/**/resources/js/Lang/*.json", { eager: true });
+
+function buildResources(files) {
+	const result = {};
+
+	for (const path in files) {
+		const lang = path.match(/([^/]+)\.json$/)?.[1];
+		if (!lang) continue;
+
+		result[lang] ??= {};
+		Object.assign(result[lang], files[path]);
+	}
+
+	return result;
+}
+
+const globalResources = buildResources(globalLangs);
+const moduleResources = buildResources(moduleLangs);
+
+const resources = {};
+
+for (const lang of new Set([...Object.keys(globalResources), ...Object.keys(moduleResources)])) {
+	resources[lang] = {
+		translation: {
+			...(globalResources[lang] ?? {}),
+			...(moduleResources[lang] ?? {}),
+		},
+	};
+}
 
 function getInitialLng() {
 	if (typeof window === "undefined") return "tr";
-	const saved = localStorage.getItem("language");
-	const htmlLang = document.documentElement.getAttribute("lang");
-	return saved || htmlLang || "tr";
+
+	return localStorage.getItem("language") || document.documentElement.lang || "tr";
 }
 
 if (!i18n.isInitialized) {

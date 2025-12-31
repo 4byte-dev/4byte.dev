@@ -1,0 +1,14 @@
+{
+    "Contents": "Contents",
+    "Title is required": "Title is required",
+    "Title must be at least 10 characters": "Title must be at least 10 characters",
+    "Excerpt is required": "Excerpt is required",
+    "Excerpt must be at least 100 characters": "Excerpt must be at least 100 characters",
+    "Content is required": "Content is required",
+    "Content must be at least 500 characters": "Content must be at least 500 characters",
+    "Select at least 1 category": "Select at least 1 category",
+    "You can select up to 3 categories": "You can select up to 3 categories",
+    "Select at least 1 tag": "Select at least 1 tag",
+    "You can select up to 3 tags": "You can select up to 3 tags",
+    "Cover image is required": "Cover image is required"
+}
