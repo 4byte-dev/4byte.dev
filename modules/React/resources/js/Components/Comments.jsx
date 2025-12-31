@@ -56,8 +56,6 @@ export function Comments({ commentsCounts: initialCommentsCounts, type, slug }) 
 		mutationFn: ({ parentId }) => ReactApi.replies({ type, slug, parent: parentId }),
 		onMutate: ({ parentId }) => setIsRepliesLoading({ ...isRepliesLoading, [parentId]: true }),
 		onSuccess: (response, { parentId }) => {
-			console.log(comments);
-
 			setReplies({ ...replies, [parentId]: response });
 			setShowReplies({ ...showReplies, [parentId]: true });
 			setIsRepliesLoading({ ...isRepliesLoading, [parentId]: false });
