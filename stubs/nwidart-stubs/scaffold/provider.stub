@@ -20,6 +20,8 @@ class $CLASS$ extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerPolicies();
+        $this->registerObservers();
         $this->registerCommands();
         $this->registerCommandSchedules();
         $this->registerTranslations();
