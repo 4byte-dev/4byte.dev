@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
-import { ScrollArea } from "../Ui/ScrollArea";
-import { Popover, PopoverContent, PopoverTrigger } from "../Ui/Popover";
+import { ScrollArea } from "@/Components/Ui/ScrollArea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/Components/Ui/Popover";
 import { Search } from "lucide-react";
-import { Input } from "../Ui/Form/Input";
-import { ContentPreviewCard } from "../Content/ContentPreviewCard";
+import { Input } from "@/Components/Ui/Form/Input";
+import { ContentPreviewCard } from "@/Components/Content/ContentPreviewCard";
 import { useTranslation } from "react-i18next";
 import { router } from "@inertiajs/react";
 import { useMutation } from "@tanstack/react-query";

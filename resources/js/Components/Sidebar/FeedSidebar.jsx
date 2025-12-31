@@ -3,7 +3,7 @@ import { Button } from "@/Components/Ui/Form/Button";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { Link } from "@inertiajs/react";
 import { useTranslation } from "react-i18next";
-import { SearchBar } from "../Layout/SearchBar";
+import { SearchBar } from "@Search/Components/SearchBar";
 
 export function FeedSidebar() {
 	const authStore = useAuthStore();
@@ -16,7 +16,7 @@ export function FeedSidebar() {
 			href: route("home.view"),
 		},
 		{
-			title: t("Code Space"),
+			title: t("CodeSpace"),
 			icon: Terminal,
 			href: route("codespace.view"),
 		},
