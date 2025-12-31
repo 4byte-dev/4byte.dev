@@ -1,0 +1,13 @@
+{
+    "Replying to comment": "Replying to comment",
+    "In response to:": "In response to:",
+    "System error. Please try again.": "System error. Please try again.",
+    "Post Comment": "Post Comment",
+    "Share your thoughts...": "Share your thoughts...",
+    "Error": "Error",
+    "You can react to the same comment once a day": "You can react to the same comment once a day",
+    "Reply": "Reply",
+    "comments": "Comments <0>{{count}}</0>",
+    "replies": "{{count}} Reply",
+    "Comment must be at least 20 characters": "Comment must be at least 20 characters"
+}

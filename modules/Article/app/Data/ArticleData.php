@@ -44,7 +44,7 @@ class ArticleData extends Data
     }
 
     /**
-     * Create a TagData instance from a Tag model.
+     * Create a ArticleData instance from a Article model.
      */
     public static function fromModel(Article $article, UserData $user, bool $setId = false): self
     {

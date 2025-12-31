@@ -16,7 +16,7 @@ import { useAuthStore } from "@/Stores/AuthStore";
 import { useSiteStore } from "@/Stores/SiteStore";
 import { useModalStore } from "@/Stores/ModalStore";
 import { useTranslation } from "react-i18next";
-import { SearchBar } from "./SearchBar";
+import { SearchBar } from "@Search/Components/SearchBar";
 import { useSidebar } from "@/Contexts/SidebarContext";
 import { useMutation } from "@tanstack/react-query";
 import UserApi from "@User/Api";

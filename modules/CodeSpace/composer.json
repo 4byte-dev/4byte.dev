@@ -1,0 +1,28 @@
+{
+    "name": "4byte/codespace",
+    "description": "CodeSpace module for 4Byte",
+    "authors": [
+        {
+            "name": "4Byte",
+            "email": "info@4byte.dev"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\CodeSpace\\": "app/",
+            "Modules\\CodeSpace\\Database\\Factories\\": "database/factories/",
+            "Modules\\CodeSpace\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\CodeSpace\\Tests\\": "tests/"
+        }
+    }
+}

@@ -27,8 +27,6 @@ import { FormTextareaInput } from "@/Components/Ui/Form/FormTextareaInput";
 import { FormMarkdownInput } from "@/Components/Ui/Form/FormMarkdownInput";
 
 export default function CreateArticlePage({ topTags, topCategories }) {
-	console.log(topCategories, topTags);
-
 	const { t } = useTranslation();
 	const [imagePreview, setImagePreview] = useState(null);
 	const [newSourceUrl, setNewSourceUrl] = useState("");

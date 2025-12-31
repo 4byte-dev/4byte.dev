@@ -3,7 +3,19 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["resources/js/*"],
-            "ziggy-js": ["./vendor/tightenco/ziggy"]
+            "ziggy-js": ["./vendor/tightenco/ziggy"],
+            "@Modules/*": ["modules/*"],
+            "@Article/*": ["modules/Article/resources/js/*"],
+            "@Category/*": ["modules/Category/resources/js/*"],
+            "@Course/*": ["modules/Course/resources/js/*"],
+            "@Entry/*": ["modules/Entry/resources/js/*"],
+            "@Page/*": ["modules/Page/resources/js/*"],
+            "@React/*": ["modules/React/resources/js/*"],
+            "@Recommend/*": ["modules/Recommend/resources/js/*"],
+            "@Search/*": ["modules/Search/resources/js/*"],
+            "@Tag/*": ["modules/Tag/resources/js/*"],
+            "@User/*": ["modules/User/resources/js/*"],
+            "@CodeSpace/*": ["modules/CodeSpace/resources/js/*"]
         }
     },
     "exclude": ["node_modules", "public"]

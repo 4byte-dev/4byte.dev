@@ -11,6 +11,7 @@ use Honeystone\Seo\OpenGraph\ProfileProperties;
 use Modules\Article\Data\ArticleData;
 use Modules\Category\Data\CategoryData;
 use Modules\Category\Data\CategoryProfileData;
+use Modules\CodeSpace\Data\CodeSpaceData;
 use Modules\Course\Data\CourseData;
 use Modules\Course\Data\CourseLessonData;
 use Modules\Entry\Data\EntryData;
@@ -186,6 +187,58 @@ class SeoService
         return $this->buildSeo([
             'title' => __('Edit Article'),
         ]);
+    }
+
+    /**
+     * Get SEO data for the CodeSpace page.
+     */
+    public function getCodeSpaceSeo(?CodeSpaceData $codeSpace, ?UserData $user): BuildsMetadata
+    {
+        if (! $codeSpace) {
+            return $this->buildSeo([
+                'title' => __('CodeSpace'),
+            ]);
+        }
+        $schema = Schema::article()
+            ->headline($codeSpace->name)
+            ->datePublished($codeSpace->updated_at)
+            ->dateModified($codeSpace->updated_at)
+            ->author(
+                Schema::person()->name($user->name)
+            )
+            ->publisher(
+                Schema::organization()
+                    ->name($this->siteSettings->title)
+                    ->description($this->seoSettings->meta_description)
+                    ->logo(
+                        Schema::imageObject()->url($this->siteSettings->getLightLogoUrlAttribute())
+                    )
+            )
+            ->mainEntityOfPage(
+                Schema::webPage()->url(route('codespace.view', ['slug' => $codeSpace->slug]))
+                    ->name($codeSpace->name)
+            );
+
+        $codeSpaceSeo = $this->buildSeo([
+            'title'         => $codeSpace->name,
+            'url'           => route('codespace.view', ['slug' => $codeSpace->slug]),
+            'openGraphType' => new ArticleProperties(
+                publishedTime: $codeSpace->updated_at,
+                modifiedTime: $codeSpace->updated_at,
+                expirationTime: null,
+                author: new ProfileProperties(
+                    firstName: $user->name,
+                    lastName: null,
+                    username: $user->username
+                )
+            ),
+        ]);
+
+        if ($codeSpace->updated_at) {
+            $codeSpaceSeo = $codeSpaceSeo->openGraphProperty('og:updated_time', $codeSpace->updated_at->format('Uu'));
+        }
+
+        return $codeSpaceSeo->jsonLdImport($schema);
     }
 
     /**

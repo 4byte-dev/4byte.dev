@@ -1,0 +1,14 @@
+{
+    "Contents": "İçerikler",
+    "Title is required": "Başlık zorunludur",
+    "Title must be at least 10 characters": "Başlık en az 10 karakter olmalıdır",
+    "Excerpt is required": "Özet zorunludur",
+    "Excerpt must be at least 100 characters": "Özet en az 100 karakter olmalıdır",
+    "Content is required": "İçerik zorunludur",
+    "Content must be at least 500 characters": "İçerik en az 500 karakter olmalıdır",
+    "Select at least 1 category": "En az 1 kategori seçiniz",
+    "You can select up to 3 categories": "En fazla 3 kategori seçebilirsiniz",
+    "Select at least 1 tag": "En az 1 etiket seçiniz",
+    "You can select up to 3 tags": "En fazla 3 etiket seçebilirsiniz",
+    "Cover image is required": "Kapak görseli zorunludur"
+}

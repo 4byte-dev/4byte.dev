@@ -1,0 +1,17 @@
+{
+    "Error": "Hata",
+    "You can react to the same course once a day": "Aynı kursa günde bir kez tepki verebilirsiniz",
+    "Video": "Video",
+    "Article": "Makale",
+    "Exercise": "Alıştırma",
+    "Lesson": "Ders",
+    "Free": "Ücretsiz",
+    "Start Course": "Kursa Başla",
+    "Course Overview": "Kurs Özeti",
+    "Curriculum": "Müfredat",
+    "Completed": "Tamamlandı",
+    "Mark Complete": "Tamamlandı İşaretle",
+    "Previous": "Önceki",
+    "lesson_progress": "Ders {{current}} / {{total}}",
+    "Next": "Sonraki"
+}

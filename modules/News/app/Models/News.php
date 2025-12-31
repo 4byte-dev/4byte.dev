@@ -22,7 +22,6 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property string $slug
  * @property string $excerpt
  * @property string $content
- * @property string $image
  * @property string $status
  * @property int $user_id
  * @property \Illuminate\Support\Carbon|null $published_at
@@ -47,7 +46,6 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|News whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|News whereExcerpt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|News whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|News whereImage($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|News wherePublishedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|News whereSlug($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|News whereStatus($value)

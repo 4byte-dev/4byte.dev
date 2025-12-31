@@ -36,13 +36,10 @@ export function CommentSubmitForm({ type, slug, parent = null, onSuccess }) {
 					commentSubmitForm.setError(key, { message: error.errors[key][0] });
 				});
 			} else {
-				commentSubmitForm.setError("email", {
-					message: t("Invalid credentials. Please try again."),
+				commentSubmitForm.setError("content", {
+					message: t("System error. Please try again."),
 				});
 			}
-			commentSubmitForm.setError("email", {
-				message: t("These credentials do not match our records."),
-			});
 		},
 	});
 

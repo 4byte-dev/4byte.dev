@@ -8,10 +8,12 @@ import { CourseSidebar } from "@/Components/Sidebar/CourseSidebar";
 import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
 import { Link } from "@inertiajs/react";
 import ReactPlayer from "react-player";
+import { Trans, useTranslation } from "react-i18next";
 
 export default function TutorialPage({ course, lesson, cirriculum }) {
 	const [completedLessons, setCompletedLessons] = useState([0, 1]);
 	const { setIsVisible, setIsOpen, isOpen } = useSidebar();
+	const { t } = useTranslation();
 	const { isMobile } = useDevice();
 
 	useEffect(() => {
@@ -67,7 +69,9 @@ export default function TutorialPage({ course, lesson, cirriculum }) {
 							) : (
 								<Circle className="h-4 w-4 mr-2" />
 							)}
-							{completedLessons.includes(currentSlug) ? "Completed" : "Mark Complete"}
+							{completedLessons.includes(currentSlug)
+								? t("Completed")
+								: t("Mark Complete")}
 						</Button>
 					</div>
 
@@ -98,11 +102,17 @@ export default function TutorialPage({ course, lesson, cirriculum }) {
 								})}
 							>
 								<ChevronLeft className="h-4 w-4 mr-2" />
-								Previous
+								{t("Previous")}
 							</Link>
 						</Button>
 						<span className="text-sm text-muted-foreground">
-							Lesson {currentIndex + 1} of {allLessons.length}
+							<Trans
+								i18nKey="lesson_progress"
+								values={{
+									current: currentIndex + 1,
+									total: allLessons.length,
+								}}
+							/>
 						</span>
 						<Button variant="outline" type="button" disabled={nextLesson == null}>
 							<Link
@@ -112,7 +122,7 @@ export default function TutorialPage({ course, lesson, cirriculum }) {
 									page: nextLesson ? nextLesson.slug : "",
 								})}
 							>
-								Next
+								{t("Next")}
 								<ChevronRight className="h-4 w-4 ml-2" />
 							</Link>
 						</Button>

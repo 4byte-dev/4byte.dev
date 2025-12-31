@@ -10,5 +10,6 @@
     "Search": true,
     "Tag": true,
     "User": true,
-    "Admin": true
+    "Admin": true,
+    "CodeSpace": true
 }

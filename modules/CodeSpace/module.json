@@ -1,0 +1,14 @@
+{
+    "name": "CodeSpace",
+    "alias": "codespace",
+    "description": "CodeSpace module for 4Byte",
+    "keywords": [
+        "4Byte",
+        "CodeSpace"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\CodeSpace\\Providers\\CodeSpaceServiceProvider"
+    ],
+    "files": []
+}

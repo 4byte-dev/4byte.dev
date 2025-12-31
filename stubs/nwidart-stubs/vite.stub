@@ -1,26 +1,23 @@
-import { defineConfig } from 'vite';
-import laravel from 'laravel-vite-plugin';
-import { readdirSync, statSync } from 'fs';
-import { join,relative,dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { defineConfig } from "vite";
+import laravel from "laravel-vite-plugin";
 
 export default defineConfig({
-    build: {
-        outDir: '../../public/build-$LOWER_NAME$',
-        emptyOutDir: true,
-        manifest: true,
-    },
-    plugins: [
-        laravel({
-            publicDirectory: '../../public',
-            buildDirectory: 'build-$LOWER_NAME$',
-            input: [
-                __dirname + '/resources/assets/sass/app.scss',
-                __dirname + '/resources/assets/js/app.js'
-            ],
-            refresh: true,
-        }),
-    ],
+	build: {
+		outDir: "../../public/build-$LOWER_NAME$",
+		emptyOutDir: true,
+		manifest: true,
+	},
+	plugins: [
+		laravel({
+			publicDirectory: "../../public",
+			buildDirectory: "build-$LOWER_NAME$",
+			input: [
+				__dirname + "/resources/assets/sass/app.scss",
+				__dirname + "/resources/assets/js/app.js",
+			],
+			refresh: true,
+		}),
+	],
 });
 // Scen all resources for assets file. Return array
 //function getFilePaths(dir) {
@@ -32,7 +29,7 @@ export default defineConfig({
 //            const filePath = join(currentPath, file);
 //            const stats = statSync(filePath);
 //            if (stats.isFile() && !file.startsWith('.')) {
-//                const relativePath = 'Modules/$STUDLY_NAME$/'+relative(__dirname, filePath);
+//                const relativePath = 'Modules/CodeSpace/'+relative(__dirname, filePath);
 //                filePaths.push(relativePath);
 //            } else if (stats.isDirectory()) {
 //                walkDirectory(filePath);
@@ -50,8 +47,7 @@ export default defineConfig({
 //const assetsDir = join(__dirname, 'resources/assets');
 //export const paths = getFilePaths(assetsDir);
 
-
 //export const paths = [
-//    'Modules/$STUDLY_NAME$/resources/assets/sass/app.scss',
-//    'Modules/$STUDLY_NAME$/resources/assets/js/app.js',
+//    'Modules/CodeSpace/resources/assets/sass/app.scss',
+//    'Modules/CodeSpace/resources/assets/js/app.js',
 //];

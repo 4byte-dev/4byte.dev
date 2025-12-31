@@ -1,0 +1,8 @@
+{
+    "Error": "Hata",
+    "You can react to the same entry once a day": "Aynı içeriğe günde bir kez tepki verebilirsiniz",
+    "Content must be at least 50 characters": "İçerik en az 50 karakter olmalıdır",
+    "Content must be at most 350 characters": "İçerik en fazla 350 karakter olmalıdır",
+    "You can upload up to 10 media files": "En fazla 10 medya dosyası yükleyebilirsiniz",
+    "You must provide either content or at least one media": "İçerik girmeli veya en az bir medya dosyası eklemelisiniz"
+}

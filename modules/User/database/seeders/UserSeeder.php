@@ -25,12 +25,14 @@ class UserSeeder extends Seeder
 
             $userRole = Role::where('name', 'User')->first();
 
-            User::factory(40)->create()->each(function (User $user) use ($userRole) {
-                $user->syncRoles($userRole);
-                UserProfile::factory()->for($user)->create();
-                Follow::factory(3)->forModel($user)->create();
-            });
-
+            User::factory()
+                ->count(5)
+                ->has(UserProfile::factory()->count(1), 'profile')
+                ->has(Follow::factory()->count(3), 'followers')
+                ->create()
+                ->each(function (User $user) use ($userRole) {
+                    $user->assignRole($userRole);
+                });
         });
     }
 }

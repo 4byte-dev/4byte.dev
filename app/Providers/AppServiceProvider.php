@@ -31,7 +31,20 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 6);
 
-        if ($this->app->environment('testings')) {
+        config()->set(
+            'inertia.testing.page_paths',
+            array_values(array_unique(array_merge(
+                config('inertia.testing.page_paths', [
+                resource_path('js/Pages'),
+            ]),
+                collect(glob(base_path('modules/*/resources/js/Pages')))
+                ->filter(fn ($path) => is_dir($path))
+                ->values()
+                ->all()
+            )))
+        );
+
+        if (! $this->app->environment('testing')) {
             register_shutdown_function(function () {
                 if (memory_get_usage() > 100 * 1024 * 1024) {
                     Log::warning('High memory usage: ' . memory_get_usage());

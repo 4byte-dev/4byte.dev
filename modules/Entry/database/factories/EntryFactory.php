@@ -24,7 +24,7 @@ class EntryFactory extends Factory
         $title = $this->faker->unique()->sentence();
 
         return [
-            'slug'    => Str::slug($title) . '-' . $this->faker->unique()->numberBetween(1, 9999),
+            'slug'    => Str::uuid(),
             'content' => $this->faker->paragraphs(rand(2, 5), true),
             'user_id' => User::factory(),
         ];
