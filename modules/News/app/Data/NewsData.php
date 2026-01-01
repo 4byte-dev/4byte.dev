@@ -8,7 +8,6 @@ use Modules\Category\Data\CategoryData;
 use Modules\News\Models\News;
 use Modules\Tag\Data\TagData;
 use Modules\User\Data\UserData;
-use Modules\User\Services\UserService;
 use Spatie\LaravelData\Data;
 
 class NewsData extends Data
@@ -38,10 +37,8 @@ class NewsData extends Data
     /**
      * Create a NewsData instance from a News model.
      */
-    public static function fromModel(News $news, bool $setId = false): self
+    public static function fromModel(News $news, UserData $user, bool $setId = false): self
     {
-        $userService = app(UserService::class);
-
         return new self(
             id: $setId ? $news->id : 0,
             title: $news->title,
@@ -50,7 +47,7 @@ class NewsData extends Data
             excerpt: $news->excerpt,
             image: $news->getCoverImage(),
             published_at: $news->published_at,
-            user: $userService->getData($news->user_id),
+            user: $user,
             categories: CategoryData::collect($news->categories)->all(),
             tags: TagData::collect($news->tags)->all(),
             canUpdate: Gate::allows('update', $news),

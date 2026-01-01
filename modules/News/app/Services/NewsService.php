@@ -30,7 +30,9 @@ class NewsService
                 ->findOrFail($newsId);
         });
 
-        return NewsData::fromModel($news);
+        $user = $this->userService->getData($news->user_id);
+
+        return NewsData::fromModel($news, $user);
     }
 
     /**
