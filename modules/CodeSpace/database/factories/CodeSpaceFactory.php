@@ -25,7 +25,7 @@ class CodeSpaceFactory extends Factory
 
         return [
             'name'    => ucfirst($name),
-            'slug'    => Str::uuid(),
+            'slug'    => Str::uuid()->toString(),
             'user_id' => User::factory(),
             'files'   => $this->defaultFiles(),
         ];

@@ -127,7 +127,7 @@ class CourseLesson extends Model implements HasMedia
 
     /**
      * Get the activity log options for CourseLesson model.
-     * Logs changes to the "title", "slug", "excerpt" and "content" attributes.
+     * Logs changes to the "title", "video_url" and "content" attributes.
      */
     public function getActivitylogOptions(): LogOptions
     {

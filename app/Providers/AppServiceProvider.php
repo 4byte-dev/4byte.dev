@@ -35,12 +35,12 @@ class AppServiceProvider extends ServiceProvider
             'inertia.testing.page_paths',
             array_values(array_unique(array_merge(
                 config('inertia.testing.page_paths', [
-                resource_path('js/Pages'),
-            ]),
+                    resource_path('js/Pages'),
+                ]),
                 collect(glob(base_path('modules/*/resources/js/Pages')))
-                ->filter(fn ($path) => is_dir($path))
-                ->values()
-                ->all()
+                    ->filter(fn ($path) => is_dir($path))
+                    ->values()
+                    ->all()
             )))
         );
 

@@ -112,14 +112,6 @@ class Course extends Model implements HasMedia
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<CourseLesson, $this>
-     */
-    public function lessons()
-    {
-        return $this->hasMany(CourseLesson::class, 'course_id');
-    }
-
-    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo

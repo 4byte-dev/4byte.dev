@@ -20,7 +20,7 @@ class CourseLessonData extends Data
         public bool $isSaved,
         public bool $canUpdate,
         public bool $canDelete,
-        public string $type = 'course'
+        public string $type = 'lesson'
     ) {
     }
 
