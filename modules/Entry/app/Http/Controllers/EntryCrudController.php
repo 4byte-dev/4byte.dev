@@ -27,7 +27,7 @@ class EntryCrudController extends Controller
         $data = $request->validated();
 
         $entry = Entry::create([
-            'slug'    => Str::uuid(),
+            'slug'    => Str::uuid()->toString(),
             'content' => $data['content'],
             'user_id' => Auth::id(),
         ]);

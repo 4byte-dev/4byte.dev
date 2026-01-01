@@ -26,7 +26,7 @@ class CreateRequest extends FormRequest
                 'nullable',
                 'string',
                 function ($attribute, $value, $fail) {
-                    $hasMedia = $this->has('media') && count($this->input('media', [])) > 0;
+                    $hasMedia = $this->hasFile('media') && count($this->file('media', [])) > 0;
 
                     if (! $hasMedia) {
                         $length = strlen(trim($value ?? ''));
