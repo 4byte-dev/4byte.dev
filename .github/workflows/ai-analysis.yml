@@ -1,0 +1,47 @@
+name: AI Issue Fixer
+
+on:
+    issues:
+        types: [labeled]
+
+jobs:
+    ai-fix:
+        if: github.event.label.name == 'ai-fix'
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: write
+            issues: write
+            pull-requests: write
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+
+            - name: Setup Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install dependencies
+              run: |
+                  pip install mini-swe-agent openai tree_sitter
+
+            - name: Run AI fixer
+              env:
+                  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+                  ISSUE_TITLE: ${{ github.event.issue.title }}
+                  ISSUE_BODY: ${{ github.event.issue.body }}
+                  ISSUE_NUMBER: ${{ github.event.issue.number }}
+                  REPO: ${{ github.repository }}
+              run: |
+                  python .github/ai/run.py
+
+            - name: Create PR if patch exists
+              if: success()
+              uses: peter-evans/create-pull-request@v6
+              with:
+                  commit-message: "AI fix for issue #${{ github.event.issue.number }}"
+                  title: "🤖 AI Fix: ${{ github.event.issue.title }}"
+                  body: "Automatically generated fix by AI."
+                  branch: ai-fix-${{ github.event.issue.number }}
