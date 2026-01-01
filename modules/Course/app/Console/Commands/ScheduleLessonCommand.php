@@ -36,6 +36,6 @@ class ScheduleLessonCommand extends Command
                 event(new LessonPublishedEvent($lesson));
             });
 
-        $this->info('Pending courses checked');
+        $this->info('Pending lessons checked');
     }
 }
