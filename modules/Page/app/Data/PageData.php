@@ -11,7 +11,7 @@ use Spatie\LaravelData\Data;
 class PageData extends Data
 {
     /**
-     * @param array{image: string, responsive: string|array<int, string>, srcset: string, thumb: string} $image
+     * @param array{image: string, responsive: string|array<int, string>, srcset: string, thumb: string|null} $image
      */
     public function __construct(
         public ?int $id,
