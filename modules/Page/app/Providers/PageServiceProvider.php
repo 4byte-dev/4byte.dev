@@ -25,6 +25,9 @@ class PageServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerObservers();
+        $this->registerPolicies();
+        $this->registerSearch();
         $this->registerCommands();
         $this->registerTranslations();
         $this->registerPublishableResources();
