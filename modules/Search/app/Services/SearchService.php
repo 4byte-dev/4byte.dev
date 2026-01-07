@@ -54,6 +54,14 @@ class SearchService
     }
 
     /**
+     * Clear all registered handlers.
+     */
+    public static function clearHandlers(): void
+    {
+        self::$handlers = [];
+    }
+
+    /**
      * Search accross multiple handlers.
      *
      * @param string $query
