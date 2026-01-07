@@ -26,7 +26,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes(): void
     {
-        Route::middleware(['web', 'auth'])
+        Route::middleware(['web'])
             ->prefix('api/feed')
             ->name('api.feed.')
             ->group(module_path($this->name, '/routes/api.php'));
