@@ -2,8 +2,7 @@
 
 namespace Modules\Recommend\Services;
 
-use GuzzleHttp;
-use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Http;
 use Modules\Recommend\Classes\GorseFeedback;
 use Modules\Recommend\Classes\GorseItem;
 use Modules\Recommend\Classes\GorseUser;
@@ -23,8 +22,6 @@ class GorseService
 
     /**
      * Insert a user to Gorse.
-     *
-     * @throws GuzzleException
      */
     public function insertUser(GorseUser $user): ?RowAffected
     {
@@ -35,8 +32,6 @@ class GorseService
 
     /**
      * Update user from Gorse.
-     *
-     * @throws GuzzleException
      */
     public function updateUser(GorseUser $user): ?RowAffected
     {
@@ -49,8 +44,6 @@ class GorseService
 
     /**
      * Get user from Gorse.
-     *
-     * @throws GuzzleException
      */
     public function getUser(string $userId): ?GorseUser
     {
@@ -63,8 +56,6 @@ class GorseService
 
     /**
      * Delete user from Gorse.
-     *
-     * @throws GuzzleException
      */
     public function deleteUser(string $userId): ?RowAffected
     {
@@ -77,8 +68,6 @@ class GorseService
 
     /**
      * Insert item to Gorse.
-     *
-     * @throws GuzzleException
      */
     public function insertItem(GorseItem $item): ?RowAffected
     {
@@ -89,8 +78,6 @@ class GorseService
 
     /**
      * Update item from Gorse.
-     *
-     * @throws GuzzleException
      */
     public function updateItem(GorseItem $item): ?RowAffected
     {
@@ -103,8 +90,6 @@ class GorseService
 
     /**
      * Get item from Gorse.
-     *
-     * @throws GuzzleException
      */
     public function getItem(string $itemId): ?GorseItem
     {
@@ -117,8 +102,6 @@ class GorseService
 
     /**
      * Delete item from Gorse.
-     *
-     * @throws GuzzleException
      */
     public function deleteItem(string $itemId): ?RowAffected
     {
@@ -131,8 +114,6 @@ class GorseService
 
     /**
      * Insert category to item.
-     *
-     * @throws GuzzleException
      */
     public function insertItemCategory(string $itemId, string $categoryId): ?RowAffected
     {
@@ -149,8 +130,6 @@ class GorseService
 
     /**
      * Delete category from item.
-     *
-     * @throws GuzzleException
      */
     public function deleteItemCategory(string $itemId, string $categoryId): ?RowAffected
     {
@@ -167,8 +146,6 @@ class GorseService
 
     /**
      * Inert feedback to Gorse.
-     *
-     * @throws GuzzleException
      */
     public function insertFeedback(GorseFeedback $feedback): ?RowAffected
     {
@@ -179,8 +156,6 @@ class GorseService
 
     /**
      * Delete feedback from Gorse.
-     *
-     * @throws GuzzleException
      */
     public function deleteFeedback(string $type, string $userId, string $itemId): ?RowAffected
     {
@@ -200,8 +175,6 @@ class GorseService
      * Get personalized recommendations for a user.
      *
      * @return array<int, string>|null
-     *
-     * @throws GuzzleException
      */
     public function getRecommend(string $userId, int $n, int $offset): ?array
     {
@@ -221,8 +194,6 @@ class GorseService
      * @param array<int, string> $categories
      *
      * @return array<int, string>|null
-     *
-     * @throws GuzzleException
      */
     public function getRecommendByCategory(string $userId, int $n, int $offset, array $categories): ?array
     {
@@ -245,8 +216,6 @@ class GorseService
      * Get non-personalized recommendations.
      *
      * @return array<int, string>|null
-     *
-     * @throws GuzzleException
      */
     public function getNonPersonalizedRecommend(string $name, int $n, int $offset): ?array
     {
@@ -266,8 +235,6 @@ class GorseService
      * @param array<int, string> $categories
      *
      * @return array<int, string>|null
-     *
-     * @throws GuzzleException
      */
     public function getNonPersonalizedRecommendByCategory(string $name, int $n, int $offset, array $categories): ?array
     {
@@ -290,32 +257,30 @@ class GorseService
      * Send HTTP request to Gorse API.
      *
      * @return mixed|null
-     *
-     * @throws GuzzleException
      */
     private function request(string $method, string $uri, mixed $body): mixed
     {
         try {
-            $client  = new GuzzleHttp\Client(['base_uri' => $this->endpoint]);
-            $options = [];
+            $http = Http::baseUrl($this->endpoint);
+
             if ($this->apiKey) {
-                $options[GuzzleHttp\RequestOptions::HEADERS] = ['X-API-Key' => $this->apiKey];
-            }
-            if ($body !== null) {
-                $options[GuzzleHttp\RequestOptions::JSON] = $body;
+                $http->withHeaders(['X-API-Key' => $this->apiKey]);
             }
 
-            $response   = $client->request($method, $uri, $options);
-            $statusCode = $response->getStatusCode();
-            $content    = (string) $response->getBody();
+            $response = match (strtoupper($method)) {
+                'GET'    => $http->get($uri),
+                'POST'   => $http->post($uri, $body instanceof \JsonSerializable ? $body->jsonSerialize() : $body),
+                'PUT'    => $http->put($uri, $body instanceof \JsonSerializable ? $body->jsonSerialize() : $body),
+                'PATCH'  => $http->patch($uri, $body instanceof \JsonSerializable ? $body->jsonSerialize() : $body),
+                'DELETE' => $http->delete($uri, $body instanceof \JsonSerializable ? $body->jsonSerialize() : $body),
+                default  => throw new \InvalidArgumentException("Unsupported HTTP method: {$method}"),
+            };
 
-            return json_decode($content, true);
-        } catch (GuzzleHttp\Exception\RequestException $e) {
-            $response   = $e->getResponse();
-            $statusCode = $response ? $response->getStatusCode() : 'N/A';
-            $content    = $response ? (string) $response->getBody() : $e->getMessage();
+            if ($response->successful()) {
+                return $response->json();
+            }
 
-            logger()->error("Gorse API Error ({$statusCode}): {$content}", ['e' => $e]);
+            logger()->error('Gorse API Error: ' . $response->body());
 
             return null;
         } catch (\Exception $e) {
