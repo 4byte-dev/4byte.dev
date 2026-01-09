@@ -2,6 +2,7 @@
 
 namespace Modules\User\Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\User\Models\UserProfile;
 
@@ -28,6 +29,7 @@ class UserProfileFactory extends Factory
                 'twitter'   => $this->faker->userName(),
                 'instagram' => $this->faker->userName(),
             ],
+            'user_id'  => User::factory(),
         ];
     }
 }
