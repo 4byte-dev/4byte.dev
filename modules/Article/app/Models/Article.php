@@ -166,8 +166,10 @@ class Article extends Model implements HasMedia
                 throw new \Exception("Unsupported file type: {$file->mimeType}");
             }
 
-            if ($file->size > 5 * 1024 * 1024) {
-                throw new \Exception('File too large. Max allowed size is 5MB.');
+            $maxSize = config('article.max_file_size', 5 * 1024 * 1024);
+
+            if ($file->size > $maxSize) {
+                throw new \Exception("File too large. Max allowed size is " . ($maxSize / 1024 / 1024) . "MB.");
             }
 
             return true;
