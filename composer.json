@@ -44,6 +44,7 @@
         "fakerphp/faker": "^1.23",
         "friendsofphp/php-cs-fixer": "3.89",
         "larastan/larastan": "^3.0",
+        "laravel/boost": "^1.1",
         "laravel/breeze": "^2.3",
         "laravel/telescope": "^5.13",
         "mockery/mockery": "^1.6",
