@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Page\Tests\Feature\Console\Commands;
+namespace Modules\Page\Tests\Unit\Console\Commands;
 
 use Illuminate\Support\Facades\Event;
 use Modules\Page\Events\PagePublishedEvent;

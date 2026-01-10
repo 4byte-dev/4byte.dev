@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\CourseChapter\Tests\Unit\Policies;
+namespace Modules\Course\Tests\Unit\Policies;
 
 use App\Models\User;
 use Mockery;
