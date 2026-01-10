@@ -3,7 +3,7 @@
         "laravel-boost": {
             "command": "/usr/bin/php8.5",
             "args": [
-                "/home/obuntu/Documents/GitHub/backend/artisan",
+                "artisan",
                 "boost:mcp"
             ]
         }
