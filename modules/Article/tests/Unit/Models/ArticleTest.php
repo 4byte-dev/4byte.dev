@@ -3,11 +3,14 @@
 namespace Modules\Article\Tests\Unit\Models;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Config;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 use Modules\Category\Models\Category;
 use Modules\Tag\Models\Tag;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\MediaLibrary\MediaCollections\File;
+use Spatie\MediaLibrary\MediaCollections\MediaCollection;
 
 class ArticleTest extends TestCase
 {
@@ -122,5 +125,58 @@ class ArticleTest extends TestCase
         $this->assertArrayHasKey('id', $array);
         $this->assertArrayHasKey('title', $array);
         $this->assertEquals($article->title, $array['title']);
+    }
+
+    public function test_it_validates_file_size_based_on_config(): void
+    {
+        Config::set('article.max_file_size', 1024 * 1024);
+
+        $article = new Article();
+        $article->registerMediaCollections();
+
+        $reflection = new \ReflectionClass($article);
+        $property   = $reflection->getProperty('mediaCollections');
+        $property->setAccessible(true);
+        $collections = $property->getValue($article);
+
+        /** @var array<MediaCollection> $collections */
+        $collection = collect($collections)->firstWhere('name', 'content');
+        $this->assertNotNull($collection, 'Content collection should exist');
+
+        $acceptsFileCallback = $collection->acceptsFile;
+
+        $validFile = new File('test.jpg', 500 * 1024, 'image/jpeg');
+
+        $this->assertTrue($acceptsFileCallback($validFile));
+        $invalidFile = new File('large.jpg', 2 * 1024 * 1024, 'image/jpeg');
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('File too large. Max allowed size is 1MB.');
+
+        $acceptsFileCallback($invalidFile);
+    }
+
+    public function test_it_defaults_to_5mb_if_config_is_missing(): void
+    {
+        Config::set('article.max_file_size', 5 * 1024 * 1024);
+
+        $article = new Article();
+        $article->registerMediaCollections();
+
+        $reflection = new \ReflectionClass($article);
+        $property   = $reflection->getProperty('mediaCollections');
+        $property->setAccessible(true);
+        $collections = $property->getValue($article);
+
+        /** @var array<MediaCollection> $collections */
+        $collection          = collect($collections)->firstWhere('name', 'content');
+        $acceptsFileCallback = $collection->acceptsFile;
+
+        $file = new File('large.jpg', 6 * 1024 * 1024, 'image/jpeg');
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('File too large. Max allowed size is 5MB.');
+
+        $acceptsFileCallback($file);
     }
 }
