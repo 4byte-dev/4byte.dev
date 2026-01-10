@@ -127,6 +127,9 @@ class ArticleCrudControllerTest extends TestCase
             'content'      => 'Deep dive into legacy code.',
             'status'       => 'PUBLISHED',
             'published_at' => now(),
+            'sources'      => [
+                ['url' => 'https://example.com', 'date' => '2020-01-01 00:00:00'],
+            ],
         ]);
 
         $category = Category::factory()->create(['slug' => 'clean-code']);
@@ -159,15 +162,18 @@ class ArticleCrudControllerTest extends TestCase
                 ->has(
                     'article',
                     fn (Assert $json) => $json
-                    ->where('title', 'Legacy Code Refactoring')
-                    ->where('excerpt', 'Refactoring steps.')
-                    ->where('content', 'Deep dive into legacy code.')
-                    ->where('published', true)
-                    ->has('categories', 1)
-                    ->where('categories.0', 'clean-code')
-                    ->has('tags', 1)
-                    ->where('tags.0', 'refactoring')
-                    ->has('image')
+                        ->where('title', 'Legacy Code Refactoring')
+                        ->where('excerpt', 'Refactoring steps.')
+                        ->where('content', 'Deep dive into legacy code.')
+                        ->where('published', true)
+                        ->has('categories', 1)
+                        ->where('categories.0', 'clean-code')
+                        ->has('tags', 1)
+                        ->where('tags.0', 'refactoring')
+                        ->has('image')
+                        ->where('sources', [
+                            ['url' => 'https://example.com', 'date' => '2020-01-01 00:00:00'],
+                        ])
                 )
         );
     }
@@ -318,8 +324,8 @@ class ArticleCrudControllerTest extends TestCase
         ]);
 
         $payload = [
-            'title'      => 'Published Title Updated',
-            'published'  => false,
+            'title'     => 'Published Title Updated',
+            'published' => false,
         ];
 
         $response = $this->postJson(route('api.article.crud.edit', $article->slug), $payload);

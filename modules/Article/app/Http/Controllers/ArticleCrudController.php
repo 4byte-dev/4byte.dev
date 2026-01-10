@@ -81,6 +81,7 @@ class ArticleCrudController extends Controller
             'article'       => [
                 'title'      => $article->title,
                 'excerpt'    => $article->excerpt,
+                'sources'    => $article->sources,
                 'content'    => $article->content,
                 'categories' => $article->categories->pluck('slug'),
                 'tags'       => $article->tags->pluck('slug'),
