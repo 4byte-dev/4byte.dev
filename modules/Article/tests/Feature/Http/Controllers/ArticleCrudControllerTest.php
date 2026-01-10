@@ -50,7 +50,7 @@ class ArticleCrudControllerTest extends TestCase
         $this->app->instance(FeedService::class, $feedService);
         $this->app->instance(SeoService::class, $seoService);
 
-        $response = $this->get(route('article.crud.create.view'));
+        $response = $this->get(route('article.create'));
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -94,7 +94,7 @@ class ArticleCrudControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson(route('api.article.crud.create'), $payload);
+        $response = $this->postJson(route('api.article.store'), $payload);
 
         $response->assertOk();
 
@@ -150,7 +150,7 @@ class ArticleCrudControllerTest extends TestCase
         $this->app->instance(FeedService::class, $feedService);
         $this->app->instance(SeoService::class, $seoService);
 
-        $response = $this->get(route('article.crud.edit.view', ['article' => $article->slug]));
+        $response = $this->get(route('article.edit', ['article' => $article->slug]));
 
         $response->assertStatus(Response::HTTP_OK);
 
@@ -210,7 +210,7 @@ class ArticleCrudControllerTest extends TestCase
             ],
         ];
 
-        $response = $this->postJson(route('api.article.crud.edit', $article->slug), $payload);
+        $response = $this->putJson(route('api.article.update', $article->slug), $payload);
 
         $response->assertOk();
         $response->assertJsonStructure(['slug']);
@@ -238,7 +238,7 @@ class ArticleCrudControllerTest extends TestCase
             'published' => false,
         ];
 
-        $response = $this->postJson(route('api.article.crud.create'), $payload);
+        $response = $this->postJson(route('api.article.store'), $payload);
 
         $response->assertOk();
 
@@ -261,7 +261,7 @@ class ArticleCrudControllerTest extends TestCase
         ];
 
         $response = $this->postJson(
-            route('api.article.crud.create'),
+            route('api.article.store'),
             $payload
         );
 
@@ -271,7 +271,7 @@ class ArticleCrudControllerTest extends TestCase
     public function test_guest_cannot_access_article_create_page(): void
     {
         $response = $this->get(
-            route('article.crud.create.view'),
+            route('article.create'),
         );
 
         $response->assertStatus(Response::HTTP_FOUND);
@@ -289,8 +289,8 @@ class ArticleCrudControllerTest extends TestCase
             'published' => true,
         ];
 
-        $response = $this->postJson(
-            route('api.article.crud.edit', $article->slug),
+        $response = $this->putJson(
+            route('api.article.update', $article->slug),
             $payload
         );
 
@@ -302,7 +302,7 @@ class ArticleCrudControllerTest extends TestCase
         $article = Article::factory()->create();
 
         $response = $this->get(
-            route('article.crud.edit.view', ['article' => $article->slug])
+            route('article.edit', ['article' => $article->slug])
         );
 
         $response->assertStatus(Response::HTTP_FOUND);
@@ -328,7 +328,7 @@ class ArticleCrudControllerTest extends TestCase
             'published' => false,
         ];
 
-        $response = $this->postJson(route('api.article.crud.edit', $article->slug), $payload);
+        $response = $this->putJson(route('api.article.update', $article->slug), $payload);
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
 
@@ -354,7 +354,7 @@ class ArticleCrudControllerTest extends TestCase
             'published' => false,
         ];
 
-        $response = $this->postJson(route('api.article.crud.create'), $payload);
+        $response = $this->postJson(route('api.article.store'), $payload);
         $response->assertOk();
 
         $actionSpy->shouldHaveReceived('execute')->once();
@@ -379,7 +379,7 @@ class ArticleCrudControllerTest extends TestCase
             'published' => false,
         ];
 
-        $response = $this->postJson(route('api.article.crud.edit', $article->slug), $payload);
+        $response = $this->putJson(route('api.article.update', $article->slug), $payload);
         $response->assertOk();
 
         $actionSpy->shouldHaveReceived('execute')->once();

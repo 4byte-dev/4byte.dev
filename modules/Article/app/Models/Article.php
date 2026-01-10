@@ -169,7 +169,7 @@ class Article extends Model implements HasMedia
             $maxSize = config('article.max_file_size', 5 * 1024 * 1024);
 
             if ($file->size > $maxSize) {
-                throw new \Exception("File too large. Max allowed size is " . ($maxSize / 1024 / 1024) . "MB.");
+                throw new \Exception('File too large. Max allowed size is ' . ($maxSize / 1024 / 1024) . 'MB.');
             }
 
             return true;

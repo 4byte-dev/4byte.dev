@@ -88,7 +88,7 @@ export default function CreateArticlePage({ topTags, topCategories, article, slu
 					method: "get",
 				});
 			} else {
-				router.visit(route("article.crud.edit.view", { article: response.slug }), {
+				router.visit(route("article.edit", { article: response.slug }), {
 					method: "get",
 				});
 			}
