@@ -26,7 +26,7 @@ class NewsService
         $news = Cache::rememberForever("news:{$newsId}", function () use ($newsId) {
             return News::where('status', 'PUBLISHED')
                 ->with(['categories:id,name,slug', 'tags:id,name,slug'])
-                ->select(['id', 'title', 'slug', 'content', 'excerpt', 'image', 'published_at', 'user_id'])
+                ->select(['id', 'title', 'slug', 'content', 'excerpt', 'published_at', 'user_id'])
                 ->findOrFail($newsId);
         });
 
