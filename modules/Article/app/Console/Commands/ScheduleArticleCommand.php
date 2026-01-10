@@ -3,7 +3,7 @@
 namespace Modules\Article\Console\Commands;
 
 use Illuminate\Console\Command;
-use Modules\Article\Events\ArticlePublishedEvent;
+use Modules\Article\Jobs\PublishArticleJob;
 use Modules\Article\Models\Article;
 
 class ScheduleArticleCommand extends Command
@@ -31,9 +31,10 @@ class ScheduleArticleCommand extends Command
             ->where('status', 'PENDING')
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
-            ->each(function ($article) {
-                $article->update(['status' => 'PUBLISHED']);
-                event(new ArticlePublishedEvent($article));
+            ->chunkById(100, function ($articles) {
+                foreach ($articles as $article) {
+                    PublishArticleJob::dispatch($article);
+                }
             });
 
         $this->info('Pending articles checked');
