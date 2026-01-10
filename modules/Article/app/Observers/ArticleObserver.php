@@ -3,8 +3,8 @@
 namespace Modules\Article\Observers;
 
 use Illuminate\Support\Facades\Cache;
-use Modules\Article\Jobs\RemoveArticleFromGorse;
-use Modules\Article\Jobs\SyncArticleToGorse;
+use Modules\Article\Events\ArticleDeletedEvent;
+use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
 
 class ArticleObserver
@@ -18,20 +18,7 @@ class ArticleObserver
             return;
         }
 
-        SyncArticleToGorse::dispatch($article);
-    }
-
-    /**
-     * Handle the "updating" event for the Article model.
-     */
-    public function updating(Article $article): void
-    {
-        if ($article->isDirty('image')) {
-            $oldMedia = $article->getFirstMedia('article');
-            if ($oldMedia) {
-                $oldMedia->delete();
-            }
-        }
+        event(new ArticlePublishedEvent($article));
     }
 
     /**
@@ -47,7 +34,7 @@ class ArticleObserver
      */
     public function deleted(Article $article): void
     {
-        RemoveArticleFromGorse::dispatch($article->id);
+        event(new ArticleDeletedEvent($article));
         Cache::forget("article:{$article->slug}:id");
         Cache::forget("article:{$article->id}");
         Cache::forget("article:{$article->id}:likes");

@@ -3,9 +3,9 @@
 namespace Modules\Article\Tests\Unit\Observers;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Queue;
-use Modules\Article\Jobs\RemoveArticleFromGorse;
-use Modules\Article\Jobs\SyncArticleToGorse;
+use Illuminate\Support\Facades\Event;
+use Modules\Article\Events\ArticleDeletedEvent;
+use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
 use Modules\Article\Observers\ArticleObserver;
 use Modules\Article\Tests\TestCase;
@@ -20,9 +20,9 @@ class ArticleObserverTest extends TestCase
         $this->observer = new ArticleObserver();
     }
 
-    public function test_saved_dispatches_sync_job_if_published(): void
+    public function test_saved_dispatches_publish_event_if_published(): void
     {
-        Queue::fake();
+        Event::fake();
 
         $article = Article::factory()->make(['status' => 'PUBLISHED', 'id' => 1]);
         $article->setRelation('tags', collect([]));
@@ -30,20 +30,20 @@ class ArticleObserverTest extends TestCase
 
         $this->observer->saved($article);
 
-        Queue::assertPushed(SyncArticleToGorse::class, function ($job) use ($article) {
-            return $job->article->id === $article->id;
+        Event::assertDispatched(ArticlePublishedEvent::class, function ($event) use ($article) {
+            return $event->article->id === $article->id;
         });
     }
 
     public function test_saved_does_not_dispatch_if_not_published(): void
     {
-        Queue::fake();
+        Event::fake();
 
         $article = Article::factory()->make(['status' => 'DRAFT']);
 
         $this->observer->saved($article);
 
-        Queue::assertNotPushed(SyncArticleToGorse::class);
+        Event::assertNotDispatched(ArticlePublishedEvent::class);
     }
 
     public function test_updated_clears_cache(): void
@@ -57,9 +57,9 @@ class ArticleObserverTest extends TestCase
         $this->observer->updated($article);
     }
 
-    public function test_deleted_dispatches_remove_job_and_clears_cache(): void
+    public function test_deleted_dispatches_delete_event_and_clears_cache(): void
     {
-        Queue::fake();
+        Event::fake();
 
         $article = Article::factory()->make(['id' => 1, 'slug' => 'slug']);
 
@@ -70,8 +70,8 @@ class ArticleObserverTest extends TestCase
 
         $this->observer->deleted($article);
 
-        Queue::assertPushed(RemoveArticleFromGorse::class, function ($job) use ($article) {
-            return $job->articleId === $article->id;
+        Event::assertDispatched(ArticleDeletedEvent::class, function ($event) use ($article) {
+            return $event->article->id === $article->id;
         });
     }
 }

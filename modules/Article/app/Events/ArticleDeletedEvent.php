@@ -6,7 +6,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Modules\Article\Models\Article;
 
-class ArticlePublishedEvent
+class ArticleDeletedEvent
 {
     use Dispatchable, SerializesModels;
 
