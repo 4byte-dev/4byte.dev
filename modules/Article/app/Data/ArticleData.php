@@ -3,9 +3,6 @@
 namespace Modules\Article\Data;
 
 use DateTime;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
-use Modules\Article\Models\Article;
 use Modules\Category\Data\CategoryData;
 use Modules\Tag\Data\TagData;
 use Modules\User\Data\UserData;
@@ -20,57 +17,26 @@ class ArticleData extends Data
      * @param array<int, array{url: string, date: string}> $sources
      */
     public function __construct(
-        public ?int $id,
-        public string $title,
-        public string $slug,
-        public ?string $excerpt,
-        public ?string $content,
-        public array $image,
-        public ?DateTime $published_at,
-        public UserData $user,
-        public array $categories,
-        public array $tags,
-        public ?array $sources,
-        public int $likes,
-        public int $dislikes,
-        public int $comments,
-        public bool $isLiked,
-        public bool $isDisliked,
-        public bool $isSaved,
-        public bool $canUpdate,
-        public bool $canDelete,
-        public string $type = 'article'
+        public readonly ?int $id,
+        public readonly string $title,
+        public readonly string $slug,
+        public readonly ?string $excerpt,
+        public readonly ?string $content,
+        public readonly array $image,
+        public readonly ?DateTime $published_at,
+        public readonly UserData $user,
+        public readonly array $categories,
+        public readonly array $tags,
+        public readonly ?array $sources,
+        public readonly int $likes,
+        public readonly int $dislikes,
+        public readonly int $comments,
+        public readonly bool $isLiked,
+        public readonly bool $isDisliked,
+        public readonly bool $isSaved,
+        public readonly bool $canUpdate,
+        public readonly bool $canDelete,
+        public readonly string $type = 'article'
     ) {
-    }
-
-    /**
-     * Create a ArticleData instance from a Article model.
-     */
-    public static function fromModel(Article $article, UserData $user, bool $setId = false): self
-    {
-        $userId = Auth::id();
-
-        return new self(
-            id: $setId ? $article->id : 0,
-            title: $article->title,
-            slug: $article->slug,
-            excerpt: $article->excerpt,
-            content: $article->content,
-            image: $article->getCoverImage(),
-            published_at: $article->published_at,
-            user: $user,
-            categories: CategoryData::collect($article->categories)->all(),
-            tags: TagData::collect($article->tags)->all(),
-            sources: $article->sources,
-            likes: $article->likesCount(),
-            dislikes: $article->dislikesCount(),
-            comments: $article->commentsCount(),
-            isLiked: $article->isLikedBy($userId),
-            isDisliked: $article->isDislikedBy($userId),
-            isSaved: $article->isSavedBy($userId),
-            canUpdate: Gate::allows('update', $article),
-            canDelete: Gate::allows('delete', $article),
-            type: $article->status === 'PUBLISHED' ? 'article' : 'draft'
-        );
     }
 }
