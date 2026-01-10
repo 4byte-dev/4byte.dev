@@ -27,18 +27,28 @@ migrate: ## Run all migrations
 	php artisan migrate
 
 test: ## Run tests using pgsql and redis
-	@docker run -d --rm \
-		--name test-pgsql \
-		-e POSTGRES_USER=4byte \
-		-e POSTGRES_PASSWORD=4byte \
-		-e POSTGRES_DB=4byte \
-		-p 5432:5432 \
-		postgres:17.0-alpine
+	@if ! docker ps --format '{{.Names}}' | grep -q '^test-pgsql$$'; then \
+		echo "Starting test-pgsql..."; \
+		docker run -d --rm \
+			--name test-pgsql \
+			-e POSTGRES_USER=4byte \
+			-e POSTGRES_PASSWORD=4byte \
+			-e POSTGRES_DB=4byte \
+			-p 5432:5432 \
+			postgres:17.0-alpine; \
+	else \
+		echo "test-pgsql already running"; \
+	fi
 
-	@docker run -d --rm \
-		--name test-redis \
-		-p 6379:6379 \
-		redis:alpine
+	@if ! docker ps --format '{{.Names}}' | grep -q '^test-redis$$'; then \
+		echo "Starting test-redis..."; \
+		docker run -d --rm \
+			--name test-redis \
+			-p 6379:6379 \
+			redis:alpine; \
+	else \
+		echo "test-redis already running"; \
+	fi
 
 	@sleep 5
 
