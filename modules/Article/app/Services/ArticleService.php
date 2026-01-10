@@ -4,6 +4,7 @@ namespace Modules\Article\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Modules\Article\Data\ArticleData;
+use Modules\Article\Mappers\ArticleMapper;
 use Modules\Article\Models\Article;
 use Modules\User\Services\UserService;
 
@@ -33,7 +34,7 @@ class ArticleService
 
         $user = $this->userService->getData($article->user_id);
 
-        return ArticleData::fromModel($article, $user);
+        return ArticleMapper::toData($article, $user);
     }
 
     /**
