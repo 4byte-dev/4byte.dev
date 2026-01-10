@@ -180,7 +180,7 @@ export function CreatorCard() {
 								<DropdownMenuContent align="start" className="w-48">
 									<DropdownMenuItem asChild>
 										<Link
-											href={route("article.crud.create.view")}
+											href={route("article.create")}
 											className="flex w-full h-full"
 										>
 											{t("Article")}

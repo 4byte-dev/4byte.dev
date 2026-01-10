@@ -257,7 +257,7 @@ export default function ArticlePage({ article }) {
 								<Button variant="outline" asChild size="sm">
 									<Link
 										className="flex"
-										href={route("article.crud.edit.view", {
+										href={route("article.edit", {
 											article: article.slug,
 										})}
 									>

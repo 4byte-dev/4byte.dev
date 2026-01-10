@@ -28,7 +28,10 @@ class ArticleCrudController extends Controller
     /**
      * Display a article create page.
      */
-    public function createView(): Response
+    /**
+     * Display a article create page.
+     */
+    public function create(): Response
     {
         $topCategories = $this->feedService->categories();
 
@@ -43,7 +46,7 @@ class ArticleCrudController extends Controller
     /**
      * Creates a new Article.
      */
-    public function create(CreateRequest $request): JsonResponse
+    public function store(CreateRequest $request): JsonResponse
     {
         $isDraft = ! $request->boolean('published', false);
 
@@ -68,7 +71,7 @@ class ArticleCrudController extends Controller
     /**
      * Display a article edit page.
      */
-    public function editView(Article $article): Response
+    public function edit(Article $article): Response
     {
         $topCategories = $this->feedService->categories();
 
@@ -94,7 +97,7 @@ class ArticleCrudController extends Controller
     /**
      * Edits a existing Article.
      */
-    public function edit(EditRequest $request, Article $article): JsonResponse
+    public function update(EditRequest $request, Article $article): JsonResponse
     {
         $isDraft = ! $request->boolean('published', false);
 

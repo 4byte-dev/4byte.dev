@@ -2,7 +2,7 @@ import { Card, CardHeader } from "@/Components/Ui/Card";
 import { Link } from "@inertiajs/react";
 
 export function DraftCard({ title, slug }) {
-	const href = route("article.crud.edit.view", { slug });
+	const href = route("article.edit", { slug });
 
 	return (
 		<Card className="group hover:shadow-lg transition-all duration-200 overflow-hidden">

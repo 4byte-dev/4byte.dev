@@ -52,6 +52,18 @@ class ArticleServiceProvider extends ServiceProvider
     }
 
     /**
+     * Get the services provided by the provider.
+     *
+     * @return array<int, string>
+     */
+    public function provides(): array
+    {
+        return [
+            ArticleService::class,
+        ];
+    }
+
+    /**
      * Register config.
      */
     protected function registerConfig(): void
@@ -92,18 +104,6 @@ class ArticleServiceProvider extends ServiceProvider
         $module_config = require $path;
 
         config([$key => array_replace_recursive($existing, $module_config)]);
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array<int, string>
-     */
-    public function provides(): array
-    {
-        return [
-            ArticleService::class,
-        ];
     }
 
     /**
