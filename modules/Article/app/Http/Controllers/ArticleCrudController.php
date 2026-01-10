@@ -8,23 +8,21 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Article\Actions\CreateArticleAction;
+use Modules\Article\Actions\UpdateArticleAction;
 use Modules\Article\Http\Requests\CreateRequest;
 use Modules\Article\Http\Requests\EditRequest;
 use Modules\Article\Models\Article;
-use Modules\Category\Models\Category;
 use Modules\Recommend\Services\FeedService;
-use Modules\Tag\Models\Tag;
 
 class ArticleCrudController extends Controller
 {
-    protected SeoService $seoService;
-
-    protected FeedService $feedService;
-
-    public function __construct(SeoService $seoService, FeedService $feedService)
-    {
-        $this->seoService     = $seoService;
-        $this->feedService    = $feedService;
+    public function __construct(
+        protected SeoService $seoService,
+        protected FeedService $feedService,
+        protected CreateArticleAction $createArticleAction,
+        protected UpdateArticleAction $updateArticleAction
+    ) {
     }
 
     /**
@@ -51,42 +49,20 @@ class ArticleCrudController extends Controller
 
         $data = $request->validated();
 
-        $image = null;
-
         if ($isDraft) {
-            $extra = $request->only(['excerpt', 'content', 'image', 'categories', 'tags', 'sources']);
-            $data  = array_merge($data, $extra);
+            $extra = $request->only(['excerpt', 'content', 'categories', 'tags', 'sources']);
+            $data  = [...$data, ...$extra];
         }
 
-        $slug = $request->createSlug();
+        $data['published'] = ! $isDraft;
 
-        $article = Article::create([
-            'title'        => $data['title'],
-            'slug'         => $slug,
-            'excerpt'      => $data['excerpt'] ?? null,
-            'content'      => $data['content'] ?? null,
-            'status'       => $isDraft ? 'DRAFT' : 'PUBLISHED',
-            'published_at' => $isDraft ? null : now(),
-            'image'        => $image,
-            'sources'      => $data['sources'] ?? [],
-            'user_id'      => Auth::id(),
-        ]);
+        $article = $this->createArticleAction->execute(
+            $data,
+            $request->file('image'),
+            Auth::id()
+        );
 
-        if ($request->hasFile('image')) {
-            $article->addMediaFromRequest('image')->toMediaCollection('article');
-        }
-
-        if (isset($data['categories'])) {
-            $categoryIds = Category::whereIn('slug', $data['categories'])->pluck('id')->toArray();
-            $article->categories()->sync($categoryIds);
-        }
-
-        if (isset($data['tags'])) {
-            $tagIds = Tag::whereIn('slug', $data['tags'])->pluck('id')->toArray();
-            $article->tags()->sync($tagIds);
-        }
-
-        return response()->json(['slug' => $slug]);
+        return response()->json(['slug' => $article->slug]);
     }
 
     /**
@@ -123,42 +99,20 @@ class ArticleCrudController extends Controller
 
         $data = $request->validated();
 
-        $image = null;
-
         if ($isDraft) {
-            $extra = $request->only(['excerpt', 'content', 'image', 'categories', 'tags', 'sources']);
-            $data  = array_merge($data, $extra);
+            $extra = $request->only(['excerpt', 'content', 'categories', 'tags', 'sources']);
+            $data  = [...$data, ...$extra];
         }
 
-        if (isset($data['image'])) {
-            $path  = $data['image']->store('article/images');
-            $image = $path;
-        }
+        $data['published'] = ! $isDraft;
 
-        $slug = $request->createSlug($article->id);
+        $article = $this->updateArticleAction->execute(
+            $article,
+            $data,
+            $request->file('image'),
+            Auth::id()
+        );
 
-        $article->update([
-            'title'        => $data['title'],
-            'slug'         => $slug,
-            'excerpt'      => $data['excerpt'] ?? null,
-            'content'      => $data['content'] ?? null,
-            'status'       => $isDraft ? 'DRAFT' : 'PUBLISHED',
-            'published_at' => $isDraft ? null : now(),
-            'image'        => $image,
-            'sources'      => $data['sources'] ?? [],
-            'user_id'      => Auth::id(),
-        ]);
-
-        if (isset($data['categories'])) {
-            $categoryIds = Category::whereIn('slug', $data['categories'])->pluck('id')->toArray();
-            $article->categories()->sync($categoryIds);
-        }
-
-        if (isset($data['tags'])) {
-            $tagIds = Tag::whereIn('slug', $data['tags'])->pluck('id')->toArray();
-            $article->tags()->sync($tagIds);
-        }
-
-        return response()->json(['slug' => $slug]);
+        return response()->json(['slug' => $article->slug]);
     }
 }
