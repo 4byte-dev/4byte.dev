@@ -330,4 +330,52 @@ class ArticleCrudControllerTest extends TestCase
 
         $this->assertEquals('Draft Title', $article->title);
     }
+
+    public function test_it_delegates_creation_to_action(): void
+    {
+        Permission::firstOrCreate(['name' => 'create_article']);
+        $user = User::factory()->create();
+        $user->givePermissionTo('create_article');
+        $this->actingAs($user);
+
+        $actionSpy = Mockery::spy(\Modules\Article\Actions\CreateArticleAction::class);
+        $this->app->instance(\Modules\Article\Actions\CreateArticleAction::class, $actionSpy);
+
+        $actionSpy->shouldReceive('execute')->andReturn(Article::factory()->create());
+
+        $payload = [
+            'title'     => 'Delegation Test',
+            'published' => false,
+        ];
+
+        $response = $this->postJson(route('api.article.crud.create'), $payload);
+        $response->assertOk();
+
+        $actionSpy->shouldHaveReceived('execute')->once();
+    }
+
+    public function test_it_delegates_update_to_action(): void
+    {
+        Permission::firstOrCreate(['name' => 'update_article']);
+        $user = User::factory()->create();
+        $user->givePermissionTo('update_article');
+        $this->actingAs($user);
+
+        $article = Article::factory()->create(['user_id' => $user->id]);
+
+        $actionSpy = Mockery::spy(\Modules\Article\Actions\UpdateArticleAction::class);
+        $this->app->instance(\Modules\Article\Actions\UpdateArticleAction::class, $actionSpy);
+
+        $actionSpy->shouldReceive('execute')->andReturn($article);
+
+        $payload = [
+            'title'     => 'Delegation Update',
+            'published' => false,
+        ];
+
+        $response = $this->postJson(route('api.article.crud.edit', $article->slug), $payload);
+        $response->assertOk();
+
+        $actionSpy->shouldHaveReceived('execute')->once();
+    }
 }
