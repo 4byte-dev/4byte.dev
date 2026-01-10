@@ -2,21 +2,13 @@
 
 namespace Modules\Article\Observers;
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Modules\Article\Jobs\RemoveArticleFromGorse;
+use Modules\Article\Jobs\SyncArticleToGorse;
 use Modules\Article\Models\Article;
-use Modules\Recommend\Classes\GorseItem;
-use Modules\Recommend\Services\GorseService;
 
 class ArticleObserver
 {
-    protected GorseService $gorse;
-
-    public function __construct(GorseService $gorse)
-    {
-        $this->gorse = $gorse;
-    }
-
     /**
      * Handle the "saved" event for the Article model.
      */
@@ -25,22 +17,8 @@ class ArticleObserver
         if ($article->status != "PUBLISHED") {
             return;
         }
-        $gorseItem = new GorseItem(
-            'article:' . $article->id,
-            ['article', "user:{$article->user_id}"],
-            $article->tags->pluck('id')
-                ->map(fn ($id) => 'tag:' . $id)
-                ->merge(
-                    $article->categories->pluck('id')
-                        ->map(fn ($id) => 'category:' . $id)
-                )
-                ->merge(['article', "user:{$article->user_id}"])
-                ->all(),
-            $article->slug,
-            false,
-            Carbon::parse($article->published_at)->toDateTimeString()
-        );
-        $this->gorse->insertItem($gorseItem);
+
+        SyncArticleToGorse::dispatch($article);
     }
 
     /**
@@ -69,7 +47,7 @@ class ArticleObserver
      */
     public function deleted(Article $article): void
     {
-        $this->gorse->deleteItem("article:{$article->id}");
+        RemoveArticleFromGorse::dispatch($article->id);
         Cache::forget("article:{$article->slug}:id");
         Cache::forget("article:{$article->id}");
         Cache::forget("article:{$article->id}:likes");
