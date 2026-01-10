@@ -2,8 +2,8 @@
 
 namespace Modules\Article\Tests\Feature\Console\Commands;
 
-use Illuminate\Support\Facades\Bus;
-use Modules\Article\Jobs\PublishArticleJob;
+use Illuminate\Support\Facades\Event;
+use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 
@@ -15,9 +15,9 @@ class ScheduleArticleCommandTest extends TestCase
         $this->travelTo(now());
     }
 
-    public function test_it_dispatches_jobs_for_valid_pending_articles(): void
+    public function test_it_dispatches_events_for_valid_pending_articles(): void
     {
-        Bus::fake();
+        Event::fake();
 
         $articleToPublish = Article::factory()->create([
             'status'       => 'PENDING',
@@ -38,22 +38,22 @@ class ScheduleArticleCommandTest extends TestCase
             ->expectsOutput('Pending articles checked')
             ->assertExitCode(0);
 
-        Bus::assertDispatched(PublishArticleJob::class, function ($job) use ($articleToPublish) {
-            return $job->article->id === $articleToPublish->id;
+        Event::assertDispatched(ArticlePublishedEvent::class, function ($event) use ($articleToPublish) {
+            return $event->article->id === $articleToPublish->id;
         });
 
-        Bus::assertNotDispatched(PublishArticleJob::class, function ($job) use ($articleFuture) {
-            return $job->article->id === $articleFuture->id;
+        Event::assertNotDispatched(ArticlePublishedEvent::class, function ($event) use ($articleFuture) {
+            return $event->article->id === $articleFuture->id;
         });
 
-        Bus::assertNotDispatched(PublishArticleJob::class, function ($job) use ($articleAlreadyPublished) {
-            return $job->article->id === $articleAlreadyPublished->id;
+        Event::assertNotDispatched(ArticlePublishedEvent::class, function ($event) use ($articleAlreadyPublished) {
+            return $event->article->id === $articleAlreadyPublished->id;
         });
     }
 
-    public function test_it_does_not_dispatch_job_without_publish_date(): void
+    public function test_it_does_not_dispatch_event_without_publish_date(): void
     {
-        Bus::fake();
+        Event::fake();
 
         $article = Article::factory()->create([
             'status'       => 'PENDING',
@@ -62,20 +62,20 @@ class ScheduleArticleCommandTest extends TestCase
 
         $this->artisan('article:schedule');
 
-        Bus::assertNotDispatched(PublishArticleJob::class);
+        Event::assertNotDispatched(ArticlePublishedEvent::class);
     }
 
-    public function test_it_dispatches_multiple_jobs(): void
+    public function test_it_dispatches_multiple_events(): void
     {
-        Bus::fake();
+        Event::fake();
 
-        $articles = Article::factory()->count(3)->create([
+        Article::factory()->count(3)->create([
             'status'       => 'PENDING',
             'published_at' => now()->subMinute(),
         ]);
 
         $this->artisan('article:schedule');
 
-        Bus::assertDispatched(PublishArticleJob::class, 3);
+        Event::assertDispatched(ArticlePublishedEvent::class, 3);
     }
 }

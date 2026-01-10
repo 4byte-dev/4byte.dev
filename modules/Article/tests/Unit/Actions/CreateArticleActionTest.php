@@ -62,7 +62,7 @@ class CreateArticleActionTest extends TestCase
         $this->assertEquals('An excerpt', $article->excerpt);
         $this->assertTrue($article->categories->contains($category));
         $this->assertTrue($article->tags->contains($tag));
-        $this->assertEquals([['url' => 'https://example.com']], $article->sources);
+        $this->assertEquals([['url' => 'https://example.com', 'date' => now()->toDateString()]], $article->sources);
     }
 
     public function test_it_handles_image_upload(): void

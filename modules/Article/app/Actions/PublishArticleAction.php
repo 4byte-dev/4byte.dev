@@ -3,6 +3,7 @@
 namespace Modules\Article\Actions;
 
 use Illuminate\Support\Facades\DB;
+use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
 
 class PublishArticleAction
@@ -14,6 +15,8 @@ class PublishArticleAction
                 'status'       => 'PUBLISHED',
                 'published_at' => now(),
             ]);
+
+            event(new ArticlePublishedEvent($article));
 
             return $article;
         });

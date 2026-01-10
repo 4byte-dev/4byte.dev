@@ -3,7 +3,7 @@
 namespace Modules\Article\Console\Commands;
 
 use Illuminate\Console\Command;
-use Modules\Article\Jobs\PublishArticleJob;
+use Modules\Article\Actions\PublishArticleAction;
 use Modules\Article\Models\Article;
 
 class ScheduleArticleCommand extends Command
@@ -25,15 +25,15 @@ class ScheduleArticleCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(PublishArticleAction $publishArticleAction): void
     {
         Article::query()
             ->where('status', 'PENDING')
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
-            ->chunkById(100, function ($articles) {
+            ->chunkById(100, function ($articles) use ($publishArticleAction) {
                 foreach ($articles as $article) {
-                    PublishArticleJob::dispatch($article);
+                    $publishArticleAction->execute($article);
                 }
             });
 
