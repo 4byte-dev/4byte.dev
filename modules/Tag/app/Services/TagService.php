@@ -3,8 +3,8 @@
 namespace Modules\Tag\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Modules\Article\Models\Article;
 use Modules\News\Models\News;
+use Modules\React\Services\ReactService;
 use Modules\Tag\Data\TagData;
 use Modules\Tag\Data\TagProfileData;
 use Modules\Tag\Mappers\TagMapper;
@@ -13,6 +13,12 @@ use Modules\Tag\Models\TagProfile;
 
 class TagService
 {
+    private ReactService $reactService;
+
+    public function __construct(ReactService $reactService) {
+        $this->reactService = $reactService;
+    }
+
     /**
      * Retrieve tag data by its ID.
      *
@@ -80,11 +86,7 @@ class TagService
      */
     public function getArticlesCount(int $tagId): int
     {
-        return Cache::remember("tag:{$tagId}:articles", 60 * 60 * 24, function () use ($tagId) {
-            return Article::whereHas('tags', function ($q) use ($tagId) {
-                $q->where('id', $tagId);
-            })->count();
-        });
+        return $this->reactService->getCount(Tag::class, $tagId, "articles");
     }
 
     /**
@@ -96,11 +98,7 @@ class TagService
      */
     public function getNewsCount(int $tagId): int
     {
-        return Cache::remember("tag:{$tagId}:news", 60 * 60 * 24, function () use ($tagId) {
-            return News::whereHas('tags', function ($q) use ($tagId) {
-                $q->where('id', $tagId);
-            })->count();
-        });
+        return $this->reactService->getCount(Tag::class, $tagId, "news");
     }
 
     /**

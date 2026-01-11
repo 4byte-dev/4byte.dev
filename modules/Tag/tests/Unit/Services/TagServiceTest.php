@@ -3,9 +3,12 @@
 namespace Modules\Tag\Tests\Unit\Services;
 
 use Illuminate\Support\Facades\Cache;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Category\Models\Category;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Models\News;
+use Modules\React\Services\ReactService;
 use Modules\Tag\Models\Tag;
 use Modules\Tag\Models\TagProfile;
 use Modules\Tag\Services\TagService;
@@ -59,26 +62,30 @@ class TagServiceTest extends TestCase
     {
         $tag = Tag::factory()->create();
 
-        $article = Article::factory()->create();
+        $article = Article::factory()->create(['status' => ArticleStatus::PUBLISHED]);
         $article->tags()->attach($tag);
+
+        app(ReactService::class)->incrementCount(Tag::class, $tag->id, 'articles');
 
         $count = $this->service->getArticlesCount($tag->id);
 
         $this->assertEquals(1, $count);
-        $this->assertTrue(Cache::has("tag:{$tag->id}:articles"));
+        $this->assertTrue(Cache::has("react:counts:tag:{$tag->id}:articles"));
     }
 
     public function test_it_can_count_news(): void
     {
         $tag = Tag::factory()->create();
 
-        $news = News::factory()->create();
+        $news = News::factory()->create(['status' => NewsStatus::PUBLISHED]);
         $news->tags()->attach($tag);
+
+        app(ReactService::class)->incrementCount(Tag::class, $tag->id, 'news');
 
         $count = $this->service->getNewsCount($tag->id);
 
         $this->assertEquals(1, $count);
-        $this->assertTrue(Cache::has("tag:{$tag->id}:news"));
+        $this->assertTrue(Cache::has("react:counts:tag:{$tag->id}:news"));
     }
 
     public function test_it_can_list_related_tags(): void
