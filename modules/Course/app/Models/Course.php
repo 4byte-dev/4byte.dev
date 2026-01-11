@@ -44,8 +44,6 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property-read int|null $comments_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Modules\React\Models\Dislike> $dislikes
  * @property-read int|null $dislikes_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, CourseLesson> $lessons
- * @property-read int|null $lessons_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Modules\React\Models\Like> $likes
  * @property-read int|null $likes_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media

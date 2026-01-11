@@ -23,6 +23,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property-read int|null $activities_count
  * @property-read User $user
  *
+ * @method static \Modules\CodeSpace\Database\Factories\CodeSpaceFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CodeSpace newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CodeSpace newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CodeSpace query()
