@@ -19,7 +19,9 @@ class ArticleObserver
             return;
         }
 
-        event(new ArticlePublishedEvent($article));
+        if ($article->wasRecentlyCreated || $article->isDirty('status')) {
+            event(new ArticlePublishedEvent($article));
+        }
     }
 
     /**

@@ -21,19 +21,42 @@ class ArticleObserverTest extends TestCase
         $this->observer = new ArticleObserver();
     }
 
-    public function test_saved_dispatches_publish_event_if_published(): void
+    public function test_saved_dispatches_publish_event_if_newly_created_published(): void
+    {
+        Event::fake();
+
+        $article                     = Article::factory()->make(['status' => ArticleStatus::PUBLISHED, 'id' => 1]);
+        $article->wasRecentlyCreated = true;
+
+        $this->observer->saved($article);
+
+        Event::assertDispatched(ArticlePublishedEvent::class);
+    }
+
+    public function test_saved_dispatches_publish_event_if_status_changed_to_published(): void
+    {
+        Event::fake();
+
+        $article = Article::factory()->make(['status' => ArticleStatus::DRAFT, 'id' => 1]);
+        $article->syncOriginal();
+
+        $article->status = ArticleStatus::PUBLISHED;
+
+        $this->observer->saved($article);
+
+        Event::assertDispatched(ArticlePublishedEvent::class);
+    }
+
+    public function test_saved_does_not_dispatch_if_published_but_status_not_changed(): void
     {
         Event::fake();
 
         $article = Article::factory()->make(['status' => ArticleStatus::PUBLISHED, 'id' => 1]);
-        $article->setRelation('tags', collect([]));
-        $article->setRelation('categories', collect([]));
+        $article->syncOriginal();
 
         $this->observer->saved($article);
 
-        Event::assertDispatched(ArticlePublishedEvent::class, function ($event) use ($article) {
-            return $event->article->id === $article->id;
-        });
+        Event::assertNotDispatched(ArticlePublishedEvent::class);
     }
 
     public function test_saved_does_not_dispatch_if_not_published(): void
