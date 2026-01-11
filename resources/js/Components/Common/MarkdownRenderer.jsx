@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { marked } from "marked";
 import hljs from "highlight.js";
 import parse from "html-react-parser";
+import DOMPurify from "dompurify";
 import { useTranslation } from "react-i18next";
 import { slugify } from "@/Lib/Utils";
 import { markedCodeGroup, initCodeGroups } from "@/Lib/MarkedCodeGroup";
@@ -52,5 +53,7 @@ export default function MarkdownRenderer({ content }) {
 		});
 	}, [content]);
 
-	return <div className="prose dark:prose-invert max-w-none">{parse(html)}</div>;
+	return (
+		<div className="prose dark:prose-invert max-w-none">{parse(DOMPurify.sanitize(html))}</div>
+	);
 }
