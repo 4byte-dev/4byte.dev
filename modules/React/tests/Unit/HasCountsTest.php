@@ -55,7 +55,7 @@ class HasCountsTest extends TestCase
             'count'          => 1,
         ]);
 
-        $this->assertEquals(1, Cache::get('react:counts:views'));
+        $this->assertEquals(1, Cache::get("react:counts:testmodelforcounts:{$model->id}:views"));
     }
 
     public function test_decrement_count_with_trait(): void
@@ -71,7 +71,7 @@ class HasCountsTest extends TestCase
             'filter' => 'views',
         ]);
 
-        $this->assertEquals(1, Cache::get('react:counts:views'));
+        $this->assertEquals(1, Cache::get("react:counts:testmodelforcounts:{$model->id}:views"));
     }
 
     public function test_get_count_with_trait(): void

@@ -424,7 +424,7 @@ class ReactService
      */
     public function incrementCount(string $countableType, int $countableId, string $filter, int $amount = 1): void
     {
-        $cacheKey = "react:counts:{$filter}";
+        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
 
         Count::firstOrCreate([
             'countable_type' => $countableType,
@@ -455,7 +455,7 @@ class ReactService
      */
     public function decrementCount(string $countableType, int $countableId, string $filter, int $amount = 1): void
     {
-        $cacheKey = "react:counts:{$filter}";
+        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
 
         Count::firstOrCreate([
             'countable_type' => $countableType,
@@ -486,7 +486,7 @@ class ReactService
      */
     public function getCount(string $countableType, int $countableId, string $filter): int
     {
-        $cacheKey = "react:counts:{$filter}";
+        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
 
         return Cache::rememberForever($cacheKey, function () use ($countableType, $countableId, $filter) {
             return Count::where([
