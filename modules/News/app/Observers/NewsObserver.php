@@ -19,7 +19,9 @@ class NewsObserver
             return;
         }
 
-        event(new NewsPublishedEvent($news));
+        if ($news->wasRecentlyCreated || $news->isDirty('status')) {
+            event(new NewsPublishedEvent($news));
+        }
     }
 
     /**
