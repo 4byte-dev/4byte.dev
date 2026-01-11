@@ -5,6 +5,7 @@ namespace Modules\Tag\Tests\Unit\Data;
 use Modules\Category\Data\CategoryData;
 use Modules\Category\Models\Category;
 use Modules\Tag\Data\TagProfileData;
+use Modules\Tag\Mappers\TagMapper;
 use Modules\Tag\Models\TagProfile;
 use Modules\Tag\Tests\TestCase;
 
@@ -39,7 +40,7 @@ class TagProfileDataTest extends TestCase
         $profile = TagProfile::factory()->create();
         $profile->categories()->detach();
 
-        $data = TagProfileData::fromModel($profile);
+        $data = TagMapper::toProfileData($profile);
 
         $this->assertSame(0, $data->id);
         $this->assertSame($profile->description, $data->description);
@@ -51,7 +52,7 @@ class TagProfileDataTest extends TestCase
     {
         $profile = TagProfile::factory()->create();
 
-        $data = TagProfileData::fromModel($profile, true);
+        $data = TagMapper::toProfileData($profile, true);
 
         $this->assertSame($profile->id, $data->id);
         $this->assertSame($profile->description, $data->description);
@@ -67,7 +68,7 @@ class TagProfileDataTest extends TestCase
 
         $profile->categories()->sync($categories->pluck('id'));
 
-        $data = TagProfileData::fromModel($profile);
+        $data = TagMapper::toProfileData($profile);
 
         $this->assertCount(3, $data->categories);
 
@@ -85,7 +86,7 @@ class TagProfileDataTest extends TestCase
         $categories = Category::factory()->count(2)->create();
         $profile->categories()->sync($categories->pluck('id'));
 
-        $data = TagProfileData::fromModel($profile, true);
+        $data = TagMapper::toProfileData($profile, true);
 
         $this->assertSame($profile->id, $data->id);
         $this->assertCount(2, $data->categories);

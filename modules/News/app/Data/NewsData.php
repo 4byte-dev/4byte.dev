@@ -5,8 +5,10 @@ namespace Modules\News\Data;
 use DateTime;
 use Illuminate\Support\Facades\Gate;
 use Modules\Category\Data\CategoryData;
+use Modules\Category\Mappers\CategoryMapper;
 use Modules\News\Models\News;
 use Modules\Tag\Data\TagData;
+use Modules\Tag\Mappers\TagMapper;
 use Modules\User\Data\UserData;
 use Spatie\LaravelData\Data;
 
@@ -48,8 +50,8 @@ class NewsData extends Data
             image: $news->getCoverImage(),
             published_at: $news->published_at,
             user: $user,
-            categories: CategoryData::collect($news->categories)->all(),
-            tags: TagData::collect($news->tags)->all(),
+            categories: CategoryMapper::collection($news->categories),
+            tags: TagMapper::collection($news->tags),
             canUpdate: Gate::allows('update', $news),
             canDelete: Gate::allows('delete', $news),
         );

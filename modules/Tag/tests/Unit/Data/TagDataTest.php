@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Mockery;
 use Mockery\MockInterface;
 use Modules\Tag\Data\TagData;
+use Modules\Tag\Mappers\TagMapper;
 use Modules\Tag\Models\Tag;
 use Modules\Tag\Tests\TestCase;
 
@@ -37,7 +38,7 @@ class TagDataTest extends TestCase
             'slug' => 'inertia',
         ]);
 
-        $tagData = TagData::fromModel($tag);
+        $tagData = TagMapper::toData($tag);
 
         $this->assertSame(0, $tagData->id);
         $this->assertSame('Inertia', $tagData->name);
@@ -52,7 +53,7 @@ class TagDataTest extends TestCase
             'slug' => 'laravel',
         ]);
 
-        $tagData = TagData::fromModel($tag, true);
+        $tagData = TagMapper::toData($tag, true);
 
         $this->assertSame($tag->id, $tagData->id);
         $this->assertSame('Laravel', $tagData->name);
@@ -80,7 +81,7 @@ class TagDataTest extends TestCase
             ->with($userId)
             ->andReturn(true);
 
-        $data = TagData::fromModel($tag, true);
+        $data = TagMapper::toData($tag, true);
 
         $this->assertSame(99, $data->id);
         $this->assertSame(42, $data->followers);
@@ -103,7 +104,7 @@ class TagDataTest extends TestCase
             ->with(null)
             ->andReturn(false);
 
-        $data = TagData::fromModel($tag);
+        $data = TagMapper::toData($tag);
 
         $this->assertFalse($data->isFollowing);
     }

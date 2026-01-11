@@ -3,10 +3,8 @@
 namespace Modules\Tag\Data;
 
 use Modules\Category\Data\CategoryData;
-use Modules\Tag\Models\TagProfile;
-use Spatie\LaravelData\Data;
 
-class TagProfileData extends Data
+readonly class TagProfileData
 {
     /**
      * Summary of __construct.
@@ -17,25 +15,10 @@ class TagProfileData extends Data
      * @param array<int, CategoryData> $categories
      */
     public function __construct(
-        public ?int $id,
-        public string $description,
-        public string $color,
-        public array $categories,
+        public readonly ?int $id,
+        public readonly string $description,
+        public readonly string $color,
+        public readonly array $categories,
     ) {
-    }
-
-    /**
-     * Create a TagProfileData instance from a TagProfile model.
-     */
-    public static function fromModel(TagProfile $tagProfile, bool $setId = false): self
-    {
-        return new self(
-            id: $setId ? $tagProfile->id : 0,
-            description: $tagProfile->description,
-            color: $tagProfile->color,
-            categories: CategoryData::collect(
-                $tagProfile->categories->map(fn ($category) => CategoryData::fromModel($category))->toArray()
-            )
-        );
     }
 }

@@ -8,7 +8,7 @@ use Modules\Article\Data\ArticleData;
 use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Category\Mappers\CategoryMapper;
-use Modules\Tag\Data\TagData;
+use Modules\Tag\Mappers\TagMapper;
 use Modules\User\Data\UserData;
 
 class ArticleMapper
@@ -30,7 +30,7 @@ class ArticleMapper
             published_at: $article->published_at,
             user: $user,
             categories: CategoryMapper::collection($article->categories),
-            tags: TagData::collect($article->tags)->all(),
+            tags: TagMapper::collection($article->tags),
             sources: $article->sources,
             likes: $article->likesCount(),
             dislikes: $article->dislikesCount(),

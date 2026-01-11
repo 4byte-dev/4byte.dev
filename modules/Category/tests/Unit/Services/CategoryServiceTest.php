@@ -100,9 +100,9 @@ class CategoryServiceTest extends TestCase
 
         $tags = $this->service->listTags($category->id);
 
-        $this->assertTrue($tags->contains('slug', $tagA->slug));
-        $this->assertFalse($tags->contains('slug', $tagB->slug));
-        $this->assertFalse($tags->contains('slug', $tagC->slug));
+        $this->assertTrue(collect($tags)->contains('slug', $tagA->slug));
+        $this->assertFalse(collect($tags)->contains('slug', $tagB->slug));
+        $this->assertFalse(collect($tags)->contains('slug', $tagC->slug));
 
         $this->assertTrue(Cache::has("category:{$category->id}:tags"));
     }
@@ -113,6 +113,6 @@ class CategoryServiceTest extends TestCase
 
         $related = $this->service->listTags($category->id);
 
-        $this->assertTrue($related->isEmpty());
+        $this->assertEmpty($related);
     }
 }

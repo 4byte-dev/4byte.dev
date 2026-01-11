@@ -34,7 +34,7 @@ class TagControllerTest extends TestCase
             categories: []
         );
 
-        $relatedTags = collect([$tagData]);
+        $relatedTags = [$tagData];
 
         $tagService = Mockery::mock(TagService::class);
         $tagService->shouldReceive('getId')

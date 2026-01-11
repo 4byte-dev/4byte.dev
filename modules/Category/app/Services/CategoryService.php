@@ -2,7 +2,6 @@
 
 namespace Modules\Category\Services;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Modules\Article\Models\Article;
 use Modules\Category\Data\CategoryData;
@@ -12,6 +11,7 @@ use Modules\Category\Models\Category;
 use Modules\Category\Models\CategoryProfile;
 use Modules\News\Models\News;
 use Modules\Tag\Data\TagData;
+use Modules\Tag\Mappers\TagMapper;
 use Modules\Tag\Models\Tag;
 
 class CategoryService
@@ -110,16 +110,16 @@ class CategoryService
      *
      * @param int $categoryId
      *
-     * @return Collection<int, TagData>
+     * @return array<TagData>
      */
-    public function listTags(int $categoryId): Collection
+    public function listTags(int $categoryId): array
     {
         return Cache::rememberForever("category:{$categoryId}:tags", function () use ($categoryId) {
             $tags = Tag::whereHas('profile.categories', function ($q) use ($categoryId) {
                 $q->where('categories.id', $categoryId);
             })->get();
 
-            return TagData::collect($tags);
+            return TagMapper::collection($tags);
         });
     }
 }

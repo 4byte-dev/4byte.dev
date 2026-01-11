@@ -97,9 +97,9 @@ class TagServiceTest extends TestCase
 
         $related = $this->service->listRelated($tagA->id);
 
-        $this->assertTrue($related->contains('slug', $tagB->slug));
-        $this->assertFalse($related->contains('slug', $tagA->slug));
-        $this->assertFalse($related->contains('slug', $tagC->slug));
+        $this->assertTrue(collect($related)->contains('slug', $tagB->slug));
+        $this->assertFalse(collect($related)->contains('slug', $tagA->slug));
+        $this->assertFalse(collect($related)->contains('slug', $tagC->slug));
         $this->assertTrue(Cache::has("tag:{$tagA->id}:related"));
     }
 
@@ -109,6 +109,6 @@ class TagServiceTest extends TestCase
 
         $related = $this->service->listRelated($tag->id);
 
-        $this->assertTrue($related->isEmpty());
+        $this->assertEmpty($related);
     }
 }
