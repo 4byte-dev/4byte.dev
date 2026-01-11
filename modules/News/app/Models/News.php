@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Category\Models\Category;
 use Modules\News\Database\Factories\NewsFactory;
+use Modules\News\Enums\NewsStatus;
 use Modules\Tag\Models\Tag;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -22,7 +23,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property string $slug
  * @property string $excerpt
  * @property string $content
- * @property string $status
+ * @property NewsStatus $status
  * @property int $user_id
  * @property \Illuminate\Support\Carbon|null $published_at
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -69,6 +70,7 @@ class News extends Model implements HasMedia
 
     protected $casts = [
         'published_at' => 'datetime',
+        'status'       => NewsStatus::class,
     ];
 
     /**

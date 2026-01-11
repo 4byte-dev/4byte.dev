@@ -4,6 +4,7 @@ namespace Modules\News\Observers;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Models\News;
 use Modules\Recommend\Classes\GorseItem;
 use Modules\Recommend\Services\GorseService;
@@ -34,18 +35,10 @@ class NewsObserver
                 ->merge(['news', "user:{$news->user_id}"])
                 ->all(),
             $news->slug,
-            $news->status != 'PUBLISHED',
+            $news->status != NewsStatus::PUBLISHED,
             Carbon::parse($news->published_at)->toDateTimeString()
         );
         $this->gorse->insertItem($gorseItem);
-    }
-
-    /**
-     * Handle the "updating" event for the News model.
-     */
-    public function updating(News $news): void
-    {
-        // Image handling is now managed by Spatie Media Library's singleFile() collection
     }
 
     /**
@@ -69,7 +62,7 @@ class NewsObserver
                 ->merge(['news', "user:{$news->user_id}"])
                 ->all(),
             $news->slug,
-            $news->status != 'PUBLISHED',
+            $news->status != NewsStatus::PUBLISHED,
             Carbon::parse($news->published_at)->toDateTimeString()
         );
 

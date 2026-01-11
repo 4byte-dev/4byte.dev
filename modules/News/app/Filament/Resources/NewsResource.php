@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use Modules\Admin\Filament\Components\SpatieMediaLibraryFileUpload;
 use Modules\Admin\Filament\Components\SpatieMediaLibraryMarkdownEditor;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Filament\Resources\NewsResource\Pages;
 use Modules\News\Models\News;
 use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
@@ -111,11 +112,11 @@ class NewsResource extends Resource
                                                 Forms\Components\Select::make('status')
                                                     ->required()
                                                     ->label(__('Status'))
-                                                    ->options(['DRAFT' => 'Draft', 'PUBLISHED' => 'Publıshed', 'PENDING' => 'Pending'])
-                                                    ->default('DRAFT')
+                                                    ->options(NewsStatus::class)
+                                                    ->default(NewsStatus::DRAFT)
                                                     ->live()
                                                     ->afterStateUpdated(function (string $state, callable $set) {
-                                                        if ($state === 'PUBLISHED') {
+                                                        if ($state === NewsStatus::PUBLISHED->value) {
                                                             $set('published_at', Carbon::now());
                                                         } else {
                                                             $set('published_at', null);
@@ -124,7 +125,7 @@ class NewsResource extends Resource
 
                                                 Forms\Components\DateTimePicker::make('published_at')
                                                     ->label(__('Published At'))
-                                                    ->required(fn ($get) => $get('status') === 'PENDING'),
+                                                    ->required(fn ($get) => $get('status') === NewsStatus::PENDING->value),
                                             ]),
                                     ])->columnSpan(3),
 
@@ -180,7 +181,7 @@ class NewsResource extends Resource
                     ->multiple(),
                 Tables\Filters\SelectFilter::make('status')
                     ->label(__('Status'))
-                    ->options(['DRAFT' => 'Draft', 'PUBLISHED' => 'Publıshed', 'PENDING' => 'Pending']),
+                    ->options(NewsStatus::class),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

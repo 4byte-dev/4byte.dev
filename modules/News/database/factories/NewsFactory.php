@@ -5,6 +5,7 @@ namespace Modules\News\Database\Factories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Models\News;
 
 /**
@@ -28,7 +29,7 @@ class NewsFactory extends Factory
             'slug'         => Str::slug($title) . '-' . $this->faker->unique()->numberBetween(1, 9999),
             'excerpt'      => $this->faker->paragraph(2),
             'content'      => $this->faker->paragraphs(5, true),
-            'status'       => $this->faker->randomElement(['DRAFT', 'PUBLISHED', 'PENDING']),
+            'status'       => $this->faker->randomElement(NewsStatus::cases()),
             'published_at' => $this->faker->optional()->dateTimeBetween('-1 year', 'now'),
             'user_id'      => User::factory(),
         ];

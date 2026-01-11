@@ -4,6 +4,7 @@ namespace Modules\News\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Modules\News\Data\NewsData;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Mappers\NewsMapper;
 use Modules\News\Models\News;
 use Modules\User\Services\UserService;
@@ -25,7 +26,7 @@ class NewsService
     public function getData(int $newsId): NewsData
     {
         $news = Cache::rememberForever("news:{$newsId}", function () use ($newsId) {
-            return News::where('status', 'PUBLISHED')
+            return News::where('status', NewsStatus::PUBLISHED)
                 ->with(['categories:id,name,slug', 'tags:id,name,slug'])
                 ->select(['id', 'title', 'slug', 'content', 'excerpt', 'published_at', 'user_id'])
                 ->findOrFail($newsId);
@@ -44,7 +45,7 @@ class NewsService
     public function getId(string $slug): int
     {
         return Cache::rememberForever("news:{$slug}:id", function () use ($slug) {
-            return News::where('status', 'PUBLISHED')
+            return News::where('status', NewsStatus::PUBLISHED)
                 ->where('slug', $slug)
                 ->select(['id'])
                 ->firstOrFail()->id;

@@ -5,6 +5,7 @@ namespace Modules\News\Tests\Unit\Observers;
 use Illuminate\Support\Facades\Cache;
 use Mockery;
 use Mockery\MockInterface;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Models\News;
 use Modules\News\Observers\NewsObserver;
 use Modules\News\Tests\TestCase;
@@ -28,7 +29,7 @@ class NewsObserverTest extends TestCase
     {
         $news = News::factory()->create([
             'id'     => 1,
-            'status' => 'PUBLISHED',
+            'status' => NewsStatus::PUBLISHED,
         ]);
         $news->setRelation('tags', collect([]));
         $news->setRelation('categories', collect([]));
@@ -44,7 +45,7 @@ class NewsObserverTest extends TestCase
     {
         $news = News::factory()->create([
             'id'     => 1,
-            'status' => 'PUBLISHED',
+            'status' => NewsStatus::PUBLISHED,
             'slug'   => 'slug',
         ]);
         $news->setRelation('tags', collect([]));
@@ -65,7 +66,7 @@ class NewsObserverTest extends TestCase
     {
         $news = News::factory()->create([
             'id'     => 1,
-            'status' => 'PUBLISHED',
+            'status' => NewsStatus::PUBLISHED,
             'slug'   => 'new-slug',
         ]);
 
