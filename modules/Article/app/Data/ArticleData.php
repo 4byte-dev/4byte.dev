@@ -6,9 +6,8 @@ use DateTime;
 use Modules\Category\Data\CategoryData;
 use Modules\Tag\Data\TagData;
 use Modules\User\Data\UserData;
-use Spatie\LaravelData\Data;
 
-class ArticleData extends Data
+readonly class ArticleData
 {
     /**
      * @param array{image: string, responsive: string|array<int, string>, srcset: string, thumb: string|null} $image
