@@ -3,6 +3,7 @@
 namespace Modules\Article\Tests\Feature\Console\Commands;
 
 use Illuminate\Support\Facades\Event;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
@@ -20,17 +21,17 @@ class ScheduleArticleCommandTest extends TestCase
         Event::fake();
 
         $articleToPublish = Article::factory()->create([
-            'status'       => 'PENDING',
+            'status'       => ArticleStatus::PENDING,
             'published_at' => now()->subMinute(),
         ]);
 
         $articleFuture = Article::factory()->create([
-            'status'       => 'PENDING',
+            'status'       => ArticleStatus::PENDING,
             'published_at' => now()->addDay(),
         ]);
 
         $articleAlreadyPublished = Article::factory()->create([
-            'status'       => 'PUBLISHED',
+            'status'       => ArticleStatus::PUBLISHED,
             'published_at' => now()->subMinute(),
         ]);
 
@@ -56,7 +57,7 @@ class ScheduleArticleCommandTest extends TestCase
         Event::fake();
 
         $article = Article::factory()->create([
-            'status'       => 'PENDING',
+            'status'       => ArticleStatus::PENDING,
             'published_at' => null,
         ]);
 
@@ -70,7 +71,7 @@ class ScheduleArticleCommandTest extends TestCase
         Event::fake();
 
         Article::factory()->count(3)->create([
-            'status'       => 'PENDING',
+            'status'       => ArticleStatus::PENDING,
             'published_at' => now()->subMinute(),
         ]);
 

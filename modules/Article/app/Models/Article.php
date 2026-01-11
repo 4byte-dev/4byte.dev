@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Laravel\Scout\Searchable;
 use Modules\Article\Database\Factories\ArticleFactory;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Category\Models\Category;
 use Modules\React\Traits\HasComments;
 use Modules\React\Traits\HasDislikes;
@@ -28,7 +29,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
  * @property string|null $excerpt
  * @property string|null $content
  * @property array<array-key, mixed>|null $sources
- * @property string $status
+ * @property ArticleStatus $status
  * @property int $user_id
  * @property \Illuminate\Support\Carbon|null $published_at
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -98,6 +99,7 @@ class Article extends Model implements HasMedia
     protected $casts = [
         'published_at' => 'datetime',
         'sources'      => 'array',
+        'status'       => ArticleStatus::class,
     ];
 
     /**
@@ -210,7 +212,7 @@ class Article extends Model implements HasMedia
      */
     public function shouldBeSearchable(): bool
     {
-        return $this->status === 'PUBLISHED';
+        return $this->status === ArticleStatus::PUBLISHED;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Modules\Article\Actions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Article\Support\SlugGenerator;
 use Modules\Category\Models\Category;
@@ -44,7 +45,7 @@ class UpdateArticleAction
                 'slug'         => $slug,
                 'excerpt'      => $data['excerpt'] ?? null,
                 'content'      => $data['content'] ?? null,
-                'status'       => $isDraft ? 'DRAFT' : 'PUBLISHED',
+                'status'       => $isDraft ? ArticleStatus::DRAFT : ArticleStatus::PUBLISHED,
                 'published_at' => $isDraft ? null : now(),
                 'sources'      => $data['sources'] ?? [],
             ];

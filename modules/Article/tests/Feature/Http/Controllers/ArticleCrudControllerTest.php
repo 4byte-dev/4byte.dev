@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Inertia\Testing\AssertableInertia as Assert;
 use Mockery;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 use Modules\Category\Models\Category;
@@ -100,7 +101,7 @@ class ArticleCrudControllerTest extends TestCase
 
         $this->assertDatabaseHas('articles', [
             'title'   => 'Published Title Updated',
-            'status'  => 'PUBLISHED',
+            'status'  => ArticleStatus::PUBLISHED,
             'user_id' => $user->id,
         ]);
 
@@ -125,7 +126,7 @@ class ArticleCrudControllerTest extends TestCase
             'title'        => 'Legacy Code Refactoring',
             'excerpt'      => 'Refactoring steps.',
             'content'      => 'Deep dive into legacy code.',
-            'status'       => 'PUBLISHED',
+            'status'       => ArticleStatus::PUBLISHED,
             'published_at' => now(),
             'sources'      => [
                 ['url' => 'https://example.com', 'date' => '2020-01-01 00:00:00'],
@@ -189,7 +190,7 @@ class ArticleCrudControllerTest extends TestCase
             'user_id' => $user->id,
             'title'   => 'Draft Title',
             'slug'    => 'draft-title',
-            'status'  => 'DRAFT',
+            'status'  => ArticleStatus::DRAFT,
         ]);
 
         $newCategory = Category::factory()->create();
@@ -217,7 +218,7 @@ class ArticleCrudControllerTest extends TestCase
 
         $article->refresh();
 
-        $this->assertEquals('PUBLISHED', $article->status);
+        $this->assertEquals(ArticleStatus::PUBLISHED, $article->status);
         $this->assertNotNull($article->published_at);
 
         $this->assertNotEquals('draft-title', $article->slug);
@@ -244,7 +245,7 @@ class ArticleCrudControllerTest extends TestCase
 
         $this->assertDatabaseHas('articles', [
             'title'        => 'Just an idea',
-            'status'       => 'DRAFT',
+            'status'       => ArticleStatus::DRAFT,
             'published_at' => null,
             'content'      => null,
         ]);
@@ -320,7 +321,7 @@ class ArticleCrudControllerTest extends TestCase
             'user_id' => $otherUser->id,
             'title'   => 'Draft Title',
             'slug'    => 'draft-title',
-            'status'  => 'DRAFT',
+            'status'  => ArticleStatus::DRAFT,
         ]);
 
         $payload = [

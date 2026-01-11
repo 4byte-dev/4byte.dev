@@ -4,6 +4,7 @@ namespace Modules\Article\Tests\Unit\Database;
 
 use App\Models\User;
 use Illuminate\Support\Str;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 
@@ -16,7 +17,7 @@ class ArticleFactoryTest extends TestCase
         $this->assertInstanceOf(Article::class, $article);
         $this->assertNotNull($article->excerpt);
         $this->assertNotNull($article->content);
-        $this->assertContains($article->status, ['DRAFT', 'PUBLISHED', 'PENDING']);
+        $this->assertContains($article->status, ArticleStatus::cases());
         $this->assertIsArray($article->sources);
         $this->assertTrue($this->isValidUrl($article->sources[0]['url']));
         $this->assertTrue($this->isValidDate($article->sources[0]['date']));

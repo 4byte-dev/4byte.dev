@@ -3,6 +3,7 @@
 namespace Modules\Article\Actions;
 
 use Illuminate\Support\Facades\DB;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
 
@@ -12,7 +13,7 @@ class PublishArticleAction
     {
         return DB::transaction(function () use ($article) {
             $article->update([
-                'status'       => 'PUBLISHED',
+                'status'       => ArticleStatus::PUBLISHED,
                 'published_at' => now(),
             ]);
 

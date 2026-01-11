@@ -5,6 +5,7 @@ namespace Modules\Recommend\Console\Commands;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Entry\Models\Entry;
 use Modules\React\Models\Comment;
@@ -60,7 +61,7 @@ class UploadRecommendations extends Command
                     ['article', "user:{$article->user_id}"],
                     $tags->merge($categories)->merge(['article', "user:{$article->user_id}"])->all(),
                     $article->slug,
-                    $article->status !== 'PUBLISHED',
+                    $article->status !== ArticleStatus::PUBLISHED,
                     Carbon::parse($article->published_at)->toDateTimeString()
                 )
             );

@@ -7,6 +7,7 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 
 class RecentArticles extends BaseWidget
@@ -57,7 +58,7 @@ class RecentArticles extends BaseWidget
                 ->multiple(),
             Tables\Filters\SelectFilter::make('status')
                 ->label(__('Status'))
-                ->options(['DRAFT' => 'Draft', 'PUBLISHED' => 'Published', 'PENDING' => 'Pending']),
+                ->options(ArticleStatus::class),
         ];
     }
 
@@ -75,11 +76,9 @@ class RecentArticles extends BaseWidget
     {
         return [
             Tables\Columns\TextColumn::make('title')->label(__('Title'))->searchable(),
-            Tables\Columns\BadgeColumn::make('status')->label(__('Status'))
-                ->colors([
-                    'success' => 'published',
-                    'warning' => 'draft',
-                ]),
+            Tables\Columns\TextColumn::make('status')
+                ->label(__('Status'))
+                ->badge(),
             Tables\Columns\TextColumn::make('created_at')
                 ->label(__('Date'))
                 ->dateTime('d M Y, H:i'),

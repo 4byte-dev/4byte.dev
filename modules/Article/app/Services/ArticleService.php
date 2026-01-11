@@ -4,6 +4,7 @@ namespace Modules\Article\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Modules\Article\Data\ArticleData;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Mappers\ArticleMapper;
 use Modules\Article\Models\Article;
 use Modules\User\Services\UserService;
@@ -26,7 +27,7 @@ class ArticleService
     {
         $article = Cache::rememberForever("article:{$articleId}", function () use ($articleId) {
             return Article::query()
-                ->where('status', 'PUBLISHED')
+                ->where('status', ArticleStatus::PUBLISHED)
                 ->with(['categories:id,name,slug', 'tags:id,name,slug'])
                 ->select(['id', 'title', 'slug', 'content', 'excerpt', 'sources', 'status', 'published_at', 'user_id'])
                 ->findOrFail($articleId);
@@ -45,7 +46,8 @@ class ArticleService
     public function getId(string $slug): int
     {
         return Cache::rememberForever("article:{$slug}:id", function () use ($slug) {
-            return Article::where('status', 'PUBLISHED')
+            return Article::query()
+                ->where('status', ArticleStatus::PUBLISHED)
                 ->where('slug', $slug)
                 ->select(['id'])
                 ->firstOrFail()->id;

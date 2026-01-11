@@ -3,6 +3,7 @@
 namespace Modules\Article\Actions;
 
 use Illuminate\Support\Facades\DB;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 
 class DraftArticleAction
@@ -11,7 +12,7 @@ class DraftArticleAction
     {
         return DB::transaction(function () use ($article) {
             $article->update([
-                'status'       => 'DRAFT',
+                'status'       => ArticleStatus::DRAFT,
                 'published_at' => null,
             ]);
 

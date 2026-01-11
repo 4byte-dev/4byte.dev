@@ -4,6 +4,7 @@ namespace Modules\Article\Tests\Unit\Models;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 use Modules\Category\Models\Category;
@@ -39,6 +40,7 @@ class ArticleTest extends TestCase
 
         $this->assertEquals('datetime', $article->getCasts()['published_at']);
         $this->assertEquals('array', $article->getCasts()['sources']);
+        $this->assertEquals(ArticleStatus::class, $article->getCasts()['status']);
     }
 
     public function test_it_belongs_to_user(): void
@@ -109,8 +111,8 @@ class ArticleTest extends TestCase
 
     public function test_it_is_searchable_only_when_published(): void
     {
-        $draftArticle     = Article::factory()->create(['status' => 'DRAFT']);
-        $publishedArticle = Article::factory()->create(['status' => 'PUBLISHED']);
+        $draftArticle     = Article::factory()->create(['status' => ArticleStatus::DRAFT]);
+        $publishedArticle = Article::factory()->create(['status' => ArticleStatus::PUBLISHED]);
 
         $this->assertFalse($draftArticle->shouldBeSearchable());
         $this->assertTrue($publishedArticle->shouldBeSearchable());
