@@ -94,7 +94,7 @@
             "@php artisan test"
         ],
         "lint": [
-            "./vendor/bin/php-cs-fixer fix"
+            "./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php"
         ],
         "model-doc": [
             "php artisan ide-helper:models -RW"

@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\React\Tests\Unit;
+namespace Modules\React\Tests\Unit\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
