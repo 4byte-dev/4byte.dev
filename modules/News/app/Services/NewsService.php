@@ -4,6 +4,7 @@ namespace Modules\News\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Modules\News\Data\NewsData;
+use Modules\News\Mappers\NewsMapper;
 use Modules\News\Models\News;
 use Modules\User\Services\UserService;
 
@@ -32,7 +33,7 @@ class NewsService
 
         $user = $this->userService->getData($news->user_id);
 
-        return NewsData::fromModel($news, $user);
+        return NewsMapper::toData($news, $user);
     }
 
     /**

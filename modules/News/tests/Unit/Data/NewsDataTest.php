@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Modules\Category\Data\CategoryData;
 use Modules\News\Data\NewsData;
+use Modules\News\Mappers\NewsMapper;
 use Modules\News\Models\News;
 use Modules\News\Tests\TestCase;
 use Modules\Tag\Data\TagData;
@@ -103,7 +104,7 @@ class NewsDataTest extends TestCase
 
         $userData = UserData::fromModel($user);
 
-        $newsData = NewsData::fromModel($news, $userData);
+        $newsData = NewsMapper::toData($news, $userData);
 
         $this->assertSame(0, $newsData->id);
         $this->assertSame('Test News', $newsData->title);
@@ -125,7 +126,7 @@ class NewsDataTest extends TestCase
 
         $userData = UserData::fromModel($user);
 
-        $newsData = NewsData::fromModel($news, $userData, true);
+        $newsData = NewsMapper::toData($news, $userData, true);
 
         $this->assertSame($news->id, $newsData->id);
     }
@@ -145,7 +146,7 @@ class NewsDataTest extends TestCase
             ->with('delete', $news)
             ->andReturn(false);
 
-        $newsData = NewsData::fromModel($news, $userData, true);
+        $newsData = NewsMapper::toData($news, $userData, true);
 
         $this->assertTrue($newsData->canUpdate);
         $this->assertFalse($newsData->canDelete);
