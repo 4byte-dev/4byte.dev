@@ -45,7 +45,14 @@ export default function ArticlePage({ article }) {
 
 	const likeMutation = useMutation({
 		mutationFn: () => ReactApi.like({ type: "article", slug: article.slug }),
-		onSuccess: () => {
+		onMutate: async () => {
+			const previousState = {
+				isLiked,
+				likes,
+				isDisliked,
+				dislikes,
+			};
+
 			setIsLiked((prev) => {
 				if (prev) {
 					setLikes((l) => l - 1);
@@ -60,8 +67,17 @@ export default function ArticlePage({ article }) {
 				setLikes((l) => l + 1);
 				return true;
 			});
+
+			return { previousState };
 		},
-		onError: () => {
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsLiked(context.previousState.isLiked);
+				setLikes(context.previousState.likes);
+				setIsDisliked(context.previousState.isDisliked);
+				setDislikes(context.previousState.dislikes);
+			}
+
 			toast({
 				title: t("Error"),
 				description: t("You can react to the same article once a day"),
@@ -77,7 +93,14 @@ export default function ArticlePage({ article }) {
 
 	const dislikeMutation = useMutation({
 		mutationFn: () => ReactApi.dislike({ type: "article", slug: article.slug }),
-		onSuccess: () => {
+		onMutate: async () => {
+			const previousState = {
+				isLiked,
+				likes,
+				isDisliked,
+				dislikes,
+			};
+
 			setIsDisliked((disliked) => {
 				const willDislike = !disliked;
 
@@ -94,8 +117,17 @@ export default function ArticlePage({ article }) {
 
 				return willDislike;
 			});
+
+			return { previousState };
 		},
-		onError: () => {
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsLiked(context.previousState.isLiked);
+				setLikes(context.previousState.likes);
+				setIsDisliked(context.previousState.isDisliked);
+				setDislikes(context.previousState.dislikes);
+			}
+
 			toast({
 				title: t("Error"),
 				description: t("You can react to the same article once a day"),
@@ -111,8 +143,15 @@ export default function ArticlePage({ article }) {
 
 	const saveMutation = useMutation({
 		mutationFn: () => ReactApi.save({ type: "article", slug: article.slug }),
-		onSuccess: () => {
+		onMutate: async () => {
+			const previousState = { isSaved };
 			setIsSaved(!isSaved);
+			return { previousState };
+		},
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsSaved(context.previousState.isSaved);
+			}
 		},
 	});
 
