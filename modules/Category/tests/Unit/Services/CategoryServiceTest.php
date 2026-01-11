@@ -65,7 +65,7 @@ class CategoryServiceTest extends TestCase
 
         $article = Article::factory()->create(['status' => ArticleStatus::PUBLISHED]);
         $article->categories()->attach($category);
-        
+
         app(ReactService::class)->incrementCount(Category::class, $category->id, 'articles');
 
         $count = $this->service->getArticlesCount($category->id);
@@ -80,7 +80,7 @@ class CategoryServiceTest extends TestCase
 
         $news = News::factory()->create(['status' => NewsStatus::PUBLISHED]);
         $news->categories()->attach($category);
-        
+
         app(ReactService::class)->incrementCount(Category::class, $category->id, 'news');
 
         $count = $this->service->getNewsCount($category->id);
