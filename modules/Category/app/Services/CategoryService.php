@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use Modules\Article\Models\Article;
 use Modules\Category\Data\CategoryData;
 use Modules\Category\Data\CategoryProfileData;
+use Modules\Category\Mappers\CategoryMapper;
 use Modules\Category\Models\Category;
 use Modules\Category\Models\CategoryProfile;
 use Modules\News\Models\News;
@@ -31,7 +32,7 @@ class CategoryService
                 ->findOrFail($categoryId);
         });
 
-        return CategoryData::fromModel($category);
+        return CategoryMapper::toData($category);
     }
 
     /**
@@ -68,7 +69,7 @@ class CategoryService
                 ->select(['description', 'color'])
                 ->firstOrFail();
 
-            return CategoryProfileData::fromModel($profile);
+            return CategoryMapper::toProfileData($profile);
         });
     }
 
