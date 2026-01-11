@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Modules\Article\Actions\CreateArticleAction;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 use Modules\Category\Models\Category;
@@ -33,7 +34,7 @@ class CreateArticleActionTest extends TestCase
 
         $this->assertInstanceOf(Article::class, $article);
         $this->assertEquals('Test Article', $article->title);
-        $this->assertEquals('DRAFT', $article->status);
+        $this->assertEquals(ArticleStatus::DRAFT, $article->status);
         $this->assertNull($article->published_at);
         $this->assertNotEmpty($article->slug);
         $this->assertEquals($user->id, $article->user_id);
@@ -57,7 +58,7 @@ class CreateArticleActionTest extends TestCase
 
         $article = $this->action->execute($data, null, $user->id);
 
-        $this->assertEquals('PUBLISHED', $article->status);
+        $this->assertEquals(ArticleStatus::PUBLISHED, $article->status);
         $this->assertNotNull($article->published_at);
         $this->assertEquals('An excerpt', $article->excerpt);
         $this->assertTrue($article->categories->contains($category));

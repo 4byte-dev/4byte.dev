@@ -4,6 +4,7 @@ namespace Modules\Article\Console\Commands;
 
 use Illuminate\Console\Command;
 use Modules\Article\Actions\PublishArticleAction;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 
 class ScheduleArticleCommand extends Command
@@ -28,7 +29,7 @@ class ScheduleArticleCommand extends Command
     public function handle(PublishArticleAction $publishArticleAction): void
     {
         Article::query()
-            ->where('status', 'PENDING')
+            ->where('status', ArticleStatus::PENDING)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
             ->chunkById(100, function ($articles) use ($publishArticleAction) {

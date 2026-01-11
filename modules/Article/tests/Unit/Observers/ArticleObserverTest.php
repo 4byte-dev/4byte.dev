@@ -4,6 +4,7 @@ namespace Modules\Article\Tests\Unit\Observers;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Events\ArticleDeletedEvent;
 use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
@@ -24,7 +25,7 @@ class ArticleObserverTest extends TestCase
     {
         Event::fake();
 
-        $article = Article::factory()->make(['status' => 'PUBLISHED', 'id' => 1]);
+        $article = Article::factory()->make(['status' => ArticleStatus::PUBLISHED, 'id' => 1]);
         $article->setRelation('tags', collect([]));
         $article->setRelation('categories', collect([]));
 
@@ -39,7 +40,7 @@ class ArticleObserverTest extends TestCase
     {
         Event::fake();
 
-        $article = Article::factory()->make(['status' => 'DRAFT']);
+        $article = Article::factory()->make(['status' => ArticleStatus::DRAFT]);
 
         $this->observer->saved($article);
 

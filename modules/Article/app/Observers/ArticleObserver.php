@@ -3,6 +3,7 @@
 namespace Modules\Article\Observers;
 
 use Illuminate\Support\Facades\Cache;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Events\ArticleDeletedEvent;
 use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
@@ -14,7 +15,7 @@ class ArticleObserver
      */
     public function saved(Article $article): void
     {
-        if ($article->status != "PUBLISHED") {
+        if ($article->status !== ArticleStatus::PUBLISHED) {
             return;
         }
 

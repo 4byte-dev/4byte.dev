@@ -10,6 +10,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Article\Actions\CreateArticleAction;
 use Modules\Article\Actions\UpdateArticleAction;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Http\Requests\CreateRequest;
 use Modules\Article\Http\Requests\EditRequest;
 use Modules\Article\Models\Article;
@@ -88,7 +89,7 @@ class ArticleCrudController extends Controller
                 'content'    => $article->content,
                 'categories' => $article->categories->pluck('slug'),
                 'tags'       => $article->tags->pluck('slug'),
-                'published'  => $article->status === 'PUBLISHED',
+                'published'  => $article->status === ArticleStatus::PUBLISHED,
                 'image'      => $article->getCoverImage()['image'],
             ],
         ])->withViewData(['seo' => $this->seoService->getArticleEditSEO()]);

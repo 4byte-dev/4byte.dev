@@ -6,6 +6,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 
 /**
@@ -29,7 +30,7 @@ class ArticleFactory extends Factory
             'slug'    => Str::slug($title),
             'excerpt' => $this->faker->paragraph(2),
             'content' => $this->faker->paragraphs(5, true),
-            'status'  => $this->faker->randomElement(['DRAFT', 'PUBLISHED', 'PENDING']),
+            'status'  => $this->faker->randomElement(ArticleStatus::cases()),
             'sources' => collect(range(0, rand(0, 5)))->map(function () {
                 return [
                     'url'  => $this->faker->url(),

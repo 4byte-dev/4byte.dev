@@ -3,6 +3,7 @@
 namespace Modules\Article\Tests\Unit\Services;
 
 use Illuminate\Support\Facades\Cache;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Article\Services\ArticleService;
 use Modules\Article\Tests\TestCase;
@@ -20,7 +21,7 @@ class ArticleServiceTest extends TestCase
 
     public function test_get_data_returns_article_data(): void
     {
-        $article = Article::factory()->create(['status' => 'PUBLISHED']);
+        $article = Article::factory()->create(['status' => ArticleStatus::PUBLISHED]);
 
         $data = $this->service->getData($article->id);
 
@@ -32,7 +33,7 @@ class ArticleServiceTest extends TestCase
     public function test_it_can_get_article_id_by_slug(): void
     {
         $article = Article::factory()->create([
-            'status' => 'PUBLISHED',
+            'status' => ArticleStatus::PUBLISHED,
         ]);
 
         $id = $this->service->getId($article->slug);

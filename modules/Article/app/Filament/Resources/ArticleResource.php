@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use Modules\Admin\Filament\Components\SpatieMediaLibraryFileUpload;
 use Modules\Admin\Filament\Components\SpatieMediaLibraryMarkdownEditor;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Filament\Resources\ArticleResource\Pages;
 use Modules\Article\Models\Article;
 use Rmsramos\Activitylog\RelationManagers\ActivitylogRelationManager;
@@ -118,11 +119,11 @@ class ArticleResource extends Resource
                                         Forms\Components\Select::make('status')
                                             ->required()
                                             ->label(__('Status'))
-                                            ->options(['DRAFT' => 'Draft', 'PUBLISHED' => 'Publıshed', 'PENDING' => 'Pending'])
-                                            ->default('DRAFT')
+                                            ->options(ArticleStatus::class)
+                                            ->default(ArticleStatus::DRAFT)
                                             ->live()
-                                            ->afterStateUpdated(function (string $state, callable $set) {
-                                                if ($state === 'PUBLISHED') {
+                                            ->afterStateUpdated(function (ArticleStatus $state, callable $set) {
+                                                if ($state === ArticleStatus::PUBLISHED) {
                                                     $set('published_at', Carbon::now());
                                                 } else {
                                                     $set('published_at', null);
@@ -131,7 +132,7 @@ class ArticleResource extends Resource
 
                                         Forms\Components\DateTimePicker::make('published_at')
                                             ->label(__('Published At'))
-                                            ->required(fn ($get) => $get('status') === 'PENDING'),
+                                            ->required(fn ($get) => $get('status') === ArticleStatus::PENDING->value),
                                     ]),
                             ])->columnSpan(3),
 
@@ -168,6 +169,7 @@ class ArticleResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('Status'))
+                    ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('published_at')
                     ->sortable()
@@ -189,7 +191,7 @@ class ArticleResource extends Resource
                     ->multiple(),
                 Tables\Filters\SelectFilter::make('status')
                     ->label(__('Status'))
-                    ->options(['DRAFT' => 'Draft', 'PUBLISHED' => 'Published', 'PENDING' => 'Pending']),
+                    ->options(ArticleStatus::class),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

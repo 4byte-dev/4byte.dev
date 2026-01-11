@@ -5,6 +5,7 @@ namespace Modules\Article\Mappers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Modules\Article\Data\ArticleData;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Category\Data\CategoryData;
 use Modules\Tag\Data\TagData;
@@ -39,7 +40,7 @@ class ArticleMapper
             isSaved: $article->isSavedBy($userId),
             canUpdate: Gate::allows('update', $article),
             canDelete: Gate::allows('delete', $article),
-            type: $article->status === 'PUBLISHED' ? 'article' : 'draft'
+            type: $article->status === ArticleStatus::PUBLISHED ? 'article' : 'draft'
         );
     }
 }

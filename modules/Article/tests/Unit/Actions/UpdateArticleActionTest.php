@@ -5,6 +5,7 @@ namespace Modules\Article\Tests\Unit\Actions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Modules\Article\Actions\UpdateArticleAction;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 use Modules\Category\Models\Category;
@@ -37,7 +38,7 @@ class UpdateArticleActionTest extends TestCase
 
         $this->assertEquals('New Title', $updatedArticle->title);
         $this->assertEquals('New Excerpt', $updatedArticle->excerpt);
-        $this->assertEquals('PUBLISHED', $updatedArticle->status);
+        $this->assertEquals(ArticleStatus::PUBLISHED, $updatedArticle->status);
     }
 
     public function test_it_updates_slug_when_title_changes(): void

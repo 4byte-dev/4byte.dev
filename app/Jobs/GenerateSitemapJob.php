@@ -8,6 +8,8 @@ use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Modules\Article\Enums\ArticleStatus;
+use Modules\Article\Models\Article;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 
@@ -45,7 +47,7 @@ class GenerateSitemapJob implements ShouldQueue
                 ->setLastModificationDate($user->updated_at));
         }
 
-        foreach (\Modules\Article\Models\Article::where('status', 'PUBLISHED')->get() as $article) {
+        foreach (Article::where('status', ArticleStatus::PUBLISHED)->get() as $article) {
             $totalItems += 1;
             $sitemap->add(Url::create(route('article.view', ['slug' => $article->slug]))
                 ->setPriority(0.7)
