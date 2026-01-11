@@ -8,7 +8,6 @@ use Modules\Category\Data\CategoryProfileData;
 use Modules\Category\Mappers\CategoryMapper;
 use Modules\Category\Models\Category;
 use Modules\Category\Models\CategoryProfile;
-use Modules\News\Models\News;
 use Modules\React\Services\ReactService;
 use Modules\Tag\Data\TagData;
 use Modules\Tag\Mappers\TagMapper;
