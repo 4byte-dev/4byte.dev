@@ -10,6 +10,7 @@ use Modules\Article\Models\Article;
 use Modules\Article\Support\SlugGenerator;
 use Modules\Category\Models\Category;
 use Modules\Tag\Models\Tag;
+use Stevebauman\Purify\Facades\Purify;
 
 class CreateArticleAction
 {
@@ -44,7 +45,7 @@ class CreateArticleAction
                 'title'        => $title,
                 'slug'         => $slug,
                 'excerpt'      => $data['excerpt'] ?? null,
-                'content'      => $data['content'] ?? null,
+                'content'      => isset($data['content']) ? Purify::clean($data['content']) : null,
                 'status'       => $isDraft ? ArticleStatus::DRAFT : ArticleStatus::PUBLISHED,
                 'published_at' => $isDraft ? null : now(),
                 'sources'      => $data['sources'] ?? [],
