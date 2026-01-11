@@ -50,6 +50,7 @@ class ArticleObserverTest extends TestCase
     public function test_updated_clears_cache(): void
     {
         $article = Article::factory()->make(['id' => 1]);
+        $article->syncOriginal();
 
         Cache::shouldReceive('forget')
             ->once()

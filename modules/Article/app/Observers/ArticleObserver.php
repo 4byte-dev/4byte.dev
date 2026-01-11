@@ -27,6 +27,10 @@ class ArticleObserver
      */
     public function updated(Article $article): void
     {
+        if ($article->isDirty('slug')) {
+            Cache::forget("article:{$article->getOriginal('slug')}:id");
+        }
+
         Cache::forget("article:{$article->id}");
     }
 
