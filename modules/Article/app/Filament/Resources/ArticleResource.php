@@ -122,8 +122,8 @@ class ArticleResource extends Resource
                                             ->options(ArticleStatus::class)
                                             ->default(ArticleStatus::DRAFT)
                                             ->live()
-                                            ->afterStateUpdated(function (ArticleStatus $state, callable $set) {
-                                                if ($state === ArticleStatus::PUBLISHED) {
+                                            ->afterStateUpdated(function (string $state, callable $set) {
+                                                if ($state === ArticleStatus::PUBLISHED->value) {
                                                     $set('published_at', Carbon::now());
                                                 } else {
                                                     $set('published_at', null);
