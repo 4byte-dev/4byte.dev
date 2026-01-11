@@ -1,19 +1,2 @@
-#!/bin/bash
-set -e
-
-STAGED_FILES=$(git diff --cached --name-only)
-
-PHP_FILES=$(echo "$STAGED_FILES" | grep '\.php$' || true)
-JS_FILES=$(echo "$STAGED_FILES" | grep -E '\.(js|ts|jsx|tsx|json)$' || true)
-
-if [ -n "$JS_FILES" ]; then
-  echo "Running npm lint on staged JS/TS files..."
-  echo "$JS_FILES" | xargs npm run lint
-fi
-
-if [ -n "$PHP_FILES" ]; then
-  echo "Running composer lint on staged PHP files..."
-  echo "$PHP_FILES" | xargs composer run lint
-fi
-
-git add -u
+npm run lint
+composer run lint
