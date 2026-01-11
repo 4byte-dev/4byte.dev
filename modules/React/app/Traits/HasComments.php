@@ -3,9 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Cache;
-use Modules\React\Helpers;
 use Modules\React\Models\Comment;
+use Modules\React\Services\ReactService;
 
 trait HasComments
 {
@@ -26,11 +25,7 @@ trait HasComments
             return false;
         }
 
-        return Cache::rememberForever(Helpers::cacheKey($this, $userId, 'commented'), function () use ($userId) {
-            return $this->comments()
-                ->where('user_id', $userId)
-                ->exists();
-        });
+        return app(ReactService::class)->checkCommented($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**
@@ -38,13 +33,7 @@ trait HasComments
      */
     public function comment(int $userId, string $content, ?int $parentId = null): void
     {
-        $this->comments()->create(['user_id' => $userId, 'parent_id' => $parentId, 'content' => $content]);
-        if (isset($parentId)) {
-            Cache::increment(Helpers::cacheKey($this, 'comment', $parentId, 'replies'));
-        } else {
-            Cache::increment(Helpers::cacheKey($this, 'comments'));
-        }
-        Cache::forever(Helpers::cacheKey($this, $userId, 'commented'), true);
+        app(ReactService::class)->insertComment($this->getMorphClass(), $this->getKey(), $content, $userId, $parentId);
     }
 
     /**
@@ -52,9 +41,7 @@ trait HasComments
      */
     public function commentsCount(): int
     {
-        return Cache::rememberForever(Helpers::cacheKey($this, 'comments'), function () {
-            return $this->comments()->count();
-        });
+        return app(ReactService::class)->getCommentsCount($this->getMorphClass(), $this->getKey());
     }
 
     /**
@@ -62,8 +49,6 @@ trait HasComments
      */
     public function commentRepliesCount(int $parentId): int
     {
-        return Cache::rememberForever(Helpers::cacheKey($this, 'comment', $parentId, 'replies'), function () use ($parentId) {
-            return $this->comments()->where('parent_id', $parentId)->count();
-        });
+        return app(ReactService::class)->getCommentRepliesCount($this->getMorphClass(), $this->getKey(), $parentId);
     }
 }

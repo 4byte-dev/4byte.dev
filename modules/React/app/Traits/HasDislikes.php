@@ -3,9 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Cache;
-use Modules\React\Helpers;
 use Modules\React\Models\Dislike;
+use Modules\React\Services\ReactService;
 
 trait HasDislikes
 {
@@ -26,11 +25,7 @@ trait HasDislikes
             return false;
         }
 
-        return Cache::rememberForever(Helpers::cacheKey($this, $userId, 'disliked'), function () use ($userId) {
-            return $this->dislikes()
-                ->where('user_id', $userId)
-                ->exists();
-        });
+        return app(ReactService::class)->checkDisliked($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**
@@ -39,9 +34,7 @@ trait HasDislikes
     public function dislike(int $userId): void
     {
         if (! $this->isDislikedBy($userId)) {
-            $this->dislikes()->create(['user_id' => $userId]);
-            Cache::increment(Helpers::cacheKey($this, 'dislikes'));
-            Cache::forever(Helpers::cacheKey($this, $userId, 'disliked'), true);
+            app(ReactService::class)->insertDislike($this->getMorphClass(), $this->getKey(), $userId);
         }
     }
 
@@ -50,11 +43,7 @@ trait HasDislikes
      */
     public function undislike(int $userId): void
     {
-        $deleted = $this->dislikes()->where('user_id', $userId)->delete();
-        if ($deleted) {
-            Cache::decrement(Helpers::cacheKey($this, 'dislikes'));
-            Cache::forget(Helpers::cacheKey($this, $userId, 'disliked'));
-        }
+        app(ReactService::class)->deleteDislike($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**
@@ -72,8 +61,6 @@ trait HasDislikes
      */
     public function dislikesCount(): int
     {
-        return Cache::rememberForever(Helpers::cacheKey($this, 'dislikes'), function () {
-            return $this->dislikes()->count();
-        });
+        return app(ReactService::class)->getDislikesCount($this->getMorphClass(), $this->getKey());
     }
 }

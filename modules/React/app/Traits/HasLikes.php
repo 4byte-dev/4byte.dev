@@ -3,9 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Cache;
-use Modules\React\Helpers;
 use Modules\React\Models\Like;
+use Modules\React\Services\ReactService;
 
 trait HasLikes
 {
@@ -26,11 +25,7 @@ trait HasLikes
             return false;
         }
 
-        return Cache::rememberForever(Helpers::cacheKey($this, $userId, 'liked'), function () use ($userId) {
-            return $this->likes()
-                ->where('user_id', $userId)
-                ->exists();
-        });
+        return app(ReactService::class)->checkLiked($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**
@@ -39,9 +34,7 @@ trait HasLikes
     public function like(int $userId): void
     {
         if (! $this->isLikedBy($userId)) {
-            $this->likes()->create(['user_id' => $userId]);
-            Cache::increment(Helpers::cacheKey($this, 'likes'));
-            Cache::forever(Helpers::cacheKey($this, $userId, 'liked'), true);
+            app(ReactService::class)->insertLike($this->getMorphClass(), $this->getKey(), $userId);
         }
     }
 
@@ -50,11 +43,7 @@ trait HasLikes
      */
     public function unlike(int $userId): void
     {
-        $deleted = $this->likes()->where('user_id', $userId)->delete();
-        if ($deleted) {
-            Cache::decrement(Helpers::cacheKey($this, 'likes'));
-            Cache::forget(Helpers::cacheKey($this, $userId, 'liked'));
-        }
+        app(ReactService::class)->deleteLike($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**
@@ -72,8 +61,6 @@ trait HasLikes
      */
     public function likesCount(): int
     {
-        return Cache::rememberForever(Helpers::cacheKey($this, 'likes'), function () {
-            return $this->likes()->count();
-        });
+        return app(ReactService::class)->getLikesCount($this->getMorphClass(), $this->getKey());
     }
 }

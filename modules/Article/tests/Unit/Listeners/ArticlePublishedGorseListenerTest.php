@@ -4,6 +4,7 @@ namespace Modules\Article\Tests\Unit\Listeners;
 
 use Carbon\Carbon;
 use Mockery;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Listeners\ArticlePublishedGorseListener;
 use Modules\Article\Models\Article;
@@ -19,6 +20,7 @@ class ArticlePublishedGorseListenerTest extends TestCase
     {
         $article = Article::factory()->create([
             'published_at' => now(),
+            'status'       => ArticleStatus::PUBLISHED,
         ]);
         $category = Category::factory()->create();
         $tag      = Tag::factory()->create();

@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Article\Data\ArticleData;
 use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
-use Modules\Category\Data\CategoryData;
-use Modules\Tag\Data\TagData;
+use Modules\Category\Mappers\CategoryMapper;
+use Modules\Tag\Mappers\TagMapper;
 use Modules\User\Data\UserData;
 
 class ArticleMapper
@@ -29,8 +29,8 @@ class ArticleMapper
             image: $article->getCoverImage(),
             published_at: $article->published_at,
             user: $user,
-            categories: CategoryData::collect($article->categories)->all(),
-            tags: TagData::collect($article->tags)->all(),
+            categories: CategoryMapper::collection($article->categories),
+            tags: TagMapper::collection($article->tags),
             sources: $article->sources,
             likes: $article->likesCount(),
             dislikes: $article->dislikesCount(),

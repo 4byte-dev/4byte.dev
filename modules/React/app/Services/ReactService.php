@@ -3,12 +3,14 @@
 namespace Modules\React\Services;
 
 use App\Models\User;
+use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 use Modules\React\Data\CommentData;
 use Modules\React\Models\Comment;
+use Modules\React\Models\Count;
 use Modules\React\Models\Dislike;
 use Modules\React\Models\Follow;
 use Modules\React\Models\Like;
@@ -263,6 +265,20 @@ class ReactService
     }
 
     /**
+     * Checks if the given user has commented on the specified model.
+     */
+    public function checkCommented(string $commentableType, int $commentableId, int $userId): bool
+    {
+        return Cache::rememberForever($this->cacheKey($commentableType, $commentableId, $userId, 'commented'), function () use ($commentableType, $commentableId, $userId) {
+            return Comment::where([
+                'user_id'          => $userId,
+                'commentable_id'   => $commentableId,
+                'commentable_type' => $commentableType,
+            ])->exists();
+        });
+    }
+
+    /**
      * Returns the total number of comments for the given model.
      */
     public function getCommentsCount(string $commentableType, int $commentableId): int
@@ -359,6 +375,7 @@ class ReactService
         ]);
 
         Cache::increment($this->cacheKey($followableType, $followableId, 'followers'));
+        Cache::increment($this->cacheKey(User::class, $followerId, 'followings'));
         Cache::forever($this->cacheKey($followableType, $followableId, $followerId, 'followed'), true);
     }
 
@@ -374,6 +391,7 @@ class ReactService
 
         if ($deleted) {
             Cache::decrement($this->cacheKey($followableType, $followableId, 'followers'));
+            Cache::decrement($this->cacheKey(User::class, $followerId, 'followings'));
             Cache::forget($this->cacheKey($followableType, $followableId, $followerId, 'followed'));
         }
 
@@ -414,6 +432,84 @@ class ReactService
                 'followable_id'   => $followableId,
                 'followable_type' => $followableType,
             ])->exists();
+        });
+    }
+
+    /**
+     * Increment the count for a specific filter.
+     */
+    public function incrementCount(string $countableType, int $countableId, string $filter, int $amount = 1): void
+    {
+        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
+
+        Count::firstOrCreate([
+            'countable_type' => $countableType,
+            'countable_id'   => $countableId,
+            'filter'         => $filter,
+        ], ['count' => 0]);
+
+        Count::where('countable_type', $countableType)
+            ->where('countable_id', $countableId)
+            ->where('filter', $filter)
+            ->increment('count', $amount);
+
+        if (Cache::has($cacheKey)) {
+            Cache::increment($cacheKey, $amount);
+        } else {
+            Cache::rememberForever($cacheKey, function () use ($countableType, $countableId, $filter) {
+                return Count::where([
+                    'countable_type' => $countableType,
+                    'countable_id'   => $countableId,
+                    'filter'         => $filter,
+                ])->value('count') ?? 0;
+            });
+        }
+    }
+
+    /**
+     * Decrement the count for a specific filter.
+     */
+    public function decrementCount(string $countableType, int $countableId, string $filter, int $amount = 1): void
+    {
+        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
+
+        Count::firstOrCreate([
+            'countable_type' => $countableType,
+            'countable_id'   => $countableId,
+            'filter'         => $filter,
+        ], ['count' => 0]);
+
+        Count::where('countable_type', $countableType)
+            ->where('countable_id', $countableId)
+            ->where('filter', $filter)
+            ->update(['count' => DB::raw("GREATEST(count - {$amount}, 0)")]);
+
+        if (Cache::has($cacheKey)) {
+            Cache::decrement($cacheKey, $amount);
+        } else {
+            Cache::rememberForever($cacheKey, function () use ($countableType, $countableId, $filter) {
+                return Count::where([
+                    'countable_type' => $countableType,
+                    'countable_id'   => $countableId,
+                    'filter'         => $filter,
+                ])->value('count') ?? 0;
+            });
+        }
+    }
+
+    /**
+     * Get the count for a specific filter.
+     */
+    public function getCount(string $countableType, int $countableId, string $filter): int
+    {
+        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
+
+        return Cache::rememberForever($cacheKey, function () use ($countableType, $countableId, $filter) {
+            return Count::where([
+                'countable_type' => $countableType,
+                'countable_id'   => $countableId,
+                'filter'         => $filter,
+            ])->value('count') ?? 0;
         });
     }
 

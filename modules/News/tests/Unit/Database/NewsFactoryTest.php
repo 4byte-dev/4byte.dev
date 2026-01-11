@@ -4,6 +4,7 @@ namespace Modules\News\Tests\Unit\Database;
 
 use App\Models\User;
 use Illuminate\Support\Str;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Models\News;
 use Modules\News\Tests\TestCase;
 
@@ -14,7 +15,7 @@ class NewsFactoryTest extends TestCase
         $news = News::factory()->create();
 
         $this->assertInstanceOf(News::class, $news);
-        $this->assertContains($news->status, ['DRAFT', 'PUBLISHED', 'PENDING']);
+        $this->assertInstanceOf(NewsStatus::class, $news->status);
     }
 
     public function test_it_creates_news_linked_to_user(): void

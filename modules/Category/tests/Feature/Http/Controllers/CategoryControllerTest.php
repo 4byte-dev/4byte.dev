@@ -42,7 +42,7 @@ class CategoryControllerTest extends TestCase
             isFollowing: false
         );
 
-        $tags = collect([$tagData]);
+        $tags = [$tagData];
 
         $categoryService = Mockery::mock(CategoryService::class);
         $categoryService->shouldReceive('getId')

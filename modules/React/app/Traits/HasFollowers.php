@@ -3,9 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Cache;
-use Modules\React\Helpers;
 use Modules\React\Models\Follow;
+use Modules\React\Services\ReactService;
 
 trait HasFollowers
 {
@@ -22,9 +21,7 @@ trait HasFollowers
      */
     public function followersCount(): int
     {
-        return Cache::rememberForever(Helpers::cacheKey($this, 'followers'), function () {
-            return $this->followers()->count();
-        });
+        return app(ReactService::class)->getFollowersCount($this->getMorphClass(), $this->getKey());
     }
 
     /**
@@ -36,8 +33,6 @@ trait HasFollowers
             return false;
         }
 
-        return Cache::rememberForever(Helpers::cacheKey($this, $userId, 'followed'), function () use ($userId) {
-            return $this->followers()->where('follower_id', $userId)->exists();
-        });
+        return app(ReactService::class)->checkFollowed($this->getMorphClass(), $this->getKey(), $userId);
     }
 }

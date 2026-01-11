@@ -19,7 +19,9 @@ class ArticleObserver
             return;
         }
 
-        event(new ArticlePublishedEvent($article));
+        if ($article->wasRecentlyCreated || $article->isDirty('status')) {
+            event(new ArticlePublishedEvent($article));
+        }
     }
 
     /**
@@ -27,6 +29,10 @@ class ArticleObserver
      */
     public function updated(Article $article): void
     {
+        if ($article->isDirty('slug')) {
+            Cache::forget("article:{$article->getOriginal('slug')}:id");
+        }
+
         Cache::forget("article:{$article->id}");
     }
 

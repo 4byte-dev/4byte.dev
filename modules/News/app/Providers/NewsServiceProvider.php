@@ -42,6 +42,14 @@ class NewsServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register the service provider.
+     */
+    public function register(): void
+    {
+        $this->app->register(EventServiceProvider::class);
+    }
+
+    /**
      * Register model policies.
      */
     protected function registerPolicies(): void

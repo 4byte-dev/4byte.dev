@@ -2,17 +2,23 @@
 
 namespace Modules\Tag\Services;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Modules\Article\Models\Article;
-use Modules\News\Models\News;
+use Modules\React\Services\ReactService;
 use Modules\Tag\Data\TagData;
 use Modules\Tag\Data\TagProfileData;
+use Modules\Tag\Mappers\TagMapper;
 use Modules\Tag\Models\Tag;
 use Modules\Tag\Models\TagProfile;
 
 class TagService
 {
+    private ReactService $reactService;
+
+    public function __construct(ReactService $reactService)
+    {
+        $this->reactService = $reactService;
+    }
+
     /**
      * Retrieve tag data by its ID.
      *
@@ -29,7 +35,7 @@ class TagService
                 ->findOrFail($tagId);
         });
 
-        return TagData::fromModel($tag);
+        return TagMapper::toData($tag);
     }
 
     /**
@@ -67,7 +73,7 @@ class TagService
                 ->with('categories:name,slug')
                 ->firstOrFail();
 
-            return TagProfileData::fromModel($profile);
+            return TagMapper::toProfileData($profile);
         });
     }
 
@@ -80,11 +86,7 @@ class TagService
      */
     public function getArticlesCount(int $tagId): int
     {
-        return Cache::remember("tag:{$tagId}:articles", 60 * 60 * 24, function () use ($tagId) {
-            return Article::whereHas('tags', function ($q) use ($tagId) {
-                $q->where('id', $tagId);
-            })->count();
-        });
+        return $this->reactService->getCount(Tag::class, $tagId, 'articles');
     }
 
     /**
@@ -96,11 +98,7 @@ class TagService
      */
     public function getNewsCount(int $tagId): int
     {
-        return Cache::remember("tag:{$tagId}:news", 60 * 60 * 24, function () use ($tagId) {
-            return News::whereHas('tags', function ($q) use ($tagId) {
-                $q->where('id', $tagId);
-            })->count();
-        });
+        return $this->reactService->getCount(Tag::class, $tagId, 'news');
     }
 
     /**
@@ -108,21 +106,21 @@ class TagService
      *
      * @param int $tagId
      *
-     * @return Collection<int, TagData>
+     * @return array<TagData>
      */
-    public function listRelated(int $tagId): Collection
+    public function listRelated(int $tagId): array
     {
         return Cache::rememberForever("tag:{$tagId}:related", function () use ($tagId) {
             $tagProfile = TagProfile::with('categories')->where('tag_id', $tagId)->first();
 
             if (! $tagProfile) {
-                return collect();
+                return [];
             }
 
             $categoryIds = $tagProfile->categories->pluck('id')->toArray();
 
             if (count($categoryIds) === 0) {
-                return collect();
+                return [];
             }
 
             $relatedTags = Tag::whereHas('profile.categories', function ($query) use ($categoryIds) {
@@ -132,7 +130,7 @@ class TagService
                 ->distinct()
                 ->get();
 
-            return TagData::collect($relatedTags);
+            return TagMapper::collection($relatedTags);
         });
     }
 }

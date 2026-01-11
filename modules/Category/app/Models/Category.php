@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\Article\Models\Article;
 use Modules\Category\Database\Factories\CategoryFactory;
+use Modules\React\Traits\HasCounts;
 use Modules\React\Traits\HasFollowers;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -42,10 +43,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Category extends Model
 {
     /** @use HasFactory<\Modules\Category\Database\Factories\CategoryFactory> */
-    use HasFactory;
-
-    use HasFollowers;
-    use LogsActivity;
+    use HasFactory, HasFollowers, LogsActivity, HasCounts;
 
     protected $fillable = ['name', 'slug'];
 

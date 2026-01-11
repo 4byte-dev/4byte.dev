@@ -6,8 +6,10 @@ use DateTime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Modules\Category\Data\CategoryData;
+use Modules\Category\Mappers\CategoryMapper;
 use Modules\Course\Models\Course;
 use Modules\Tag\Data\TagData;
+use Modules\Tag\Mappers\TagMapper;
 use Modules\User\Data\UserData;
 use Spatie\LaravelData\Data;
 
@@ -59,8 +61,8 @@ class CourseData extends Data
             image: $course->getCoverImage(),
             published_at: $course->published_at,
             user: $user,
-            categories: CategoryData::collect($course->categories)->all(),
-            tags: TagData::collect($course->tags)->all(),
+            categories: CategoryMapper::collection($course->categories),
+            tags: TagMapper::collection($course->tags),
             likes: $course->likesCount(),
             dislikes: $course->dislikesCount(),
             comments: $course->commentsCount(),

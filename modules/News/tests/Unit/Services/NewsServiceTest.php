@@ -3,6 +3,7 @@
 namespace Modules\News\Tests\Unit\Services;
 
 use Illuminate\Support\Facades\Cache;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Models\News;
 use Modules\News\Services\NewsService;
 use Modules\News\Tests\TestCase;
@@ -20,7 +21,7 @@ class NewsServiceTest extends TestCase
 
     public function test_get_data_returns_news_data(): void
     {
-        $news = News::factory()->create(['status' => 'PUBLISHED']);
+        $news = News::factory()->create(['status' => NewsStatus::PUBLISHED]);
 
         $data = $this->service->getData($news->id);
 
@@ -31,7 +32,7 @@ class NewsServiceTest extends TestCase
 
     public function test_it_can_get_news_id_by_slug(): void
     {
-        $news = News::factory()->create(['status' => 'PUBLISHED']);
+        $news = News::factory()->create(['status' => NewsStatus::PUBLISHED]);
 
         $id = $this->service->getId($news->slug);
 

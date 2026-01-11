@@ -2,19 +2,26 @@
 
 namespace Modules\Category\Services;
 
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Modules\Article\Models\Article;
 use Modules\Category\Data\CategoryData;
 use Modules\Category\Data\CategoryProfileData;
+use Modules\Category\Mappers\CategoryMapper;
 use Modules\Category\Models\Category;
 use Modules\Category\Models\CategoryProfile;
-use Modules\News\Models\News;
+use Modules\React\Services\ReactService;
 use Modules\Tag\Data\TagData;
+use Modules\Tag\Mappers\TagMapper;
 use Modules\Tag\Models\Tag;
 
 class CategoryService
 {
+    private ReactService $reactService;
+
+    public function __construct(ReactService $reactService)
+    {
+        $this->reactService = $reactService;
+    }
+
     /**
      * Retrieve category data by its ID.
      *
@@ -31,7 +38,7 @@ class CategoryService
                 ->findOrFail($categoryId);
         });
 
-        return CategoryData::fromModel($category);
+        return CategoryMapper::toData($category);
     }
 
     /**
@@ -68,7 +75,7 @@ class CategoryService
                 ->select(['description', 'color'])
                 ->firstOrFail();
 
-            return CategoryProfileData::fromModel($profile);
+            return CategoryMapper::toProfileData($profile);
         });
     }
 
@@ -81,11 +88,7 @@ class CategoryService
      */
     public function getArticlesCount(int $categoryId): int
     {
-        return Cache::rememberForever("category:{$categoryId}:articles", function () use ($categoryId) {
-            return Article::whereHas('categories', function ($q) use ($categoryId) {
-                $q->where('id', $categoryId);
-            })->count();
-        });
+        return $this->reactService->getCount(Category::class, $categoryId, 'articles');
     }
 
     /**
@@ -97,11 +100,7 @@ class CategoryService
      */
     public function getNewsCount(int $categoryId): int
     {
-        return Cache::rememberForever("category:{$categoryId}:news", function () use ($categoryId) {
-            return News::whereHas('categories', function ($q) use ($categoryId) {
-                $q->where('id', $categoryId);
-            })->count();
-        });
+        return $this->reactService->getCount(Category::class, $categoryId, 'news');
     }
 
     /**
@@ -109,16 +108,16 @@ class CategoryService
      *
      * @param int $categoryId
      *
-     * @return Collection<int, TagData>
+     * @return array<TagData>
      */
-    public function listTags(int $categoryId): Collection
+    public function listTags(int $categoryId): array
     {
         return Cache::rememberForever("category:{$categoryId}:tags", function () use ($categoryId) {
             $tags = Tag::whereHas('profile.categories', function ($q) use ($categoryId) {
                 $q->where('categories.id', $categoryId);
             })->get();
 
-            return TagData::collect($tags);
+            return TagMapper::collection($tags);
         });
     }
 }

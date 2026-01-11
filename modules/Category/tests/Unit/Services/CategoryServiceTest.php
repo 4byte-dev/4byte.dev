@@ -3,12 +3,15 @@
 namespace Modules\Category\Tests\Unit\Services;
 
 use Illuminate\Support\Facades\Cache;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
 use Modules\Category\Models\Category;
 use Modules\Category\Models\CategoryProfile;
 use Modules\Category\Services\CategoryService;
 use Modules\Category\Tests\TestCase;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Models\News;
+use Modules\React\Services\ReactService;
 use Modules\Tag\Models\Tag;
 use Modules\Tag\Models\TagProfile;
 
@@ -60,26 +63,30 @@ class CategoryServiceTest extends TestCase
     {
         $category = Category::factory()->create();
 
-        $article = Article::factory()->create();
+        $article = Article::factory()->create(['status' => ArticleStatus::PUBLISHED]);
         $article->categories()->attach($category);
+
+        app(ReactService::class)->incrementCount(Category::class, $category->id, 'articles');
 
         $count = $this->service->getArticlesCount($category->id);
 
         $this->assertEquals(1, $count);
-        $this->assertTrue(Cache::has("category:{$category->id}:articles"));
+        $this->assertTrue(Cache::has("react:counts:category:{$category->id}:articles"));
     }
 
     public function test_it_can_count_news(): void
     {
         $category = Category::factory()->create();
 
-        $news = News::factory()->create();
+        $news = News::factory()->create(['status' => NewsStatus::PUBLISHED]);
         $news->categories()->attach($category);
+
+        app(ReactService::class)->incrementCount(Category::class, $category->id, 'news');
 
         $count = $this->service->getNewsCount($category->id);
 
         $this->assertEquals(1, $count);
-        $this->assertTrue(Cache::has("category:{$category->id}:news"));
+        $this->assertTrue(Cache::has("react:counts:category:{$category->id}:news"));
     }
 
     public function test_it_can_list_tags_by_category(): void
@@ -100,9 +107,9 @@ class CategoryServiceTest extends TestCase
 
         $tags = $this->service->listTags($category->id);
 
-        $this->assertTrue($tags->contains('slug', $tagA->slug));
-        $this->assertFalse($tags->contains('slug', $tagB->slug));
-        $this->assertFalse($tags->contains('slug', $tagC->slug));
+        $this->assertTrue(collect($tags)->contains('slug', $tagA->slug));
+        $this->assertFalse(collect($tags)->contains('slug', $tagB->slug));
+        $this->assertFalse(collect($tags)->contains('slug', $tagC->slug));
 
         $this->assertTrue(Cache::has("category:{$category->id}:tags"));
     }
@@ -113,6 +120,6 @@ class CategoryServiceTest extends TestCase
 
         $related = $this->service->listTags($category->id);
 
-        $this->assertTrue($related->isEmpty());
+        $this->assertEmpty($related);
     }
 }

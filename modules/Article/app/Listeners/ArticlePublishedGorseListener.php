@@ -5,6 +5,7 @@ namespace Modules\Article\Listeners;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Recommend\Classes\GorseItem;
 use Modules\Recommend\Services\GorseService;
@@ -53,7 +54,7 @@ class ArticlePublishedGorseListener implements ShouldQueue
                 ->merge(['article', "user:{$article->user_id}"])
                 ->all(),
             $article->slug,
-            false,
+            $article->status !== ArticleStatus::PUBLISHED,
             Carbon::parse($article->published_at)->toDateTimeString()
         );
 

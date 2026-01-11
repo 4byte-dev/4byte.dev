@@ -4,6 +4,7 @@ namespace Modules\News\Tests\Unit\Models;
 
 use App\Models\User;
 use Modules\Category\Models\Category;
+use Modules\News\Enums\NewsStatus;
 use Modules\News\Models\News;
 use Modules\News\Tests\TestCase;
 use Modules\Tag\Models\Tag;
@@ -34,6 +35,7 @@ class NewsTest extends TestCase
         $news = new News();
 
         $this->assertEquals('datetime', $news->getCasts()['published_at']);
+        $this->assertEquals(NewsStatus::class, $news->getCasts()['status']);
     }
 
     public function test_it_belongs_to_user(): void
