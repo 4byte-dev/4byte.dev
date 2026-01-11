@@ -25,7 +25,7 @@ trait HasComments
             return false;
         }
 
-       return app(ReactService::class)->checkCommented($this->getMorphClass(), $this->getKey(), $userId);
+        return app(ReactService::class)->checkCommented($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**

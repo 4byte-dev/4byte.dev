@@ -17,7 +17,8 @@ class CategoryService
 {
     private ReactService $reactService;
 
-    public function __construct(ReactService $reactService) {
+    public function __construct(ReactService $reactService)
+    {
         $this->reactService = $reactService;
     }
 
@@ -87,7 +88,7 @@ class CategoryService
      */
     public function getArticlesCount(int $categoryId): int
     {
-        return $this->reactService->getCount(Category::class, $categoryId, "articles");
+        return $this->reactService->getCount(Category::class, $categoryId, 'articles');
     }
 
     /**
@@ -99,7 +100,7 @@ class CategoryService
      */
     public function getNewsCount(int $categoryId): int
     {
-        return $this->reactService->getCount(Category::class, $categoryId, "news");
+        return $this->reactService->getCount(Category::class, $categoryId, 'news');
     }
 
     /**

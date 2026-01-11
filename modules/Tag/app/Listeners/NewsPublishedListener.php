@@ -14,7 +14,8 @@ class NewsPublishedListener implements ShouldQueue
 
     public function __construct(
         protected ReactService $reactService
-    ) {}
+    ) {
+    }
 
     /**
      * Handle the event.
@@ -24,7 +25,7 @@ class NewsPublishedListener implements ShouldQueue
         $news = $event->news;
 
         $news->tags()->each(function ($tag) {
-            $this->reactService->incrementCount(Tag::class, $tag->id, "news");
+            $this->reactService->incrementCount(Tag::class, $tag->id, 'news');
         });
     }
 }

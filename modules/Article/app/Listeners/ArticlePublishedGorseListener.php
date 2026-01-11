@@ -54,7 +54,7 @@ class ArticlePublishedGorseListener implements ShouldQueue
                 ->merge(['article', "user:{$article->user_id}"])
                 ->all(),
             $article->slug,
-            $article->status != ArticleStatus::PUBLISHED,
+            $article->status !== ArticleStatus::PUBLISHED,
             Carbon::parse($article->published_at)->toDateTimeString()
         );
 

@@ -3,7 +3,6 @@
 namespace Modules\Tag\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Modules\News\Models\News;
 use Modules\React\Services\ReactService;
 use Modules\Tag\Data\TagData;
 use Modules\Tag\Data\TagProfileData;
@@ -15,7 +14,8 @@ class TagService
 {
     private ReactService $reactService;
 
-    public function __construct(ReactService $reactService) {
+    public function __construct(ReactService $reactService)
+    {
         $this->reactService = $reactService;
     }
 
@@ -86,7 +86,7 @@ class TagService
      */
     public function getArticlesCount(int $tagId): int
     {
-        return $this->reactService->getCount(Tag::class, $tagId, "articles");
+        return $this->reactService->getCount(Tag::class, $tagId, 'articles');
     }
 
     /**
@@ -98,7 +98,7 @@ class TagService
      */
     public function getNewsCount(int $tagId): int
     {
-        return $this->reactService->getCount(Tag::class, $tagId, "news");
+        return $this->reactService->getCount(Tag::class, $tagId, 'news');
     }
 
     /**

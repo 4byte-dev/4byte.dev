@@ -54,7 +54,7 @@ class NewsPublishedListener implements ShouldQueue
                 ->merge(['news', "user:{$news->user_id}"])
                 ->all(),
             $news->slug,
-            $news->status != NewsStatus::PUBLISHED,
+            $news->status !== NewsStatus::PUBLISHED,
             Carbon::parse($news->published_at)->toDateTimeString()
         );
 

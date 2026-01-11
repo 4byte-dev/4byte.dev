@@ -14,7 +14,8 @@ class ArticleDeletedListener implements ShouldQueue
 
     public function __construct(
         protected ReactService $reactService
-    ) {}
+    ) {
+    }
 
     /**
      * Handle the event.
@@ -24,7 +25,7 @@ class ArticleDeletedListener implements ShouldQueue
         $article = $event->article;
 
         $article->categories()->each(function ($category) {
-            $this->reactService->decrementCount(Category::class, $category->id, "articles");
+            $this->reactService->decrementCount(Category::class, $category->id, 'articles');
         });
     }
 }
