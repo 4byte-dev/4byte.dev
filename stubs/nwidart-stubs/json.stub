@@ -1,8 +1,11 @@
 {
     "name": "$STUDLY_NAME$",
     "alias": "$LOWER_NAME$",
-    "description": "",
-    "keywords": [],
+    "description": "$STUDLY_NAME$ module for 4Byte",
+    "keywords": [
+        "4Byte",
+        "$STUDLY_NAME$"
+    ],
     "priority": 0,
     "providers": [
         "$MODULE_NAMESPACE$\\$STUDLY_NAME$\\$PROVIDER_NAMESPACE$\\$STUDLY_NAME$ServiceProvider"
