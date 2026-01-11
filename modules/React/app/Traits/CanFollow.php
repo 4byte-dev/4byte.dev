@@ -3,9 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Cache;
-use Modules\React\Helpers;
 use Modules\React\Models\Follow;
+use Modules\React\Services\ReactService;
 
 trait CanFollow
 {
@@ -22,9 +21,7 @@ trait CanFollow
      */
     public function followingsCount(): int
     {
-        return Cache::rememberForever(Helpers::cacheKey($this, 'followings'), function () {
-            return $this->followings()->count();
-        });
+        return app(ReactService::class)->getFollowingsCount($this->getKey());
     }
 
     /**
@@ -35,14 +32,7 @@ trait CanFollow
     public function follow($target): void
     {
         if (! $this->isFollowing($target)) {
-            $this->followings()->create([
-                'followable_id'   => $target->id,
-                'followable_type' => $target::class,
-            ]);
-
-            Cache::increment(Helpers::cacheKey($target, 'followers'));
-            Cache::increment(Helpers::cacheKey($this, 'followings'));
-            Cache::forever(Helpers::cacheKey($target, $this->id, 'followed'), true);
+            app(ReactService::class)->insertFollow($target->getMorphClass(), $target->getKey(), $this->getKey());
         }
     }
 
@@ -53,14 +43,7 @@ trait CanFollow
      */
     public function unfollow($target): void
     {
-        $this->followings()
-            ->where('followable_id', $target->id)
-            ->where('followable_type', $target::class)
-            ->delete();
-
-        Cache::decrement(Helpers::cacheKey($target, 'followers'));
-        Cache::decrement(Helpers::cacheKey($this, 'followings'));
-        Cache::forget(Helpers::cacheKey($target, $this->id, 'followed'));
+        app(ReactService::class)->deleteFollow($target->getMorphClass(), $target->getKey(), $this->getKey());
     }
 
     /**
@@ -70,14 +53,6 @@ trait CanFollow
      */
     public function isFollowing($target): bool
     {
-        return Cache::rememberForever(
-            Helpers::cacheKey($target, $this->id, 'followed'),
-            function () use ($target) {
-                return $this->followings()
-                    ->where('followable_id', $target->id)
-                    ->where('followable_type', $target::class)
-                    ->exists();
-            }
-        );
+        return app(ReactService::class)->checkFollowed($target->getMorphClass(), $target->getKey(), $this->getKey());
     }
 }

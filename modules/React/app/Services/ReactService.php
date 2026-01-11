@@ -265,6 +265,20 @@ class ReactService
     }
 
     /**
+     * Checks if the given user has commented on the specified model.
+     */
+    public function checkCommented(string $commentableType, int $commentableId, int $userId): bool
+    {
+        return Cache::rememberForever($this->cacheKey($commentableType, $commentableId, $userId, 'commented'), function () use ($commentableType, $commentableId, $userId) {
+            return Comment::where([
+                'user_id'          => $userId,
+                'commentable_id'   => $commentableId,
+                'commentable_type' => $commentableType,
+            ])->exists();
+        });
+    }
+
+    /**
      * Returns the total number of comments for the given model.
      */
     public function getCommentsCount(string $commentableType, int $commentableId): int
@@ -361,6 +375,7 @@ class ReactService
         ]);
 
         Cache::increment($this->cacheKey($followableType, $followableId, 'followers'));
+        Cache::increment($this->cacheKey(User::class, $followerId, 'followings'));
         Cache::forever($this->cacheKey($followableType, $followableId, $followerId, 'followed'), true);
     }
 
@@ -376,6 +391,7 @@ class ReactService
 
         if ($deleted) {
             Cache::decrement($this->cacheKey($followableType, $followableId, 'followers'));
+            Cache::decrement($this->cacheKey(User::class, $followerId, 'followings'));
             Cache::forget($this->cacheKey($followableType, $followableId, $followerId, 'followed'));
         }
 

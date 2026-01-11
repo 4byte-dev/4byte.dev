@@ -3,9 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Cache;
-use Modules\React\Helpers;
 use Modules\React\Models\Save;
+use Modules\React\Services\ReactService;
 
 trait HasSaves
 {
@@ -26,11 +25,7 @@ trait HasSaves
             return false;
         }
 
-        return Cache::rememberForever(Helpers::cacheKey($this, $userId, 'saved'), function () use ($userId) {
-            return $this->saves()
-                ->where('user_id', $userId)
-                ->exists();
-        });
+        return app(ReactService::class)->checkSaved($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**
@@ -39,8 +34,7 @@ trait HasSaves
     public function saveFor(int $userId): void
     {
         if (! $this->isSavedBy($userId)) {
-            $this->saves()->create(['user_id' => $userId]);
-            Cache::forever(Helpers::cacheKey($this, $userId, 'saved'), true);
+            app(ReactService::class)->insertSave($this->getMorphClass(), $this->getKey(), $userId);
         }
     }
 
@@ -49,10 +43,7 @@ trait HasSaves
      */
     public function unsave(int $userId): void
     {
-        $deleted = $this->saves()->where('user_id', $userId)->delete();
-        if ($deleted) {
-            Cache::forget(Helpers::cacheKey($this, $userId, 'saved'));
-        }
+        app(ReactService::class)->deleteSave($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**
