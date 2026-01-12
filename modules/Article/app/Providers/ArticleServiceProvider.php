@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Modules\Article\Console\Commands\ScheduleArticleCommand;
 use Modules\Article\Models\Article;
-use Modules\Article\Observers\ArticleObserver;
 use Modules\Article\Policies\ArticlePolicy;
 use Modules\Article\Services\ArticleService;
 use Modules\React\Services\ReactService;
@@ -31,7 +30,6 @@ class ArticleServiceProvider extends ServiceProvider
     {
         $this->registerConfig();
         $this->registerPolicies();
-        $this->registerObservers();
         $this->registerCommands();
         $this->registerTranslations();
         $this->registerPublishableResources();
@@ -112,14 +110,6 @@ class ArticleServiceProvider extends ServiceProvider
     protected function registerPolicies(): void
     {
         Gate::policy(Article::class, ArticlePolicy::class);
-    }
-
-    /**
-     * Register model observers.
-     */
-    protected function registerObservers(): void
-    {
-        Article::observe(ArticleObserver::class);
     }
 
     /**

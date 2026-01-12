@@ -2,14 +2,14 @@
 
 namespace Modules\Article\Listeners;
 
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Modules\Article\Events\ArticleDeletedEvent;
 use Modules\Recommend\Services\GorseService;
 
 class ArticleDeletedListener implements ShouldQueue
 {
-    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The number of times the job may be attempted.
@@ -24,13 +24,6 @@ class ArticleDeletedListener implements ShouldQueue
      * @var int
      */
     public $timeout = 60;
-
-    /**
-     * Create the event listener.
-     */
-    public function __construct()
-    {
-    }
 
     /**
      * Handle the event.

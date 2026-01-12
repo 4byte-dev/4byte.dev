@@ -3,6 +3,7 @@
 namespace Modules\Article\Tests\Unit\Actions;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Modules\Article\Actions\UpdateArticleAction;
 use Modules\Article\Enums\ArticleStatus;
@@ -39,6 +40,8 @@ class UpdateArticleActionTest extends TestCase
         $this->assertEquals('New Title', $updatedArticle->title);
         $this->assertEquals('New Excerpt', $updatedArticle->excerpt);
         $this->assertEquals(ArticleStatus::PUBLISHED, $updatedArticle->status);
+
+        $this->assertFalse(Cache::has("article:{$article->id}"));
     }
 
     public function test_it_updates_slug_when_title_changes(): void
