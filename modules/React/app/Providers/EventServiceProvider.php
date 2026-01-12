@@ -5,6 +5,8 @@ namespace Modules\React\Providers;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Modules\React\Events\FollowedEvent;
 use Modules\React\Listeners\FollowedListener;
+use Modules\React\Listeners\SyncDbListener;
+use Modules\React\Listeners\SyncGorseListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -17,6 +19,16 @@ class EventServiceProvider extends ServiceProvider
         FollowedEvent::class => [
             FollowedListener::class,
         ],
+    ];
+
+    /**
+     * The subscriber classes to register.
+     *
+     * @var array
+     */
+    protected $subscribe = [
+        SyncGorseListener::class,
+        SyncDbListener::class,
     ];
 
     /**

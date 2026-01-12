@@ -14,6 +14,7 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        \Illuminate\Support\Facades\Cache::flush();
 
         $this->app->bind(GorseService::class, function () {
             $userMock = Mockery::mock(\Modules\Recommend\Classes\GorseUser::class);

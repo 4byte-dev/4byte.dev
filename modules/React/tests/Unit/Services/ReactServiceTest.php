@@ -16,18 +16,56 @@ class ReactServiceTest extends TestCase
         $this->service = new ReactService();
     }
 
-    public function test_can_insert_and_delete_like(): void
+    public function test_can_persist_and_persist_unlike_like(): void
     {
         $user         = User::factory()->create();
         $likeableId   = $user->id;
         $likeableType = User::class;
 
-        $this->service->insertLike($likeableType, $likeableId, $user->id);
+        $this->service->persistLike($likeableType, $likeableId, $user->id);
+
+        $this->assertDatabaseHas('likes', [
+            'user_id'       => $user->id,
+            'likeable_id'   => $likeableId,
+            'likeable_type' => $likeableType,
+        ]);
+        $this->assertEquals(1, $this->service->getCount($likeableType, $likeableId, 'likes')); 
+        
+        $this->assertDatabaseHas('counts', [
+            'countable_id' => $likeableId,
+            'countable_type' => $likeableType,
+            'filter' => 'likes',
+            'count' => 1
+        ]);
+
+        $this->service->persistUnlike($likeableType, $likeableId, $user->id);
+
+        $this->assertDatabaseMissing('likes', [
+            'user_id'       => $user->id,
+            'likeable_id'   => $likeableId,
+            'likeable_type' => $likeableType,
+        ]);
+        
+        $this->assertDatabaseHas('counts', [
+            'countable_id' => $likeableId,
+            'countable_type' => $likeableType,
+            'filter' => 'likes',
+            'count' => 0
+        ]);
+    }
+
+    public function test_can_cache_and_cache_unlike_like(): void
+    {
+        $user         = User::factory()->create();
+        $likeableId   = $user->id;
+        $likeableType = User::class;
+
+        $this->service->cacheLike($likeableType, $likeableId, $user->id);
 
         $this->assertTrue($this->service->checkLiked($likeableType, $likeableId, $user->id));
         $this->assertEquals(1, $this->service->getLikesCount($likeableType, $likeableId));
 
-        $this->service->deleteLike($likeableType, $likeableId, $user->id);
+        $this->service->cacheUnlike($likeableType, $likeableId, $user->id);
 
         $this->assertFalse($this->service->checkLiked($likeableType, $likeableId, $user->id));
         $this->assertEquals(0, $this->service->getLikesCount($likeableType, $likeableId));

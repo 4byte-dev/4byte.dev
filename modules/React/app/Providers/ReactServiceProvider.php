@@ -12,7 +12,6 @@ use Modules\React\Models\Save;
 use Modules\React\Observers\CommentObserver;
 use Modules\React\Observers\DislikeObserver;
 use Modules\React\Observers\FollowObserver;
-use Modules\React\Observers\LikeObserver;
 use Modules\React\Observers\SaveObserver;
 use Modules\React\Policies\CommentPolicy;
 use Modules\React\Policies\DislikePolicy;
@@ -96,7 +95,6 @@ class ReactServiceProvider extends ServiceProvider
      */
     protected function registerObservers(): void
     {
-        Like::observe(LikeObserver::class);
         Dislike::observe(DislikeObserver::class);
         Save::observe(SaveObserver::class);
         Comment::observe(CommentObserver::class);

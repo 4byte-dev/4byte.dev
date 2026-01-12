@@ -53,37 +53,41 @@ class ReactService
         return self::$callbacks[$name] ?? null;
     }
 
-    /**
-     * Inserts a like for the given user on the specified model.
-     */
-    public function insertLike(string $likeableType, int $likeableId, int $userId): void
+    public function persistLike(string $likeableType, int $likeableId, int $userId): void
     {
-        Like::create([
+        Like::firstOrCreate([
             'user_id'       => $userId,
             'likeable_id'   => $likeableId,
             'likeable_type' => $likeableType,
         ]);
 
-        $this->incrementCount($likeableType, $likeableId, 'likes');
+        $this->incrementCountDb($likeableType, $likeableId, 'likes');
+    }
+
+    public function cacheLike(string $likeableType, int $likeableId, int $userId): void
+    {
+        $this->incrementCountCache($likeableType, $likeableId, 'likes');
         Cache::forever($this->cacheKey($likeableType, $likeableId, $userId, 'liked'), true);
     }
 
-    /**
-     * Deletes a like from the given user on the specified model.
-     */
-    public function deleteLike(string $likeableType, int $likeableId, int $userId): bool
+    public function persistUnlike(string $likeableType, int $likeableId, int $userId): bool
     {
         $deleted = Like::where('user_id', $userId)
             ->where('likeable_id', $likeableId)
             ->where('likeable_type', $likeableType)
             ->delete();
-
+        
         if ($deleted) {
-            $this->decrementCount($likeableType, $likeableId, 'likes');
-            Cache::forget($this->cacheKey($likeableType, $likeableId, $userId, 'liked'));
+            $this->decrementCountDb($likeableType, $likeableId, 'likes');
         }
 
         return (bool) $deleted;
+    }
+
+    public function cacheUnlike(string $likeableType, int $likeableId, int $userId): void
+    {
+        $this->decrementCountCache($likeableType, $likeableId, 'likes');
+        Cache::forget($this->cacheKey($likeableType, $likeableId, $userId, 'liked'));
     }
 
     /**
@@ -110,23 +114,49 @@ class ReactService
 
     /**
      * Inserts a dislike for the given user on the specified model.
+     * @deprecated Use persistDislike and cacheDislike
      */
     public function insertDislike(string $dislikeableType, int $dislikeableId, int $userId): void
     {
-        Dislike::create([
+        $this->persistDislike($dislikeableType, $dislikeableId, $userId);
+        Cache::forget("react:counts:{$this->cacheKey($dislikeableType, $dislikeableId, 'dislikes')}");
+        Cache::forever($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'), true);
+    }
+
+    public function persistDislike(string $dislikeableType, int $dislikeableId, int $userId): void
+    {
+        Dislike::firstOrCreate([
             'user_id'          => $userId,
             'dislikeable_id'   => $dislikeableId,
             'dislikeable_type' => $dislikeableType,
         ]);
 
-        $this->incrementCount($dislikeableType, $dislikeableId, 'dislikes');
+        $this->incrementCountDb($dislikeableType, $dislikeableId, 'dislikes');
+    }
+
+    public function cacheDislike(string $dislikeableType, int $dislikeableId, int $userId): void
+    {
+        $this->incrementCountCache($dislikeableType, $dislikeableId, 'dislikes');
         Cache::forever($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'), true);
     }
 
     /**
      * Deletes a dislike from the given user on the specified model.
+     * @deprecated Use persistDeleteDislike and cacheDeleteDislike
      */
     public function deleteDislike(string $dislikeableType, int $dislikeableId, int $userId): bool
+    {
+        $deleted = $this->persistDeleteDislike($dislikeableType, $dislikeableId, $userId);
+
+        if ($deleted) {
+             Cache::forget("react:counts:{$this->cacheKey($dislikeableType, $dislikeableId, 'dislikes')}");
+             Cache::forget($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'));
+        }
+
+        return $deleted;
+    }
+
+    public function persistDeleteDislike(string $dislikeableType, int $dislikeableId, int $userId): bool
     {
         $deleted = Dislike::where('user_id', $userId)
             ->where('dislikeable_id', $dislikeableId)
@@ -134,11 +164,16 @@ class ReactService
             ->delete();
 
         if ($deleted) {
-            $this->decrementCount($dislikeableType, $dislikeableId, 'dislikes');
-            Cache::forget($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'));
+            $this->decrementCountDb($dislikeableType, $dislikeableId, 'dislikes');
         }
 
         return (bool) $deleted;
+    }
+
+    public function cacheDeleteDislike(string $dislikeableType, int $dislikeableId, int $userId): void
+    {
+        $this->decrementCountCache($dislikeableType, $dislikeableId, 'dislikes');
+        Cache::forget($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'));
     }
 
     /**
@@ -415,12 +450,16 @@ class ReactService
     }
 
     /**
-     * Increment the count for a specific filter.
+     * Increment the count for a specific filter (DB + Cache).
      */
     public function incrementCount(string $countableType, int $countableId, string $filter, int $amount = 1): void
     {
-        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
+        $this->incrementCountDb($countableType, $countableId, $filter, $amount);
+        $this->incrementCountCache($countableType, $countableId, $filter, $amount);
+    }
 
+    public function incrementCountDb(string $countableType, int $countableId, string $filter, int $amount = 1): void
+    {
         Count::firstOrCreate([
             'countable_type' => $countableType,
             'countable_id'   => $countableId,
@@ -431,10 +470,13 @@ class ReactService
             ->where('countable_id', $countableId)
             ->where('filter', $filter)
             ->increment('count', $amount);
+    }
 
-        if (Cache::has($cacheKey)) {
-            Cache::increment($cacheKey, $amount);
-        } else {
+    public function incrementCountCache(string $countableType, int $countableId, string $filter, int $amount = 1): void
+    {
+        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
+
+        if (! Cache::has($cacheKey)) {
             Cache::rememberForever($cacheKey, function () use ($countableType, $countableId, $filter) {
                 return Count::where([
                     'countable_type' => $countableType,
@@ -443,15 +485,21 @@ class ReactService
                 ])->value('count') ?? 0;
             });
         }
+        
+        Cache::increment($cacheKey, $amount);
     }
 
     /**
-     * Decrement the count for a specific filter.
+     * Decrement the count for a specific filter (DB + Cache).
      */
     public function decrementCount(string $countableType, int $countableId, string $filter, int $amount = 1): void
     {
-        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
+        $this->decrementCountDb($countableType, $countableId, $filter, $amount);
+        $this->decrementCountCache($countableType, $countableId, $filter, $amount);
+    }
 
+    public function decrementCountDb(string $countableType, int $countableId, string $filter, int $amount = 1): void
+    {
         Count::firstOrCreate([
             'countable_type' => $countableType,
             'countable_id'   => $countableId,
@@ -462,10 +510,13 @@ class ReactService
             ->where('countable_id', $countableId)
             ->where('filter', $filter)
             ->update(['count' => DB::raw("GREATEST(count - {$amount}, 0)")]);
+    }
 
-        if (Cache::has($cacheKey)) {
-            Cache::decrement($cacheKey, $amount);
-        } else {
+    public function decrementCountCache(string $countableType, int $countableId, string $filter, int $amount = 1): void
+    {
+        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
+
+        if (! Cache::has($cacheKey)) {
             Cache::rememberForever($cacheKey, function () use ($countableType, $countableId, $filter) {
                 return Count::where([
                     'countable_type' => $countableType,
@@ -474,6 +525,8 @@ class ReactService
                 ])->value('count') ?? 0;
             });
         }
+        
+        Cache::decrement($cacheKey, $amount);
     }
 
     /**
