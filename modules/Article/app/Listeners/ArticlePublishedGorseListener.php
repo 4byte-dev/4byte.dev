@@ -3,8 +3,8 @@
 namespace Modules\Article\Listeners;
 
 use Carbon\Carbon;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Recommend\Classes\GorseItem;
@@ -12,7 +12,7 @@ use Modules\Recommend\Services\GorseService;
 
 class ArticlePublishedGorseListener implements ShouldQueue
 {
-    use InteractsWithQueue;
+    use Queueable;
 
     /**
      * The number of times the job may be attempted.
@@ -27,13 +27,6 @@ class ArticlePublishedGorseListener implements ShouldQueue
      * @var int
      */
     public $timeout = 60;
-
-    /**
-     * Create the event listener.
-     */
-    public function __construct()
-    {
-    }
 
     /**
      * Handle the event.

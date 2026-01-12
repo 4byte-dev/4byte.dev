@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Modules\React\Database\Factories\CommentFactory;
 use Modules\React\Services\ReactService;
+use Modules\React\Traits\HasCounts;
 use Modules\React\Traits\HasLikes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -54,6 +55,7 @@ class Comment extends Model
     /** @use HasFactory<\Modules\React\Database\Factories\CommentFactory> */
     use HasFactory;
 
+    use HasCounts;
     use HasLikes;
     use LogsActivity;
 

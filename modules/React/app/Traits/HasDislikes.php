@@ -3,6 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Modules\React\Actions\DislikeAction;
+use Modules\React\Actions\UndislikeAction;
 use Modules\React\Models\Dislike;
 use Modules\React\Services\ReactService;
 
@@ -34,7 +36,7 @@ trait HasDislikes
     public function dislike(int $userId): void
     {
         if (! $this->isDislikedBy($userId)) {
-            app(ReactService::class)->insertDislike($this->getMorphClass(), $this->getKey(), $userId);
+            app(DislikeAction::class)->execute($this->getMorphClass(), $this->getKey(), $userId);
         }
     }
 
@@ -43,7 +45,7 @@ trait HasDislikes
      */
     public function undislike(int $userId): void
     {
-        app(ReactService::class)->deleteDislike($this->getMorphClass(), $this->getKey(), $userId);
+        app(UndislikeAction::class)->execute($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**

@@ -3,6 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Modules\React\Actions\LikeAction;
+use Modules\React\Actions\UnlikeAction;
 use Modules\React\Models\Like;
 use Modules\React\Services\ReactService;
 
@@ -34,7 +36,7 @@ trait HasLikes
     public function like(int $userId): void
     {
         if (! $this->isLikedBy($userId)) {
-            app(ReactService::class)->insertLike($this->getMorphClass(), $this->getKey(), $userId);
+            app(LikeAction::class)->execute($this->getMorphClass(), $this->getKey(), $userId);
         }
     }
 
@@ -43,7 +45,7 @@ trait HasLikes
      */
     public function unlike(int $userId): void
     {
-        app(ReactService::class)->deleteLike($this->getMorphClass(), $this->getKey(), $userId);
+        app(UnlikeAction::class)->execute($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Modules\Article\Actions;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Modules\Article\Enums\ArticleStatus;
 use Modules\Article\Models\Article;
@@ -70,6 +71,12 @@ class UpdateArticleAction
                 $tagIds = Tag::whereIn('slug', $data['tags'])->pluck('id')->toArray();
                 $article->tags()->sync($tagIds);
             }
+
+            if ($article->isDirty('slug')) {
+                Cache::forget("article:{$article->getOriginal('slug')}:id");
+            }
+
+            Cache::forget("article:{$article->id}");
 
             return $article;
         });

@@ -4,9 +4,11 @@ namespace Modules\Article\Tests\Unit\Actions;
 
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Modules\Article\Actions\CreateArticleAction;
 use Modules\Article\Enums\ArticleStatus;
+use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 use Modules\Category\Models\Category;
@@ -20,6 +22,7 @@ class CreateArticleActionTest extends TestCase
     {
         parent::setUp();
         $this->action = new CreateArticleAction();
+        Event::fake();
     }
 
     public function test_it_creates_draft_article(): void
@@ -38,6 +41,8 @@ class CreateArticleActionTest extends TestCase
         $this->assertNull($article->published_at);
         $this->assertNotEmpty($article->slug);
         $this->assertEquals($user->id, $article->user_id);
+
+        Event::assertNotDispatched(ArticlePublishedEvent::class);
     }
 
     public function test_it_creates_published_article_with_full_data(): void
@@ -64,6 +69,8 @@ class CreateArticleActionTest extends TestCase
         $this->assertTrue($article->categories->contains($category));
         $this->assertTrue($article->tags->contains($tag));
         $this->assertEquals([['url' => 'https://example.com', 'date' => now()->toDateString()]], $article->sources);
+
+        Event::assertDispatched(ArticlePublishedEvent::class);
     }
 
     public function test_it_handles_image_upload(): void

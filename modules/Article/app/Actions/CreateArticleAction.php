@@ -6,6 +6,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Article\Enums\ArticleStatus;
+use Modules\Article\Events\ArticlePublishedEvent;
 use Modules\Article\Models\Article;
 use Modules\Article\Support\SlugGenerator;
 use Modules\Category\Models\Category;
@@ -64,6 +65,10 @@ class CreateArticleAction
             if (! empty($data['tags'])) {
                 $tagIds = Tag::whereIn('slug', $data['tags'])->pluck('id')->toArray();
                 $article->tags()->sync($tagIds);
+            }
+
+            if (! $isDraft) {
+                event(new ArticlePublishedEvent($article));
             }
 
             return $article;

@@ -3,8 +3,14 @@
 namespace Modules\React\Tests\Feature\Controllers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
+use Modules\React\Events\UserDislikedEvent;
+use Modules\React\Events\UserLikedEvent;
+use Modules\React\Events\UserUnlikedEvent;
+use Modules\React\Models\Save;
 use Modules\React\Services\ReactService;
 use Modules\User\Models\User;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class ReactControllerTest extends TestCase
@@ -32,8 +38,10 @@ class ReactControllerTest extends TestCase
 
     public function test_can_like_a_resource(): void
     {
+        Event::fake();
+
         $user       = User::factory()->create();
-        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'create_like']);
+        $permission = Permission::firstOrCreate(['name' => 'create_like']);
         $user->givePermissionTo($permission);
 
         $target = User::factory()->create(['username' => 'target-user']);
@@ -43,17 +51,43 @@ class ReactControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $this->assertTrue(\Modules\React\Models\Like::where([
-            'user_id'       => $user->id,
-            'likeable_id'   => $target->id,
-            'likeable_type' => User::class,
-        ])->exists());
+        Event::assertDispatched(UserLikedEvent::class, function ($event) use ($user, $target) {
+            return $event->userId === $user->id
+                && $event->likeableId === $target->id
+                && $event->likeableType === User::class;
+        });
+    }
+
+    public function test_can_unlike_a_resource(): void
+    {
+        Event::fake();
+
+        $user       = User::factory()->create();
+        $permission = Permission::firstOrCreate(['name' => 'create_like']);
+        $user->givePermissionTo($permission);
+
+        $target = User::factory()->create(['username' => 'target-user']);
+
+        app(ReactService::class)->cacheLike(User::class, $target->id, $user->id);
+
+        $response = $this->actingAs($user)
+            ->postJson(route('api.react.like', ['type' => 'user', 'slug' => 'target-user']));
+
+        $response->assertStatus(200);
+
+        Event::assertDispatched(UserUnlikedEvent::class, function ($event) use ($user, $target) {
+            return $event->userId === $user->id
+                && $event->likeableId === $target->id
+                && $event->likeableType === User::class;
+        });
     }
 
     public function test_can_dislike_a_resource(): void
     {
+        Event::fake();
+
         $user       = User::factory()->create();
-        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'create_dislike']);
+        $permission = Permission::firstOrCreate(['name' => 'create_dislike']);
         $user->givePermissionTo($permission);
 
         $target = User::factory()->create(['username' => 'target-user']);
@@ -62,17 +96,18 @@ class ReactControllerTest extends TestCase
             ->postJson(route('api.react.dislike', ['type' => 'user', 'slug' => 'target-user']));
 
         $response->assertStatus(200);
-        $this->assertTrue(\Modules\React\Models\Dislike::where([
-            'user_id'          => $user->id,
-            'dislikeable_id'   => $target->id,
-            'dislikeable_type' => User::class,
-        ])->exists());
+
+        Event::assertDispatched(UserDislikedEvent::class, function ($event) use ($user, $target) {
+            return $event->userId === $user->id
+                && $event->dislikeableId === $target->id
+                && $event->dislikeableType === User::class;
+        });
     }
 
     public function test_can_save_a_resource(): void
     {
         $user       = User::factory()->create();
-        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'create_save']);
+        $permission = Permission::firstOrCreate(['name' => 'create_save']);
         $user->givePermissionTo($permission);
 
         $target = User::factory()->create(['username' => 'target-user']);
@@ -81,7 +116,7 @@ class ReactControllerTest extends TestCase
             ->postJson(route('api.react.save', ['type' => 'user', 'slug' => 'target-user']));
 
         $response->assertStatus(200);
-        $this->assertTrue(\Modules\React\Models\Save::where([
+        $this->assertTrue(Save::where([
             'user_id'       => $user->id,
             'saveable_id'   => $target->id,
             'saveable_type' => User::class,
@@ -91,7 +126,7 @@ class ReactControllerTest extends TestCase
     public function test_can_follow_a_resource(): void
     {
         $user       = User::factory()->create();
-        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'create_follow']);
+        $permission = Permission::firstOrCreate(['name' => 'create_follow']);
         $user->givePermissionTo($permission);
 
         $target = User::factory()->create(['username' => 'target-user']);
@@ -106,7 +141,7 @@ class ReactControllerTest extends TestCase
     public function test_can_comment_on_a_resource(): void
     {
         $user       = User::factory()->create();
-        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'create_comment']);
+        $permission = Permission::firstOrCreate(['name' => 'create_comment']);
         $user->givePermissionTo($permission);
 
         User::factory()->create(['username' => 'target-user']);
