@@ -58,8 +58,6 @@ class ReactControllerTest extends TestCase
         });
     }
 
-
-
     public function test_can_unlike_a_resource(): void
     {
         Event::fake();

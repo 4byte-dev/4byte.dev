@@ -3,8 +3,8 @@
 namespace Modules\React\Listeners;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Queue\InteractsWithQueue;
 use Modules\React\Events\UserLikedEvent;
 use Modules\React\Events\UserUnlikedEvent;
 use Modules\React\Services\ReactService;
@@ -46,7 +46,7 @@ class SyncDbListener implements ShouldQueue
     /**
      * Register the listeners for the subscriber.
      *
-     * @param  \Illuminate\Events\Dispatcher  $events
+     * @param Dispatcher $events
      */
     public function subscribe(Dispatcher $events): void
     {

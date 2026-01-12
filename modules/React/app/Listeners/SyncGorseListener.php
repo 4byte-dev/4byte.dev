@@ -3,12 +3,12 @@
 namespace Modules\React\Listeners;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Queue\InteractsWithQueue;
 use Modules\React\Events\UserLikedEvent;
 use Modules\React\Events\UserUnlikedEvent;
-use Modules\Recommend\Services\GorseService; // Assuming this is the correct namespace based on file view
-use Modules\Recommend\Classes\GorseFeedback;
+use Modules\Recommend\Classes\GorseFeedback; // Assuming this is the correct namespace based on file view
+use Modules\Recommend\Services\GorseService;
 
 class SyncGorseListener implements ShouldQueue
 {
@@ -19,9 +19,9 @@ class SyncGorseListener implements ShouldQueue
      */
     public function handleUserLiked(UserLikedEvent $event, GorseService $gorse): void
     {
-        $type = strtolower(class_basename($event->likeableType));
+        $type   = strtolower(class_basename($event->likeableType));
         $itemId = "{$type}:{$event->likeableId}";
-        
+
         $userId = (string) $event->userId;
 
         $feedback = new GorseFeedback(
@@ -40,7 +40,7 @@ class SyncGorseListener implements ShouldQueue
      */
     public function handleUserUnliked(UserUnlikedEvent $event, GorseService $gorse): void
     {
-        $type = strtolower(class_basename($event->likeableType));
+        $type   = strtolower(class_basename($event->likeableType));
         $itemId = "{$type}:{$event->likeableId}";
         $userId = (string) $event->userId;
 
@@ -50,7 +50,7 @@ class SyncGorseListener implements ShouldQueue
     /**
      * Register the listeners for the subscriber.
      *
-     * @param  \Illuminate\Events\Dispatcher  $events
+     * @param Dispatcher $events
      */
     public function subscribe(Dispatcher $events): void
     {

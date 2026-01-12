@@ -7,9 +7,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
-use Modules\React\Http\Requests\ReactRequest;
 use Modules\React\Actions\LikeAction;
 use Modules\React\Actions\UnlikeAction;
+use Modules\React\Http\Requests\ReactRequest;
 use Modules\React\Services\ReactService;
 
 class ReactController extends Controller

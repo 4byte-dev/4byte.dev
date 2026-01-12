@@ -29,13 +29,13 @@ class ReactServiceTest extends TestCase
             'likeable_id'   => $likeableId,
             'likeable_type' => $likeableType,
         ]);
-        $this->assertEquals(1, $this->service->getCount($likeableType, $likeableId, 'likes')); 
-        
+        $this->assertEquals(1, $this->service->getCount($likeableType, $likeableId, 'likes'));
+
         $this->assertDatabaseHas('counts', [
-            'countable_id' => $likeableId,
+            'countable_id'   => $likeableId,
             'countable_type' => $likeableType,
-            'filter' => 'likes',
-            'count' => 1
+            'filter'         => 'likes',
+            'count'          => 1,
         ]);
 
         $this->service->persistUnlike($likeableType, $likeableId, $user->id);
@@ -45,12 +45,12 @@ class ReactServiceTest extends TestCase
             'likeable_id'   => $likeableId,
             'likeable_type' => $likeableType,
         ]);
-        
+
         $this->assertDatabaseHas('counts', [
-            'countable_id' => $likeableId,
+            'countable_id'   => $likeableId,
             'countable_type' => $likeableType,
-            'filter' => 'likes',
-            'count' => 0
+            'filter'         => 'likes',
+            'count'          => 0,
         ]);
     }
 

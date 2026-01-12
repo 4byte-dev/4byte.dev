@@ -2,12 +2,12 @@
 
 namespace Modules\React\Tests\Unit\Actions;
 
+use Illuminate\Support\Facades\Event;
+use Mockery;
 use Modules\React\Actions\LikeAction;
+use Modules\React\Events\UserLikedEvent;
 use Modules\React\Services\ReactService;
 use Tests\TestCase;
-use Mockery;
-use Illuminate\Support\Facades\Event;
-use Modules\React\Events\UserLikedEvent;
 
 class LikeActionTest extends TestCase
 {
@@ -16,10 +16,10 @@ class LikeActionTest extends TestCase
         Event::fake();
 
         $reactService = Mockery::mock(ReactService::class);
-        $action = new LikeAction($reactService);
+        $action       = new LikeAction($reactService);
 
-        $type = 'post';
-        $id = 1;
+        $type   = 'post';
+        $id     = 1;
         $userId = 1;
 
         $reactService->shouldReceive('checkDisliked')
@@ -37,8 +37,8 @@ class LikeActionTest extends TestCase
         $action->execute($type, $id, $userId);
 
         Event::assertDispatched(UserLikedEvent::class, function ($event) use ($type, $id, $userId) {
-            return $event->userId === $userId 
-                && $event->likeableId === $id 
+            return $event->userId === $userId
+                && $event->likeableId === $id
                 && $event->likeableType === $type;
         });
     }
@@ -48,10 +48,10 @@ class LikeActionTest extends TestCase
         Event::fake();
 
         $reactService = Mockery::mock(ReactService::class);
-        $action = new LikeAction($reactService);
+        $action       = new LikeAction($reactService);
 
-        $type = 'post';
-        $id = 1;
+        $type   = 'post';
+        $id     = 1;
         $userId = 1;
 
         $reactService->shouldReceive('checkDisliked')
@@ -64,7 +64,7 @@ class LikeActionTest extends TestCase
             ->with($type, $id, $userId);
 
         $action->execute($type, $id, $userId);
-        
+
         Event::assertDispatched(UserLikedEvent::class);
     }
 }

@@ -76,7 +76,7 @@ class ReactService
             ->where('likeable_id', $likeableId)
             ->where('likeable_type', $likeableType)
             ->delete();
-        
+
         if ($deleted) {
             $this->decrementCountDb($likeableType, $likeableId, 'likes');
         }
@@ -114,6 +114,7 @@ class ReactService
 
     /**
      * Inserts a dislike for the given user on the specified model.
+     *
      * @deprecated Use persistDislike and cacheDislike
      */
     public function insertDislike(string $dislikeableType, int $dislikeableId, int $userId): void
@@ -142,6 +143,7 @@ class ReactService
 
     /**
      * Deletes a dislike from the given user on the specified model.
+     *
      * @deprecated Use persistDeleteDislike and cacheDeleteDislike
      */
     public function deleteDislike(string $dislikeableType, int $dislikeableId, int $userId): bool
@@ -485,7 +487,7 @@ class ReactService
                 ])->value('count') ?? 0;
             });
         }
-        
+
         Cache::increment($cacheKey, $amount);
     }
 
@@ -525,7 +527,7 @@ class ReactService
                 ])->value('count') ?? 0;
             });
         }
-        
+
         Cache::decrement($cacheKey, $amount);
     }
 
