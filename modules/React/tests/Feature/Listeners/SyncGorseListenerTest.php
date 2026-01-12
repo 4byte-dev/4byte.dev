@@ -3,7 +3,9 @@
 namespace Modules\React\Tests\Feature\Listeners;
 
 use Mockery;
+use Modules\React\Events\UserDislikedEvent;
 use Modules\React\Events\UserLikedEvent;
+use Modules\React\Events\UserUndislikedEvent;
 use Modules\React\Events\UserUnlikedEvent;
 use Modules\React\Listeners\SyncGorseListener;
 use Modules\Recommend\Classes\GorseFeedback;
@@ -41,5 +43,36 @@ class SyncGorseListenerTest extends TestCase
         $event    = new UserUnlikedEvent(1, 'App\Models\Article', 100);
 
         $listener->handleUserUnliked($event, $gorseService);
+    }
+
+    public function test_it_handles_user_disliked_event_and_inserts_feedback()
+    {
+        $gorseService = Mockery::mock(GorseService::class);
+        $gorseService->shouldReceive('insertFeedback')
+            ->once()
+            ->with(Mockery::on(function ($feedback) {
+                return $feedback instanceof GorseFeedback
+                    && $feedback->getFeedbackType() === 'dislike'
+                    && $feedback->getUserId() === '1'
+                    && $feedback->getItemId() === 'article:100';
+            }));
+
+        $listener = new SyncGorseListener();
+        $event    = new UserDislikedEvent(1, 'App\Models\Article', 100);
+
+        $listener->handleUserDisliked($event, $gorseService);
+    }
+
+    public function test_it_handles_user_undisliked_event_and_deletes_feedback()
+    {
+        $gorseService = Mockery::mock(GorseService::class);
+        $gorseService->shouldReceive('deleteFeedback')
+            ->once()
+            ->with('dislike', '1', 'article:100');
+
+        $listener = new SyncGorseListener();
+        $event    = new UserUndislikedEvent(1, 'App\Models\Article', 100);
+
+        $listener->handleUserUndisliked($event, $gorseService);
     }
 }

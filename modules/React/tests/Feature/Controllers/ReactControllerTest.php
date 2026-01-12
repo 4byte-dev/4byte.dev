@@ -4,9 +4,9 @@ namespace Modules\React\Tests\Feature\Controllers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Modules\React\Events\UserDislikedEvent;
 use Modules\React\Events\UserLikedEvent;
 use Modules\React\Events\UserUnlikedEvent;
-use Modules\React\Models\Dislike;
 use Modules\React\Models\Save;
 use Modules\React\Services\ReactService;
 use Modules\User\Models\User;
@@ -84,6 +84,8 @@ class ReactControllerTest extends TestCase
 
     public function test_can_dislike_a_resource(): void
     {
+        Event::fake();
+
         $user       = User::factory()->create();
         $permission = Permission::firstOrCreate(['name' => 'create_dislike']);
         $user->givePermissionTo($permission);
@@ -94,11 +96,12 @@ class ReactControllerTest extends TestCase
             ->postJson(route('api.react.dislike', ['type' => 'user', 'slug' => 'target-user']));
 
         $response->assertStatus(200);
-        $this->assertTrue(Dislike::where([
-            'user_id'          => $user->id,
-            'dislikeable_id'   => $target->id,
-            'dislikeable_type' => User::class,
-        ])->exists());
+
+        Event::assertDispatched(UserDislikedEvent::class, function ($event) use ($user, $target) {
+            return $event->userId === $user->id
+                && $event->dislikeableId === $target->id
+                && $event->dislikeableType === User::class;
+        });
     }
 
     public function test_can_save_a_resource(): void

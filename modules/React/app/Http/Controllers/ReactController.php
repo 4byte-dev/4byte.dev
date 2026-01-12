@@ -7,7 +7,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
+use Modules\React\Actions\DislikeAction;
 use Modules\React\Actions\LikeAction;
+use Modules\React\Actions\UndislikeAction;
 use Modules\React\Actions\UnlikeAction;
 use Modules\React\Http\Requests\ReactRequest;
 use Modules\React\Services\ReactService;
@@ -17,7 +19,9 @@ class ReactController extends Controller
     public function __construct(
         protected ReactService $reactService,
         protected LikeAction $likeAction,
-        protected UnlikeAction $unlikeAction
+        protected UnlikeAction $unlikeAction,
+        protected DislikeAction $dislikeAction,
+        protected UndislikeAction $undislikeAction
     ) {
     }
 
@@ -75,12 +79,9 @@ class ReactController extends Controller
             decaySeconds: 60 * 60 * 24,
             callback: function () use ($baseClass, $itemId, $userId) {
                 if ($this->reactService->checkDisliked($baseClass, $itemId, $userId)) {
-                    $this->reactService->deleteDislike($baseClass, $itemId, $userId);
+                    $this->undislikeAction->execute($baseClass, $itemId, $userId);
                 } else {
-                    if ($this->reactService->checkLiked($baseClass, $itemId, $userId)) {
-                        $this->unlikeAction->execute($baseClass, $itemId, $userId);
-                    }
-                    $this->reactService->insertDislike($baseClass, $itemId, $userId);
+                    $this->dislikeAction->execute($baseClass, $itemId, $userId);
                 }
             }
         );

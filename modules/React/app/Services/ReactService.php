@@ -112,18 +112,6 @@ class ReactService
         });
     }
 
-    /**
-     * Inserts a dislike for the given user on the specified model.
-     *
-     * @deprecated Use persistDislike and cacheDislike
-     */
-    public function insertDislike(string $dislikeableType, int $dislikeableId, int $userId): void
-    {
-        $this->persistDislike($dislikeableType, $dislikeableId, $userId);
-        Cache::forget("react:counts:{$this->cacheKey($dislikeableType, $dislikeableId, 'dislikes')}");
-        Cache::forever($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'), true);
-    }
-
     public function persistDislike(string $dislikeableType, int $dislikeableId, int $userId): void
     {
         Dislike::firstOrCreate([
@@ -139,23 +127,6 @@ class ReactService
     {
         $this->incrementCountCache($dislikeableType, $dislikeableId, 'dislikes');
         Cache::forever($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'), true);
-    }
-
-    /**
-     * Deletes a dislike from the given user on the specified model.
-     *
-     * @deprecated Use persistDeleteDislike and cacheDeleteDislike
-     */
-    public function deleteDislike(string $dislikeableType, int $dislikeableId, int $userId): bool
-    {
-        $deleted = $this->persistDeleteDislike($dislikeableType, $dislikeableId, $userId);
-
-        if ($deleted) {
-             Cache::forget("react:counts:{$this->cacheKey($dislikeableType, $dislikeableId, 'dislikes')}");
-             Cache::forget($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'));
-        }
-
-        return $deleted;
     }
 
     public function persistDeleteDislike(string $dislikeableType, int $dislikeableId, int $userId): bool
