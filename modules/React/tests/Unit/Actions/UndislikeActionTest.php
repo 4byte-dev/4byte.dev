@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class UndislikeActionTest extends TestCase
 {
-    public function test_it_removes_dislike_from_cache()
+    public function test_it_removes_dislike_from_cache(): void
     {
         Event::fake();
 

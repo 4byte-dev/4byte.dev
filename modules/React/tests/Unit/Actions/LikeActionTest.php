@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class LikeActionTest extends TestCase
 {
-    public function test_it_removes_existing_dislike_from_cache_before_liking()
+    public function test_it_removes_existing_dislike_from_cache_before_liking(): void
     {
         Event::fake();
 
@@ -43,7 +43,7 @@ class LikeActionTest extends TestCase
         });
     }
 
-    public function test_it_does_not_remove_dislike_if_not_present()
+    public function test_it_does_not_remove_dislike_if_not_present(): void
     {
         Event::fake();
 

@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class SyncGorseListenerTest extends TestCase
 {
-    public function test_it_handles_user_liked_event_and_inserts_feedback()
+    public function test_it_handles_user_liked_event_and_inserts_feedback(): void
     {
         $gorseService = Mockery::mock(GorseService::class);
         $gorseService->shouldReceive('insertFeedback')
@@ -32,7 +32,7 @@ class SyncGorseListenerTest extends TestCase
         $listener->handleUserLiked($event, $gorseService);
     }
 
-    public function test_it_handles_user_unliked_event_and_deletes_feedback()
+    public function test_it_handles_user_unliked_event_and_deletes_feedback(): void
     {
         $gorseService = Mockery::mock(GorseService::class);
         $gorseService->shouldReceive('deleteFeedback')
@@ -45,7 +45,7 @@ class SyncGorseListenerTest extends TestCase
         $listener->handleUserUnliked($event, $gorseService);
     }
 
-    public function test_it_handles_user_disliked_event_and_inserts_feedback()
+    public function test_it_handles_user_disliked_event_and_inserts_feedback(): void
     {
         $gorseService = Mockery::mock(GorseService::class);
         $gorseService->shouldReceive('insertFeedback')
@@ -63,7 +63,7 @@ class SyncGorseListenerTest extends TestCase
         $listener->handleUserDisliked($event, $gorseService);
     }
 
-    public function test_it_handles_user_undisliked_event_and_deletes_feedback()
+    public function test_it_handles_user_undisliked_event_and_deletes_feedback(): void
     {
         $gorseService = Mockery::mock(GorseService::class);
         $gorseService->shouldReceive('deleteFeedback')

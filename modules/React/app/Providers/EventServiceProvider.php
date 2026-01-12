@@ -24,7 +24,7 @@ class EventServiceProvider extends ServiceProvider
     /**
      * The subscriber classes to register.
      *
-     * @var array
+     * @var array<string>
      */
     protected $subscribe = [
         SyncGorseListener::class,

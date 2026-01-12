@@ -19,7 +19,7 @@ class SyncDbListenerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_handles_user_liked_event_and_persists_like()
+    public function test_it_handles_user_liked_event_and_persists_like(): void
     {
         $user    = User::factory()->create();
         $article = Article::factory()->create();
@@ -65,7 +65,7 @@ class SyncDbListenerTest extends TestCase
         ]);
     }
 
-    public function test_it_handles_user_unliked_event_and_removes_like()
+    public function test_it_handles_user_unliked_event_and_removes_like(): void
     {
         $user    = User::factory()->create();
         $article = Article::factory()->create();
@@ -99,7 +99,7 @@ class SyncDbListenerTest extends TestCase
         ]);
     }
 
-    public function test_it_handles_user_disliked_event_and_persists_dislike()
+    public function test_it_handles_user_disliked_event_and_persists_dislike(): void
     {
         $user    = User::factory()->create();
         $article = Article::factory()->create();
@@ -145,7 +145,7 @@ class SyncDbListenerTest extends TestCase
         ]);
     }
 
-    public function test_it_handles_user_undisliked_event_and_removes_dislike()
+    public function test_it_handles_user_undisliked_event_and_removes_dislike(): void
     {
         $user    = User::factory()->create();
         $article = Article::factory()->create();

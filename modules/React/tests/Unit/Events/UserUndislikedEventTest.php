@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class UserUndislikedEventTest extends TestCase
 {
-    public function test_it_has_correct_properties()
+    public function test_it_has_correct_properties(): void
     {
         $userId          = 1;
         $dislikeableType = 'post';
