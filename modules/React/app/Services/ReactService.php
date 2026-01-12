@@ -457,7 +457,12 @@ class ReactService
     public function incrementCount(string $countableType, int $countableId, string $filter, int $amount = 1): void
     {
         $this->incrementCountDb($countableType, $countableId, $filter, $amount);
-        $this->incrementCountCache($countableType, $countableId, $filter, $amount);
+
+        if (Cache::has("react:counts:{$this->cacheKey($countableType, $countableId, $filter)}")) {
+            $this->incrementCountCache($countableType, $countableId, $filter, $amount);
+        } else {
+            $this->getCount($countableType, $countableId, $filter);
+        }
     }
 
     public function incrementCountDb(string $countableType, int $countableId, string $filter, int $amount = 1): void
@@ -497,7 +502,12 @@ class ReactService
     public function decrementCount(string $countableType, int $countableId, string $filter, int $amount = 1): void
     {
         $this->decrementCountDb($countableType, $countableId, $filter, $amount);
-        $this->decrementCountCache($countableType, $countableId, $filter, $amount);
+
+        if (Cache::has("react:counts:{$this->cacheKey($countableType, $countableId, $filter)}")) {
+            $this->decrementCountCache($countableType, $countableId, $filter, $amount);
+        } else {
+            $this->getCount($countableType, $countableId, $filter);
+        }
     }
 
     public function decrementCountDb(string $countableType, int $countableId, string $filter, int $amount = 1): void
