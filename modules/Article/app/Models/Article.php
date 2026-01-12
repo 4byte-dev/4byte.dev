@@ -12,6 +12,7 @@ use Modules\Article\Database\Factories\ArticleFactory;
 use Modules\Article\Enums\ArticleStatus;
 use Modules\Category\Models\Category;
 use Modules\React\Traits\HasComments;
+use Modules\React\Traits\HasCounts;
 use Modules\React\Traits\HasDislikes;
 use Modules\React\Traits\HasLikes;
 use Modules\React\Traits\HasSaves;
@@ -74,6 +75,7 @@ use Spatie\MediaLibrary\MediaCollections\File;
 class Article extends Model implements HasMedia
 {
     use HasComments;
+    use HasCounts;
     use HasDislikes;
 
     /** @use HasFactory<\Modules\Article\Database\Factories\ArticleFactory> */

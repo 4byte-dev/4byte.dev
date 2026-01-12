@@ -64,7 +64,7 @@ class ReactService
             'likeable_type' => $likeableType,
         ]);
 
-        Cache::increment($this->cacheKey($likeableType, $likeableId, 'likes'));
+        $this->incrementCount($likeableType, $likeableId, 'likes');
         Cache::forever($this->cacheKey($likeableType, $likeableId, $userId, 'liked'), true);
     }
 
@@ -79,7 +79,7 @@ class ReactService
             ->delete();
 
         if ($deleted) {
-            Cache::decrement($this->cacheKey($likeableType, $likeableId, 'likes'));
+            $this->decrementCount($likeableType, $likeableId, 'likes');
             Cache::forget($this->cacheKey($likeableType, $likeableId, $userId, 'liked'));
         }
 
@@ -91,12 +91,7 @@ class ReactService
      */
     public function getLikesCount(string $likeableType, int $likeableId): int
     {
-        return Cache::rememberForever(
-            $this->cacheKey($likeableType, $likeableId, 'likes'),
-            fn () => Like::where('likeable_id', $likeableId)
-                ->where('likeable_type', $likeableType)
-                ->count()
-        );
+        return $this->getCount($likeableType, $likeableId, 'likes');
     }
 
     /**
@@ -124,7 +119,7 @@ class ReactService
             'dislikeable_type' => $dislikeableType,
         ]);
 
-        Cache::increment($this->cacheKey($dislikeableType, $dislikeableId, 'dislikes'));
+        $this->incrementCount($dislikeableType, $dislikeableId, 'dislikes');
         Cache::forever($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'), true);
     }
 
@@ -139,7 +134,7 @@ class ReactService
             ->delete();
 
         if ($deleted) {
-            Cache::decrement($this->cacheKey($dislikeableType, $dislikeableId, 'dislikes'));
+            $this->decrementCount($dislikeableType, $dislikeableId, 'dislikes');
             Cache::forget($this->cacheKey($dislikeableType, $dislikeableId, $userId, 'disliked'));
         }
 
@@ -151,12 +146,7 @@ class ReactService
      */
     public function getDislikesCount(string $dislikeableType, int $dislikeableId): int
     {
-        return Cache::rememberForever(
-            $this->cacheKey($dislikeableType, $dislikeableId, 'dislikes'),
-            fn () => Dislike::where('dislikeable_id', $dislikeableId)
-                ->where('dislikeable_type', $dislikeableType)
-                ->count()
-        );
+        return $this->getCount($dislikeableType, $dislikeableId, 'dislikes');
     }
 
     /**
@@ -228,7 +218,7 @@ class ReactService
                 ->where('commentable_id', $commentableId)
                 ->where('commentable_type', $commentableType)
                 ->existsOrFail();
-            Cache::increment($this->cacheKey($commentableType, $commentableId, 'comment', $parentId, 'replies'));
+            $this->incrementCount(Comment::class, $parentId, 'replies');
             try {
                 $replyPaginationKeys = Redis::keys($this->cacheKey($commentableType, $commentableId, 'comment', $parentId, 'replies', 'pagination') . '*');
 
@@ -240,7 +230,7 @@ class ReactService
             }
         }
 
-        Cache::increment($this->cacheKey($commentableType, $commentableId, 'comments'));
+        $this->incrementCount($commentableType, $commentableId, 'comments');
         Cache::forever($this->cacheKey($commentableType, $commentableId, $userId, 'commented'), true);
 
         try {
@@ -283,12 +273,7 @@ class ReactService
      */
     public function getCommentsCount(string $commentableType, int $commentableId): int
     {
-        return Cache::rememberForever(
-            $this->cacheKey($commentableType, $commentableId, 'comments'),
-            function () use ($commentableType, $commentableId) {
-                return Comment::where('commentable_id', $commentableId)->where('commentable_type', $commentableType)->count();
-            }
-        );
+        return $this->getCount($commentableType, $commentableId, 'comments');
     }
 
     /**
@@ -333,13 +318,7 @@ class ReactService
             return 0;
         }
 
-        return Cache::rememberForever(
-            $this->cacheKey($commentableType, $commentableId, 'comment', $parentId, 'replies'),
-            fn () => Comment::where('commentable_id', $commentableId)
-                ->where('commentable_type', $commentableType)
-                ->where('parent_id', $parentId)
-                ->count()
-        );
+        return $this->getCount(Comment::class, $parentId, 'replies');
     }
 
     /**
