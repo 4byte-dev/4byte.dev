@@ -5,8 +5,10 @@ namespace Modules\Category\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\SeoService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Category\Data\CategoryData;
 use Modules\Category\Services\CategoryService;
 
 class CategoryController extends Controller
@@ -43,5 +45,17 @@ class CategoryController extends Controller
             'news'     => $news,
             'tags'     => $tags,
         ])->withViewData(['seo' => $this->seoService->getCategorySeo($category, $profile)]);
+    }
+
+    /**
+     * Search for categories.
+     *
+     * @return LengthAwarePaginator<int, CategoryData>
+     */
+    public function search(Request $request): LengthAwarePaginator
+    {
+        $term = $request->input('q', '');
+
+        return $this->categoryService->search($term);
     }
 }
