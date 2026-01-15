@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 use Modules\React\Data\CommentData;
+use Modules\React\Mappers\CommentMapper;
 use Modules\React\Models\Comment;
 use Modules\React\Models\Count;
 use Modules\React\Models\Dislike;
@@ -259,7 +260,7 @@ class ReactService
             'commentable_type' => $commentableType,
         ]);
 
-        return CommentData::fromModel($comment);
+        return CommentMapper::toData($comment);
     }
 
     /**
@@ -293,15 +294,15 @@ class ReactService
             return Comment::where('id', $commentId)->first();
         });
 
-        return CommentData::fromModel($comment, false, false, false, true, true, true);
+        return CommentMapper::toData($comment, false, false, false, true, true, true);
     }
 
     /**
      * Returns a paginated collection of top-level comments for the given model.
      *
-     * @return Collection<int, CommentData>
+     * @return array<CommentData>
      */
-    public function getComments(string $commentableType, int $commentableId, int $page, int $perPage): Collection
+    public function getComments(string $commentableType, int $commentableId, int $page, int $perPage): array
     {
         $comments = Cache::rememberForever(
             $this->cacheKey($commentableType, $commentableId, 'comments', 'pagination', (string) $page, (string) $perPage),
@@ -314,7 +315,7 @@ class ReactService
                 ->get()
         );
 
-        return CommentData::collect($comments);
+        return CommentMapper::collection($comments, false, false, false, true, true, true);
     }
 
     /**
@@ -332,9 +333,9 @@ class ReactService
     /**
      * Returns a paginated collection of replies for a specific comment.
      *
-     * @return Collection<int, CommentData>
+     * @return array<CommentData>
      */
-    public function getCommentReplies(string $commentableType, int $commentableId, int $parentId, int $page, int $perPage): Collection
+    public function getCommentReplies(string $commentableType, int $commentableId, int $parentId, int $page, int $perPage): array
     {
         $comments = Cache::rememberForever(
             $this->cacheKey($commentableType, $commentableId, 'comment', $parentId, 'replies', 'pagination', $page, $perPage),
@@ -347,7 +348,7 @@ class ReactService
                 ->get()
         );
 
-        return CommentData::collect($comments);
+        return CommentMapper::collection($comments);
     }
 
     /**
