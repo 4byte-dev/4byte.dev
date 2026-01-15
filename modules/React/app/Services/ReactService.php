@@ -353,23 +353,29 @@ class ReactService
     /**
      * Inserts a follow relationship for the given user.
      */
-    public function insertFollow(string $followableType, int $followableId, int $followerId): void
+    public function persistFollow(string $followableType, int $followableId, int $followerId): void
     {
-        Follow::create([
+        Follow::firstOrCreate([
             'follower_id'     => $followerId,
             'followable_id'   => $followableId,
             'followable_type' => $followableType,
         ]);
 
-        Cache::increment($this->cacheKey($followableType, $followableId, 'followers'));
-        Cache::increment($this->cacheKey(User::class, $followerId, 'followings'));
+        $this->incrementCountDb($followableType, $followableId, 'followers');
+        $this->incrementCountDb(User::class, $followerId, 'followings');
+    }
+
+    public function cacheFollow(string $followableType, int $followableId, int $followerId): void
+    {
+        $this->incrementCountCache($followableType, $followableId, 'followers');
+        $this->incrementCountCache(User::class, $followerId, 'followings');
         Cache::forever($this->cacheKey($followableType, $followableId, $followerId, 'followed'), true);
     }
 
     /**
      * Deletes a follow relationship for the given user.
      */
-    public function deleteFollow(string $followableType, int $followableId, int $followerId): bool
+    public function persistDeleteFollow(string $followableType, int $followableId, int $followerId): bool
     {
         $deleted = Follow::where('follower_id', $followerId)
             ->where('followable_id', $followableId)
@@ -377,12 +383,18 @@ class ReactService
             ->delete();
 
         if ($deleted) {
-            Cache::decrement($this->cacheKey($followableType, $followableId, 'followers'));
-            Cache::decrement($this->cacheKey(User::class, $followerId, 'followings'));
-            Cache::forget($this->cacheKey($followableType, $followableId, $followerId, 'followed'));
+            $this->decrementCountDb($followableType, $followableId, 'followers');
+            $this->decrementCountDb(User::class, $followerId, 'followings');
         }
 
         return (bool) $deleted;
+    }
+
+    public function cacheDeleteFollow(string $followableType, int $followableId, int $followerId): void
+    {
+        $this->decrementCountCache($followableType, $followableId, 'followers');
+        $this->decrementCountCache(User::class, $followerId, 'followings');
+        Cache::forget($this->cacheKey($followableType, $followableId, $followerId, 'followed'));
     }
 
     /**
@@ -390,11 +402,7 @@ class ReactService
      */
     public function getFollowersCount(string $followableType, int $followableId): int
     {
-        return Cache::rememberForever($this->cacheKey($followableType, $followableId, 'followers'), function () use ($followableId, $followableType) {
-            return Follow::where('followable_id', $followableId)
-                ->where('followable_type', $followableType)
-                ->count();
-        });
+        return $this->getCount($followableType, $followableId, 'followers');
     }
 
     /**
@@ -402,10 +410,7 @@ class ReactService
      */
     public function getFollowingsCount(int $userId): int
     {
-        return Cache::rememberForever($this->cacheKey(User::class, $userId, 'followings'), function () use ($userId) {
-            return Follow::where('follower_id', $userId)
-                ->count();
-        });
+        return $this->getCount(User::class, $userId, 'followings');
     }
 
     /**

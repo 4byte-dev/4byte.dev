@@ -3,6 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\React\Actions\FollowAction;
+use Modules\React\Actions\UnfollowAction;
 use Modules\React\Models\Follow;
 use Modules\React\Services\ReactService;
 
@@ -32,7 +34,7 @@ trait CanFollow
     public function follow($target): void
     {
         if (! $this->isFollowing($target)) {
-            app(ReactService::class)->insertFollow($target->getMorphClass(), $target->getKey(), $this->getKey());
+            app(FollowAction::class)->execute($target->getMorphClass(), $target->getKey(), $this->getKey());
         }
     }
 
@@ -43,7 +45,7 @@ trait CanFollow
      */
     public function unfollow($target): void
     {
-        app(ReactService::class)->deleteFollow($target->getMorphClass(), $target->getKey(), $this->getKey());
+        app(UnfollowAction::class)->execute($target->getMorphClass(), $target->getKey(), $this->getKey());
     }
 
     /**

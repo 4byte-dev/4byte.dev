@@ -8,9 +8,11 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\React\Actions\DislikeAction;
+use Modules\React\Actions\FollowAction;
 use Modules\React\Actions\LikeAction;
 use Modules\React\Actions\SaveAction;
 use Modules\React\Actions\UndislikeAction;
+use Modules\React\Actions\UnfollowAction;
 use Modules\React\Actions\UnlikeAction;
 use Modules\React\Actions\UnsaveAction;
 use Modules\React\Http\Requests\ReactRequest;
@@ -25,7 +27,9 @@ class ReactController extends Controller
         protected DislikeAction $dislikeAction,
         protected UndislikeAction $undislikeAction,
         protected SaveAction $saveAction,
-        protected UnsaveAction $unsaveAction
+        protected UnsaveAction $unsaveAction,
+        protected FollowAction $followAction,
+        protected UnfollowAction $unfollowAction
     ) {
     }
 
@@ -207,8 +211,10 @@ class ReactController extends Controller
             maxAttempts: 1,
             decaySeconds: 60 * 60 * 24,
             callback: function () use ($baseClass, $itemId, $userId) {
-                if (! $this->reactService->deleteFollow($baseClass, $itemId, $userId)) {
-                    $this->reactService->insertFollow($baseClass, $itemId, $userId);
+                if ($this->reactService->checkFollowed($baseClass, $itemId, $userId)) {
+                    $this->unfollowAction->execute($baseClass, $itemId, $userId);
+                } else {
+                    $this->followAction->execute($baseClass, $itemId, $userId);
                 }
             }
         );

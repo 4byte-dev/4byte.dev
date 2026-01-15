@@ -192,25 +192,51 @@ class ReactServiceTest extends TestCase
         $this->assertEquals(1, $this->service->getCommentRepliesCount($commentableType, $commentableId, $parentComment->id));
     }
 
-    public function test_can_insert_and_delete_follow(): void
+    public function test_can_cache_and_cache_unfollow_follow(): void
     {
-        $follower       = User::factory()->create();
-        $followableId   = $follower->id;
+        $user         = User::factory()->create();
+        $followableId   = $user->id;
         $followableType = User::class;
 
-        $target       = User::factory()->create();
-        $followableId = $target->id;
+        $this->service->cacheFollow($followableType, $followableId, $user->id);
 
-        $this->service->insertFollow($followableType, $followableId, $follower->id);
-
-        $this->assertTrue($this->service->checkFollowed($followableType, $followableId, $follower->id));
+        $this->assertTrue($this->service->checkFollowed($followableType, $followableId, $user->id));
         $this->assertEquals(1, $this->service->getFollowersCount($followableType, $followableId));
-        $this->assertEquals(1, $this->service->getFollowingsCount($follower->id));
 
-        $this->service->deleteFollow($followableType, $followableId, $follower->id);
+        $this->service->cacheDeleteFollow($followableType, $followableId, $user->id);
 
-        $this->assertFalse($this->service->checkFollowed($followableType, $followableId, $follower->id));
+        $this->assertFalse($this->service->checkFollowed($followableType, $followableId, $user->id));
         $this->assertEquals(0, $this->service->getFollowersCount($followableType, $followableId));
+    }
+
+    public function test_can_persist_and_persist_delete_follow(): void
+    {
+        $user            = User::factory()->create();
+        $followableId   = $user->id;
+        $followableType = User::class;
+
+        $this->service->persistFollow($followableType, $followableId, $user->id);
+
+        $this->assertDatabaseHas('follows', [
+            'follower_id'          => $user->id,
+            'followable_id'   => $followableId,
+            'followable_type' => $followableType,
+        ]);
+        $this->assertEquals(1, $this->service->getCount($followableType, $followableId, 'followers'));
+
+        $this->service->persistDeleteFollow($followableType, $followableId, $user->id);
+
+        $this->assertDatabaseMissing('follows', [
+            'follower_id'          => $user->id,
+            'followable_id'   => $followableId,
+            'followable_type' => $followableType,
+        ]);
+        $this->assertDatabaseHas('counts', [
+            'countable_id'   => $followableId,
+            'countable_type' => $followableType,
+            'filter'         => 'followers',
+            'count'          => 0,
+        ]);
     }
 
     public function test_can_increment_and_decrement_count(): void

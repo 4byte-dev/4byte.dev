@@ -6,9 +6,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\React\Events\UserDislikedEvent;
+use Modules\React\Events\UserFollowedEvent;
 use Modules\React\Events\UserLikedEvent;
 use Modules\React\Events\UserSavedEvent;
 use Modules\React\Events\UserUndislikedEvent;
+use Modules\React\Events\UserUnfollowedEvent;
 use Modules\React\Events\UserUnlikedEvent;
 use Modules\React\Events\UserUnsavedEvent;
 use Modules\React\Services\ReactService;
@@ -102,6 +104,30 @@ class SyncDbListener implements ShouldQueue
     }
 
     /**
+     * Handle user followed event.
+     */
+    public function handleUserFollowed(UserFollowedEvent $event, ReactService $reactService): void
+    {
+        $reactService->persistFollow(
+            $event->followableType,
+            $event->followableId,
+            $event->followerId
+        );
+    }
+
+    /**
+     * Handle user unfollowed event.
+     */
+    public function handleUserUnfollowed(UserUnfollowedEvent $event, ReactService $reactService): void
+    {
+        $reactService->persistDeleteFollow(
+            $event->followableType,
+            $event->followableId,
+            $event->followerId
+        );
+    }
+
+    /**
      * Register the listeners for the subscriber.
      *
      * @param Dispatcher $events
@@ -136,6 +162,16 @@ class SyncDbListener implements ShouldQueue
         $events->listen(
             UserUnsavedEvent::class,
             [self::class, 'handleUserUnsaved']
+        );
+
+        $events->listen(
+            UserFollowedEvent::class,
+            [self::class, 'handleUserFollowed']
+        );
+
+        $events->listen(
+            UserUnfollowedEvent::class,
+            [self::class, 'handleUserUnfollowed']
         );
     }
 }
