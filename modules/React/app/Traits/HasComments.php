@@ -50,6 +50,6 @@ trait HasComments
      */
     public function commentRepliesCount(int $parentId): int
     {
-        return app(ReactService::class)->getCommentRepliesCount($this->getMorphClass(), $this->getKey(), $parentId);
+        return app(ReactService::class)->getCommentRepliesCount($parentId);
     }
 }

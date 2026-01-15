@@ -5,12 +5,10 @@ namespace Modules\Article\Tests\Unit;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
 use Modules\Article\Models\Article;
-use Modules\React\Actions\CommentAction;
 use Modules\React\Events\UserDislikedEvent;
 use Modules\React\Events\UserLikedEvent;
 use Modules\React\Events\UserUndislikedEvent;
 use Modules\React\Events\UserUnlikedEvent;
-use Modules\React\Models\Comment;
 use Modules\React\Services\ReactService;
 use Tests\TestCase;
 
