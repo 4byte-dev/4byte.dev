@@ -2,6 +2,7 @@
 
 namespace Modules\Tag\Services;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Modules\React\Services\ReactService;
 use Modules\Tag\Data\TagData;
@@ -132,5 +133,17 @@ class TagService
 
             return TagMapper::collection($relatedTags);
         });
+    }
+
+    /**
+     * Search categories by slug.
+     *
+     * @return LengthAwarePaginator<int, TagData>
+     */
+    public function search(string $term, int $perPage = 15): LengthAwarePaginator
+    {
+        return Tag::where('slug', 'like', "%{$term}%")
+            ->paginate($perPage)
+            ->through(fn ($tag) => TagMapper::toData($tag));
     }
 }

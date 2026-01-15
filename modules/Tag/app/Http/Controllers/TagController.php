@@ -5,8 +5,10 @@ namespace Modules\Tag\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\SeoService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Tag\Data\TagData;
 use Modules\Tag\Services\TagService;
 
 class TagController extends Controller
@@ -43,5 +45,17 @@ class TagController extends Controller
             'news'     => $news,
             'tags'     => $tags,
         ])->withViewData(['seo' => $this->seoService->getTagSeo($tag, $profile)]);
+    }
+
+    /**
+     * Search for categories.
+     *
+     * @return LengthAwarePaginator<int, TagData>
+     */
+    public function search(Request $request): LengthAwarePaginator
+    {
+        $term = $request->input('q', '');
+
+        return $this->tagService->search($term);
     }
 }
