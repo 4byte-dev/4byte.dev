@@ -7,8 +7,10 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\React\Events\UserDislikedEvent;
 use Modules\React\Events\UserLikedEvent;
+use Modules\React\Events\UserSavedEvent;
 use Modules\React\Events\UserUndislikedEvent;
 use Modules\React\Events\UserUnlikedEvent;
+use Modules\React\Events\UserUnsavedEvent;
 use Modules\Recommend\Classes\GorseFeedback;
 use Modules\Recommend\Services\GorseService;
 
@@ -82,6 +84,38 @@ class SyncGorseListener implements ShouldQueue
     }
 
     /**
+     * Handle user saved event.
+     */
+    public function handleUserSaved(UserSavedEvent $event, GorseService $gorse): void
+    {
+        $type   = strtolower(class_basename($event->saveableType));
+        $itemId = "{$type}:{$event->saveableId}";
+        $userId = (string) $event->userId;
+
+        $feedback = new GorseFeedback(
+            'star',
+            $userId,
+            $itemId,
+            '',
+            now()->toDateTimeString()
+        );
+
+        $gorse->insertFeedback($feedback);
+    }
+
+    /**
+     * Handle user unsaved event.
+     */
+    public function handleUserUnsaved(UserUnsavedEvent $event, GorseService $gorse): void
+    {
+        $type   = strtolower(class_basename($event->saveableType));
+        $itemId = "{$type}:{$event->saveableId}";
+        $userId = (string) $event->userId;
+
+        $gorse->deleteFeedback('star', $userId, $itemId);
+    }
+
+    /**
      * Register the listeners for the subscriber.
      *
      * @param Dispatcher $events
@@ -106,6 +140,16 @@ class SyncGorseListener implements ShouldQueue
         $events->listen(
             UserUndislikedEvent::class,
             [self::class, 'handleUserUndisliked']
+        );
+
+        $events->listen(
+            UserSavedEvent::class,
+            [self::class, 'handleUserSaved']
+        );
+
+        $events->listen(
+            UserUnsavedEvent::class,
+            [self::class, 'handleUserUnsaved']
         );
     }
 }

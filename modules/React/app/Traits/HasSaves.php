@@ -3,6 +3,8 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Modules\React\Actions\SaveAction;
+use Modules\React\Actions\UnsaveAction;
 use Modules\React\Models\Save;
 use Modules\React\Services\ReactService;
 
@@ -34,7 +36,7 @@ trait HasSaves
     public function saveFor(int $userId): void
     {
         if (! $this->isSavedBy($userId)) {
-            app(ReactService::class)->insertSave($this->getMorphClass(), $this->getKey(), $userId);
+            app(SaveAction::class)->execute($this->getMorphClass(), $this->getKey(), $userId);
         }
     }
 
@@ -43,7 +45,7 @@ trait HasSaves
      */
     public function unsave(int $userId): void
     {
-        app(ReactService::class)->deleteSave($this->getMorphClass(), $this->getKey(), $userId);
+        app(UnsaveAction::class)->execute($this->getMorphClass(), $this->getKey(), $userId);
     }
 
     /**

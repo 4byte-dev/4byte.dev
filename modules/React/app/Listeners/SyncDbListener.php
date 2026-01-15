@@ -7,8 +7,10 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\React\Events\UserDislikedEvent;
 use Modules\React\Events\UserLikedEvent;
+use Modules\React\Events\UserSavedEvent;
 use Modules\React\Events\UserUndislikedEvent;
 use Modules\React\Events\UserUnlikedEvent;
+use Modules\React\Events\UserUnsavedEvent;
 use Modules\React\Services\ReactService;
 
 class SyncDbListener implements ShouldQueue
@@ -76,6 +78,30 @@ class SyncDbListener implements ShouldQueue
     }
 
     /**
+     * Handle user saved event.
+     */
+    public function handleUserSaved(UserSavedEvent $event, ReactService $reactService): void
+    {
+        $reactService->persistSave(
+            $event->saveableType,
+            $event->saveableId,
+            $event->userId
+        );
+    }
+
+    /**
+     * Handle user unsaved event.
+     */
+    public function handleUserUnsaved(UserUnsavedEvent $event, ReactService $reactService): void
+    {
+        $reactService->persistDeleteSave(
+            $event->saveableType,
+            $event->saveableId,
+            $event->userId
+        );
+    }
+
+    /**
      * Register the listeners for the subscriber.
      *
      * @param Dispatcher $events
@@ -100,6 +126,16 @@ class SyncDbListener implements ShouldQueue
         $events->listen(
             UserUndislikedEvent::class,
             [self::class, 'handleUserUndisliked']
+        );
+
+        $events->listen(
+            UserSavedEvent::class,
+            [self::class, 'handleUserSaved']
+        );
+
+        $events->listen(
+            UserUnsavedEvent::class,
+            [self::class, 'handleUserUnsaved']
         );
     }
 }

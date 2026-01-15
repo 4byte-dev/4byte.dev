@@ -171,33 +171,33 @@ class ReactService
         });
     }
 
-    /**
-     * Inserts a save for the given user on the specified model.
-     */
-    public function insertSave(string $saveableType, int $saveableId, int $userId): void
+    public function persistSave(string $saveableType, int $saveableId, int $userId): void
     {
-        Save::create([
+        Save::firstOrCreate([
             'user_id'       => $userId,
             'saveable_id'   => $saveableId,
             'saveable_type' => $saveableType,
         ]);
+    }
+
+    public function cacheSave(string $saveableType, int $saveableId, int $userId): void
+    {
         Cache::forever($this->cacheKey($saveableType, $saveableId, $userId, 'saved'), true);
     }
 
-    /**
-     * Deletes a save for the given user on the specified model.
-     */
-    public function deleteSave(string $saveableType, int $saveableId, int $userId): bool
+    public function persistDeleteSave(string $saveableType, int $saveableId, int $userId): bool
     {
         $deleted = Save::where('user_id', $userId)
             ->where('saveable_id', $saveableId)
             ->where('saveable_type', $saveableType)
             ->delete();
-        if ($deleted) {
-            Cache::forget($this->cacheKey($saveableType, $saveableId, $userId, 'saved'));
-        }
 
-        return $deleted;
+        return (bool) $deleted;
+    }
+
+    public function cacheDeleteSave(string $saveableType, int $saveableId, int $userId): void
+    {
+        Cache::forget($this->cacheKey($saveableType, $saveableId, $userId, 'saved'));
     }
 
     /**

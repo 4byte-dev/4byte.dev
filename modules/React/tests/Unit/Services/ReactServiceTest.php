@@ -118,17 +118,40 @@ class ReactServiceTest extends TestCase
         $this->assertEquals(0, $this->service->getDislikesCount($dislikeableType, $dislikeableId));
     }
 
-    public function test_can_insert_and_delete_save(): void
+    public function test_can_persist_and_persist_delete_save(): void
     {
         $user         = User::factory()->create();
         $saveableId   = $user->id;
         $saveableType = User::class;
 
-        $this->service->insertSave($saveableType, $saveableId, $user->id);
+        $this->service->persistSave($saveableType, $saveableId, $user->id);
+
+        $this->assertDatabaseHas('saves', [
+            'user_id'       => $user->id,
+            'saveable_id'   => $saveableId,
+            'saveable_type' => $saveableType,
+        ]);
+
+        $this->service->persistDeleteSave($saveableType, $saveableId, $user->id);
+
+        $this->assertDatabaseMissing('saves', [
+            'user_id'       => $user->id,
+            'saveable_id'   => $saveableId,
+            'saveable_type' => $saveableType,
+        ]);
+    }
+
+    public function test_can_cache_and_cache_delete_save(): void
+    {
+        $user         = User::factory()->create();
+        $saveableId   = $user->id;
+        $saveableType = User::class;
+
+        $this->service->cacheSave($saveableType, $saveableId, $user->id);
 
         $this->assertTrue($this->service->checkSaved($saveableType, $saveableId, $user->id));
 
-        $this->service->deleteSave($saveableType, $saveableId, $user->id);
+        $this->service->cacheDeleteSave($saveableType, $saveableId, $user->id);
 
         $this->assertFalse($this->service->checkSaved($saveableType, $saveableId, $user->id));
     }

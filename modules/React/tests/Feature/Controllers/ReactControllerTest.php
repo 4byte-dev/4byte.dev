@@ -6,8 +6,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Modules\React\Events\UserDislikedEvent;
 use Modules\React\Events\UserLikedEvent;
+use Modules\React\Events\UserSavedEvent;
 use Modules\React\Events\UserUnlikedEvent;
-use Modules\React\Models\Save;
+use Modules\React\Events\UserUnsavedEvent;
 use Modules\React\Services\ReactService;
 use Modules\User\Models\User;
 use Spatie\Permission\Models\Permission;
@@ -106,6 +107,8 @@ class ReactControllerTest extends TestCase
 
     public function test_can_save_a_resource(): void
     {
+        Event::fake();
+
         $user       = User::factory()->create();
         $permission = Permission::firstOrCreate(['name' => 'create_save']);
         $user->givePermissionTo($permission);
@@ -116,11 +119,36 @@ class ReactControllerTest extends TestCase
             ->postJson(route('api.react.save', ['type' => 'user', 'slug' => 'target-user']));
 
         $response->assertStatus(200);
-        $this->assertTrue(Save::where([
-            'user_id'       => $user->id,
-            'saveable_id'   => $target->id,
-            'saveable_type' => User::class,
-        ])->exists());
+
+        Event::assertDispatched(UserSavedEvent::class, function ($event) use ($user, $target) {
+            return $event->userId === $user->id
+                && $event->saveableId === $target->id
+                && $event->saveableType === User::class;
+        });
+    }
+
+    public function test_can_unsave_a_resource(): void
+    {
+        Event::fake();
+
+        $user       = User::factory()->create();
+        $permission = Permission::firstOrCreate(['name' => 'create_save']);
+        $user->givePermissionTo($permission);
+
+        $target = User::factory()->create(['username' => 'target-user']);
+
+        app(ReactService::class)->cacheSave(User::class, $target->id, $user->id);
+
+        $response = $this->actingAs($user)
+            ->postJson(route('api.react.save', ['type' => 'user', 'slug' => 'target-user']));
+
+        $response->assertStatus(200);
+
+        Event::assertDispatched(UserUnsavedEvent::class, function ($event) use ($user, $target) {
+            return $event->userId === $user->id
+                && $event->saveableId === $target->id
+                && $event->saveableType === User::class;
+        });
     }
 
     public function test_can_follow_a_resource(): void

@@ -9,8 +9,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Modules\React\Actions\DislikeAction;
 use Modules\React\Actions\LikeAction;
+use Modules\React\Actions\SaveAction;
 use Modules\React\Actions\UndislikeAction;
 use Modules\React\Actions\UnlikeAction;
+use Modules\React\Actions\UnsaveAction;
 use Modules\React\Http\Requests\ReactRequest;
 use Modules\React\Services\ReactService;
 
@@ -21,7 +23,9 @@ class ReactController extends Controller
         protected LikeAction $likeAction,
         protected UnlikeAction $unlikeAction,
         protected DislikeAction $dislikeAction,
-        protected UndislikeAction $undislikeAction
+        protected UndislikeAction $undislikeAction,
+        protected SaveAction $saveAction,
+        protected UnsaveAction $unsaveAction
     ) {
     }
 
@@ -105,8 +109,10 @@ class ReactController extends Controller
         [$baseClass, $itemId] = $request->resolveTarget();
         $userId               = Auth::id();
 
-        if (! $this->reactService->deleteSave($baseClass, $itemId, $userId)) {
-            $this->reactService->insertSave($baseClass, $itemId, $userId);
+        if ($this->reactService->checkSaved($baseClass, $itemId, $userId)) {
+            $this->unsaveAction->execute($baseClass, $itemId, $userId);
+        } else {
+            $this->saveAction->execute($baseClass, $itemId, $userId);
         }
 
         return response()->noContent(200);
