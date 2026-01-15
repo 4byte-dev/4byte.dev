@@ -5,13 +5,16 @@ namespace Modules\React\Tests\Feature\Listeners;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Article\Models\Article;
+use Modules\React\Events\UserCommentedEvent;
 use Modules\React\Events\UserDislikedEvent;
 use Modules\React\Events\UserFollowedEvent;
 use Modules\React\Events\UserLikedEvent;
+use Modules\React\Events\UserUncommentedEvent;
 use Modules\React\Events\UserUndislikedEvent;
 use Modules\React\Events\UserUnfollowedEvent;
 use Modules\React\Events\UserUnlikedEvent;
 use Modules\React\Listeners\SyncDbListener;
+use Modules\React\Models\Comment;
 use Modules\React\Models\Dislike;
 use Modules\React\Models\Follow;
 use Modules\React\Models\Like;
@@ -253,6 +256,49 @@ class SyncDbListenerTest extends TestCase
             'countable_type' => User::class,
             'filter'         => 'followings',
             'count'          => 0,
+        ]);
+    }
+
+    public function test_it_handles_user_commented_event_and_persists_comment(): void
+    {
+        $user    = User::factory()->create();
+        $article = Article::factory()->create();
+        $content = 'Test comment content';
+
+        $event = new UserCommentedEvent($user->id, Article::class, $article->id, $content);
+
+        $listener     = new SyncDbListener();
+        $reactService = app(ReactService::class);
+
+        $listener->handleUserCommented($event, $reactService);
+
+        $this->assertDatabaseHas('comments', [
+            'user_id'          => $user->id,
+            'commentable_id'   => $article->id,
+            'commentable_type' => Article::class,
+            'content'          => $content,
+        ]);
+    }
+
+    public function test_it_handles_user_uncommented_event_and_removes_comment(): void
+    {
+        $user    = User::factory()->create();
+        $article = Article::factory()->create();
+        $comment = Comment::factory()->create([
+            'user_id'          => $user->id,
+            'commentable_id'   => $article->id,
+            'commentable_type' => Article::class,
+        ]);
+
+        $event = new UserUncommentedEvent($user->id, Article::class, $article->id, $comment->id);
+
+        $listener     = new SyncDbListener();
+        $reactService = app(ReactService::class);
+
+        $listener->handleUserUncommented($event, $reactService);
+
+        $this->assertDatabaseMissing('comments', [
+            'id' => $comment->id,
         ]);
     }
 }

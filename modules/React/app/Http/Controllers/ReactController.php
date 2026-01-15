@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
+use Modules\React\Actions\CommentAction;
 use Modules\React\Actions\DislikeAction;
 use Modules\React\Actions\FollowAction;
 use Modules\React\Actions\LikeAction;
@@ -29,7 +30,8 @@ class ReactController extends Controller
         protected SaveAction $saveAction,
         protected UnsaveAction $unsaveAction,
         protected FollowAction $followAction,
-        protected UnfollowAction $unfollowAction
+        protected UnfollowAction $unfollowAction,
+        protected CommentAction $commentAction
     ) {
     }
 
@@ -122,12 +124,7 @@ class ReactController extends Controller
         return response()->noContent(200);
     }
 
-    /**
-     * Create a new comment on a model.
-     *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
-     */
-    public function comment(ReactRequest $request): JsonResponse
+    public function comment(ReactRequest $request): Response
     {
         $request->validate([
             'content' => 'required|string|min:20',
@@ -139,9 +136,9 @@ class ReactController extends Controller
         $content              = $request->input('content');
         $parentId             = $request->input('parent', null);
 
-        $comment = $this->reactService->insertComment($baseClass, $itemId, $content, $userId, $parentId);
+        $this->commentAction->execute($baseClass, $itemId, $content, $userId, $parentId);
 
-        return response()->json($comment);
+        return response()->noContent(200);
     }
 
     /**

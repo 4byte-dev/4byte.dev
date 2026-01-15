@@ -4,6 +4,7 @@ namespace Modules\React\Tests\Feature\Controllers;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Modules\React\Events\UserCommentedEvent;
 use Modules\React\Events\UserDislikedEvent;
 use Modules\React\Events\UserLikedEvent;
 use Modules\React\Events\UserSavedEvent;
@@ -168,11 +169,13 @@ class ReactControllerTest extends TestCase
 
     public function test_can_comment_on_a_resource(): void
     {
+        Event::fake();
+
         $user       = User::factory()->create();
         $permission = Permission::firstOrCreate(['name' => 'create_comment']);
         $user->givePermissionTo($permission);
 
-        User::factory()->create(['username' => 'target-user']);
+        $target = User::factory()->create(['username' => 'target-user']);
 
         $response = $this->actingAs($user)
             ->postJson(route('api.react.comment', ['type' => 'user', 'slug' => 'target-user']), [
@@ -180,6 +183,12 @@ class ReactControllerTest extends TestCase
             ]);
 
         $response->assertStatus(200);
+
+        Event::assertDispatched(UserCommentedEvent::class, function ($event) use ($user, $target) {
+            return $event->userId === $user->id
+                && $event->commentableId === $target->id
+                && $event->commentableType === User::class;
+        });
     }
 
     public function test_can_get_comments_list(): void
@@ -188,7 +197,7 @@ class ReactControllerTest extends TestCase
         $target = User::factory()->create(['username' => 'target-user']);
 
         $service = new ReactService();
-        $service->insertComment(User::class, $target->id, 'Test comment content', $user->id);
+        $service->persistComment(User::class, $target->id, 'Test comment content', $user->id);
 
         $response = $this->actingAs($user)->postJson(route('api.react.comments', ['type' => 'user', 'slug' => 'target-user']));
 

@@ -9,7 +9,6 @@ use Modules\React\Models\Dislike;
 use Modules\React\Models\Follow;
 use Modules\React\Models\Like;
 use Modules\React\Models\Save;
-use Modules\React\Observers\CommentObserver;
 use Modules\React\Policies\CommentPolicy;
 use Modules\React\Policies\DislikePolicy;
 use Modules\React\Policies\FollowPolicy;
@@ -85,14 +84,6 @@ class ReactServiceProvider extends ServiceProvider
         Gate::policy(Save::class, SavePolicy::class);
         Gate::policy(Comment::class, CommentPolicy::class);
         Gate::policy(Follow::class, FollowPolicy::class);
-    }
-
-    /**
-     * Register model observers.
-     */
-    protected function registerObservers(): void
-    {
-        Comment::observe(CommentObserver::class);
     }
 
     /**

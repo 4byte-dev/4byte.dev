@@ -3,6 +3,7 @@
 namespace Modules\React\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Modules\React\Actions\CommentAction;
 use Modules\React\Models\Comment;
 use Modules\React\Services\ReactService;
 
@@ -33,7 +34,7 @@ trait HasComments
      */
     public function comment(int $userId, string $content, ?int $parentId = null): void
     {
-        app(ReactService::class)->insertComment($this->getMorphClass(), $this->getKey(), $content, $userId, $parentId);
+        app(CommentAction::class)->execute($this->getMorphClass(), $this->getKey(), $content, $userId, $parentId);
     }
 
     /**

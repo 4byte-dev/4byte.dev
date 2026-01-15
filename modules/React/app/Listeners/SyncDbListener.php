@@ -5,10 +5,12 @@ namespace Modules\React\Listeners;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Queue\InteractsWithQueue;
+use Modules\React\Events\UserCommentedEvent;
 use Modules\React\Events\UserDislikedEvent;
 use Modules\React\Events\UserFollowedEvent;
 use Modules\React\Events\UserLikedEvent;
 use Modules\React\Events\UserSavedEvent;
+use Modules\React\Events\UserUncommentedEvent;
 use Modules\React\Events\UserUndislikedEvent;
 use Modules\React\Events\UserUnfollowedEvent;
 use Modules\React\Events\UserUnlikedEvent;
@@ -128,6 +130,30 @@ class SyncDbListener implements ShouldQueue
     }
 
     /**
+     * Handle user commented event.
+     */
+    public function handleUserCommented(UserCommentedEvent $event, ReactService $reactService): void
+    {
+        $reactService->persistComment(
+            $event->commentableType,
+            $event->commentableId,
+            $event->content,
+            $event->userId,
+            $event->parentId
+        );
+    }
+
+    /**
+     * Handle user uncommented event.
+     */
+    public function handleUserUncommented(UserUncommentedEvent $event, ReactService $reactService): void
+    {
+        if ($event->commentId) {
+            $reactService->persistDeleteComment($event->commentId);
+        }
+    }
+
+    /**
      * Register the listeners for the subscriber.
      *
      * @param Dispatcher $events
@@ -172,6 +198,16 @@ class SyncDbListener implements ShouldQueue
         $events->listen(
             UserUnfollowedEvent::class,
             [self::class, 'handleUserUnfollowed']
+        );
+
+        $events->listen(
+            UserCommentedEvent::class,
+            [self::class, 'handleUserCommented']
+        );
+
+        $events->listen(
+            UserUncommentedEvent::class,
+            [self::class, 'handleUserUncommented']
         );
     }
 }

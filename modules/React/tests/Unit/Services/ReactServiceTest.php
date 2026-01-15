@@ -156,40 +156,46 @@ class ReactServiceTest extends TestCase
         $this->assertFalse($this->service->checkSaved($saveableType, $saveableId, $user->id));
     }
 
-    public function test_can_insert_and_retrieve_comments(): void
+    public function test_can_persist_and_persist_delete_comment(): void
     {
         $user            = User::factory()->create();
         $commentableId   = $user->id;
         $commentableType = User::class;
         $content         = 'Test comment';
 
-        $commentData = $this->service->insertComment($commentableType, $commentableId, $content, $user->id);
+        $this->service->persistComment($commentableType, $commentableId, $content, $user->id);
 
-        $this->assertNotNull($commentData->id);
-        $this->assertEquals($content, $commentData->content);
-        $this->assertEquals(1, $this->service->getCommentsCount($commentableType, $commentableId));
+        $this->assertDatabaseHas('comments', [
+            'user_id'          => $user->id,
+            'commentable_id'   => $commentableId,
+            'commentable_type' => $commentableType,
+            'content'          => $content,
+        ]);
 
-        $retrievedComment = $this->service->getComment($commentData->id);
-        $this->assertEquals($commentData->content, $retrievedComment->content);
+        $commentId = \Modules\React\Models\Comment::where('content', $content)->first()->id;
 
-        $comments = $this->service->getComments($commentableType, $commentableId, 1, 10);
-        $this->assertCount(1, $comments);
+        $this->service->persistDeleteComment($commentId);
+
+        $this->assertDatabaseMissing('comments', [
+            'id' => $commentId,
+        ]);
     }
 
-    public function test_can_insert_reply_comment(): void
+    public function test_can_cache_and_cache_delete_comment(): void
     {
-         $user           = User::factory()->create();
+        $user            = User::factory()->create();
         $commentableId   = $user->id;
         $commentableType = User::class;
-        $content         = 'Parent comment';
 
-        $parentComment = $this->service->insertComment($commentableType, $commentableId, $content, $user->id);
+        $this->service->cacheComment($commentableType, $commentableId, $user->id);
 
-        $replyContent = 'Reply comment';
-        $replyComment = $this->service->insertComment($commentableType, $commentableId, $replyContent, $user->id, $parentComment->id);
+        $this->assertTrue($this->service->checkCommented($commentableType, $commentableId, $user->id));
+        $this->assertEquals(1, $this->service->getCommentsCount($commentableType, $commentableId));
 
-        $this->assertEquals($parentComment->id, $replyComment->parent);
-        $this->assertEquals(1, $this->service->getCommentRepliesCount($commentableType, $commentableId, $parentComment->id));
+        $this->service->cacheDeleteComment($commentableType, $commentableId, $user->id);
+
+        $this->assertFalse($this->service->checkCommented($commentableType, $commentableId, $user->id));
+        $this->assertEquals(0, $this->service->getCommentsCount($commentableType, $commentableId));
     }
 
     public function test_can_cache_and_cache_unfollow_follow(): void

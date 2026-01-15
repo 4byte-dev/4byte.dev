@@ -220,14 +220,27 @@ class ReactService
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function insertComment(string $commentableType, int $commentableId, string $content, int $userId, ?int $parentId = null): CommentData
+    public function persistComment(string $commentableType, int $commentableId, string $content, int $userId, ?int $parentId = null): void
+    {
+        Comment::create([
+            'content'          => $content,
+            'user_id'          => $userId,
+            'parent_id'        => $parentId,
+            'commentable_id'   => $commentableId,
+            'commentable_type' => $commentableType,
+        ]);
+
+        if ($parentId) {
+            $this->incrementCountDb(Comment::class, $parentId, 'replies');
+        }
+
+        $this->incrementCountDb($commentableType, $commentableId, 'comments');
+    }
+
+    public function cacheComment(string $commentableType, int $commentableId, int $userId, ?int $parentId = null): void
     {
         if ($parentId) {
-            Comment::where('id', $parentId)
-                ->where('commentable_id', $commentableId)
-                ->where('commentable_type', $commentableType)
-                ->existsOrFail();
-            $this->incrementCount(Comment::class, $parentId, 'replies');
+            $this->incrementCountCache(Comment::class, $parentId, 'replies');
             try {
                 $replyPaginationKeys = Redis::keys($this->cacheKey($commentableType, $commentableId, 'comment', $parentId, 'replies', 'pagination') . '*');
 
@@ -239,7 +252,7 @@ class ReactService
             }
         }
 
-        $this->incrementCount($commentableType, $commentableId, 'comments');
+        $this->incrementCountCache($commentableType, $commentableId, 'comments');
         Cache::forever($this->cacheKey($commentableType, $commentableId, $userId, 'commented'), true);
 
         try {
@@ -251,16 +264,40 @@ class ReactService
         } catch (\Exception $e) {
             logger()->warning('Redis is not avaliable: ' . $e->getMessage());
         }
+    }
 
-        $comment = Comment::create([
-            'content'          => $content,
-            'user_id'          => $userId,
-            'parent_id'        => $parentId,
-            'commentable_id'   => $commentableId,
-            'commentable_type' => $commentableType,
-        ]);
+    public function persistDeleteComment(int $commentId): bool
+    {
+        return (bool) Comment::destroy($commentId);
+    }
 
-        return CommentMapper::toData($comment);
+    public function cacheDeleteComment(string $commentableType, int $commentableId, int $userId, ?int $parentId = null): void
+    {
+        if ($parentId) {
+            $this->decrementCountCache(Comment::class, $parentId, 'replies');
+            try {
+                $replyPaginationKeys = Redis::keys($this->cacheKey($commentableType, $commentableId, 'comment', $parentId, 'replies', 'pagination') . '*');
+
+                if (count($replyPaginationKeys) > 0) {
+                    Redis::del(...$replyPaginationKeys);
+                }
+            } catch (\Exception $e) {
+                logger()->warning('Redis is not avaliable: ' . $e->getMessage());
+            }
+        }
+
+        $this->decrementCountCache($commentableType, $commentableId, 'comments');
+        Cache::forget($this->cacheKey($commentableType, $commentableId, $userId, 'commented'));
+
+        try {
+            $paginationKeys = Redis::keys($this->cacheKey($commentableType, $commentableId, 'comments', 'pagination') . '*');
+
+            if (count($paginationKeys) > 0) {
+                Redis::del(...$paginationKeys);
+            }
+        } catch (\Exception $e) {
+            logger()->warning('Redis is not avaliable: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -321,7 +358,7 @@ class ReactService
     /**
      * Returns the number of replies for a specific comment.
      */
-    public function getCommentRepliesCount(string $commentableType, int $commentableId, ?int $parentId): int
+    public function getCommentRepliesCount(?int $parentId): int
     {
         if (! $parentId) {
             return 0;
