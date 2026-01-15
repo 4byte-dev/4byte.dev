@@ -194,7 +194,7 @@ class ReactServiceTest extends TestCase
 
     public function test_can_cache_and_cache_unfollow_follow(): void
     {
-        $user         = User::factory()->create();
+        $user           = User::factory()->create();
         $followableId   = $user->id;
         $followableType = User::class;
 
@@ -212,15 +212,15 @@ class ReactServiceTest extends TestCase
     public function test_can_persist_and_persist_delete_follow(): void
     {
         $user            = User::factory()->create();
-        $followableId   = $user->id;
-        $followableType = User::class;
+        $followableId    = $user->id;
+        $followableType  = User::class;
 
         $this->service->persistFollow($followableType, $followableId, $user->id);
 
         $this->assertDatabaseHas('follows', [
             'follower_id'          => $user->id,
-            'followable_id'   => $followableId,
-            'followable_type' => $followableType,
+            'followable_id'        => $followableId,
+            'followable_type'      => $followableType,
         ]);
         $this->assertEquals(1, $this->service->getCount($followableType, $followableId, 'followers'));
 
@@ -228,8 +228,8 @@ class ReactServiceTest extends TestCase
 
         $this->assertDatabaseMissing('follows', [
             'follower_id'          => $user->id,
-            'followable_id'   => $followableId,
-            'followable_type' => $followableType,
+            'followable_id'        => $followableId,
+            'followable_type'      => $followableType,
         ]);
         $this->assertDatabaseHas('counts', [
             'countable_id'   => $followableId,

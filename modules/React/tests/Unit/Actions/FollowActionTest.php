@@ -18,7 +18,7 @@ class FollowActionTest extends TestCase
         $reactService = Mockery::mock(ReactService::class);
         $action       = new FollowAction($reactService);
 
-        $type       = 'post';
+        $type         = 'post';
         $followableId = 1;
         $followerId   = 1;
 
