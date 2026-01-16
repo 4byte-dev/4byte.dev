@@ -22,6 +22,9 @@ import {
 import { FormInput } from "@/Components/Ui/Form/FormInput";
 import { FormTextareaInput } from "@/Components/Ui/Form/FormTextareaInput";
 import { FormMarkdownInput } from "@/Components/Ui/Form/FormMarkdownInput";
+import { useQueryClient } from "@tanstack/react-query";
+import CategoryApi from "@Category/Api";
+import TagApi from "@Tag/Api";
 
 export default function ArticleForm({
     initialValues,
@@ -51,6 +54,60 @@ export default function ArticleForm({
             sources: initialValues?.sources || [],
         },
     });
+
+    const queryClient = useQueryClient();
+
+    async function asyncSearchCategories(
+        term,
+        { page = 1, pageSize = 15 }
+    ) {
+        if (!term) {
+            return {
+                results: [],
+                total: 0,
+            }
+        }
+
+        const data = await queryClient.fetchQuery({
+            queryKey: [`categories-${term}-${page}-${pageSize}`],
+            queryFn: () => CategoryApi.search(term, { page, per_page: pageSize }),
+            staleTime: 5 * 60 * 1000,
+        });
+
+        return {
+            results: data.data.map((item) => ({
+                value: item.id,
+                label: item.name,
+            })),
+            total: data.total,
+        }
+    }
+
+    async function asyncSearchTags(
+        term,
+        { page = 1, pageSize = 15 }
+    ) {
+        if (!term) {
+            return {
+                results: [],
+                total: 0,
+            }
+        }
+
+        const data = await queryClient.fetchQuery({
+            queryKey: [`tags-${term}-${page}-${pageSize}`],
+            queryFn: () => TagApi.search(term, { page, per_page: pageSize }),
+            staleTime: 5 * 60 * 1000,
+        });
+
+        return {
+            results: data.data.map((item) => ({
+                value: item.id,
+                label: item.name,
+            })),
+            total: data.total,
+        }
+    }
 
     useEffect(() => {
         if (apiErrors) {
@@ -350,6 +407,10 @@ export default function ArticleForm({
                                                 defaultValue={field.value}
                                                 hideSelectAll
                                                 placeholder={t("Select Options")}
+                                                pageSize={5}
+                                                debounceMs={300}
+                                                asyncSearch={asyncSearchCategories}
+                                                paginationType="page"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -381,6 +442,10 @@ export default function ArticleForm({
                                                 defaultValue={field.value}
                                                 hideSelectAll
                                                 placeholder={t("Select Options")}
+                                                pageSize={5}
+                                                debounceMs={300}
+                                                asyncSearch={asyncSearchTags}
+                                                paginationType="page"
                                             />
                                         </FormControl>
                                         <FormMessage />
