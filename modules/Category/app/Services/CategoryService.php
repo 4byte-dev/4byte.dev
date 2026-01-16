@@ -127,7 +127,7 @@ class CategoryService
      *
      * @return LengthAwarePaginator<int, CategoryData>
      */
-    public function search(string $term, int $perPage = 15): LengthAwarePaginator
+    public function search(string $term, int $perPage = 5): LengthAwarePaginator
     {
         return Category::where('slug', 'like', "%{$term}%")
             ->paginate($perPage)

@@ -140,7 +140,7 @@ class TagService
      *
      * @return LengthAwarePaginator<int, TagData>
      */
-    public function search(string $term, int $perPage = 15): LengthAwarePaginator
+    public function search(string $term, int $perPage = 5): LengthAwarePaginator
     {
         return Tag::where('slug', 'like', "%{$term}%")
             ->paginate($perPage)
