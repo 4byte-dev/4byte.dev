@@ -63,6 +63,16 @@ export function Comments({ commentsCounts: initialCommentsCounts, type, slug }) 
 	});
 
 	const toggleReplies = (parentId) => {
+		if (!parentId) {
+			toast({
+				title: t("Error"),
+				description: t(
+					"This comment is not ready to receive replies yet. Please try again later.",
+				),
+				variant: "destructive",
+			});
+			return;
+		}
 		if (showReplies[parentId]) {
 			setShowReplies({ ...showReplies, [parentId]: false });
 		} else {
@@ -115,6 +125,16 @@ export function Comments({ commentsCounts: initialCommentsCounts, type, slug }) 
 
 	const handleCommentLike = (commentId, parentId) => {
 		if (!authStore.isAuthenticated) return;
+		if (!commentId) {
+			toast({
+				title: t("Error"),
+				description: t(
+					"This comment is not ready to receive likes yet. Please try again later.",
+				),
+				variant: "destructive",
+			});
+			return;
+		}
 		likeMutation.mutate({ commentId, parentId });
 	};
 

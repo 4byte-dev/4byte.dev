@@ -9,5 +9,7 @@
     "Reply": "Yanıtla",
     "comments": "<0>{{count}}</0> Yorum",
     "replies": "{{count}} Yanıt",
-    "Comment must be at least 20 characters": "Yorum en az 20 karater olmalıdır"
+    "Comment must be at least 20 characters": "Yorum en az 20 karater olmalıdır",
+    "This comment is not ready to receive likes yet. Please try again later.": "Bu yorum henüz beğeni almaya hazır değil. Lütfen daha sonra tekrar deneyin.",
+    "This comment is not ready to receive replies yet. Please try again later.": "Bu yorum henüz yanıt almaya hazır değil. Lütfen daha sonra tekrar deneyin."
 }
