@@ -18,10 +18,21 @@ use Tests\TestCase;
 
 class SyncGorseListenerTest extends TestCase
 {
+    /** @var Mockery\MockInterface&GorseService */
+    protected GorseService $gorseService;
+
+    protected SyncGorseListener $listener;
+
+    public function setUp(): void
+    {
+        $this->gorseService = Mockery::mock(GorseService::class);
+        $this->listener     = new SyncGorseListener($this->gorseService);
+        parent::setUp();
+    }
+
     public function test_it_handles_user_liked_event_and_inserts_feedback(): void
     {
-        $gorseService = Mockery::mock(GorseService::class);
-        $gorseService->shouldReceive('insertFeedback')
+        $this->gorseService->shouldReceive('insertFeedback')
             ->once()
             ->with(Mockery::on(function ($feedback) {
                 return $feedback instanceof GorseFeedback
@@ -30,29 +41,25 @@ class SyncGorseListenerTest extends TestCase
                     && $feedback->getItemId() === 'article:100';
             }));
 
-        $listener = new SyncGorseListener();
         $event    = new UserLikedEvent(1, 'App\Models\Article', 100);
 
-        $listener->handleUserLiked($event, $gorseService);
+        $this->listener->handleUserLiked($event);
     }
 
     public function test_it_handles_user_unliked_event_and_deletes_feedback(): void
     {
-        $gorseService = Mockery::mock(GorseService::class);
-        $gorseService->shouldReceive('deleteFeedback')
+        $this->gorseService->shouldReceive('deleteFeedback')
             ->once()
             ->with('like', '1', 'article:100');
 
-        $listener = new SyncGorseListener();
         $event    = new UserUnlikedEvent(1, 'App\Models\Article', 100);
 
-        $listener->handleUserUnliked($event, $gorseService);
+        $this->listener->handleUserUnliked($event);
     }
 
     public function test_it_handles_user_disliked_event_and_inserts_feedback(): void
     {
-        $gorseService = Mockery::mock(GorseService::class);
-        $gorseService->shouldReceive('insertFeedback')
+        $this->gorseService->shouldReceive('insertFeedback')
             ->once()
             ->with(Mockery::on(function ($feedback) {
                 return $feedback instanceof GorseFeedback
@@ -61,29 +68,25 @@ class SyncGorseListenerTest extends TestCase
                     && $feedback->getItemId() === 'article:100';
             }));
 
-        $listener = new SyncGorseListener();
         $event    = new UserDislikedEvent(1, 'App\Models\Article', 100);
 
-        $listener->handleUserDisliked($event, $gorseService);
+        $this->listener->handleUserDisliked($event);
     }
 
     public function test_it_handles_user_undisliked_event_and_deletes_feedback(): void
     {
-        $gorseService = Mockery::mock(GorseService::class);
-        $gorseService->shouldReceive('deleteFeedback')
+        $this->gorseService->shouldReceive('deleteFeedback')
             ->once()
             ->with('dislike', '1', 'article:100');
 
-        $listener = new SyncGorseListener();
         $event    = new UserUndislikedEvent(1, 'App\Models\Article', 100);
 
-        $listener->handleUserUndisliked($event, $gorseService);
+        $this->listener->handleUserUndisliked($event);
     }
 
     public function test_it_handles_user_followed_event_and_inserts_feedback(): void
     {
-        $gorseService = Mockery::mock(GorseService::class);
-        $gorseService->shouldReceive('insertFeedback')
+        $this->gorseService->shouldReceive('insertFeedback')
             ->once()
             ->with(Mockery::on(function ($feedback) {
                 return $feedback instanceof GorseFeedback
@@ -92,29 +95,25 @@ class SyncGorseListenerTest extends TestCase
                     && $feedback->getItemId() === 'user:2';
             }));
 
-        $listener = new SyncGorseListener();
         $event    = new UserFollowedEvent(1, 'App\Models\User', 2);
 
-        $listener->handleUserFollowed($event, $gorseService);
+        $this->listener->handleUserFollowed($event);
     }
 
     public function test_it_handles_user_unfollowed_event_and_deletes_feedback(): void
     {
-        $gorseService = Mockery::mock(GorseService::class);
-        $gorseService->shouldReceive('deleteFeedback')
+        $this->gorseService->shouldReceive('deleteFeedback')
             ->once()
             ->with('subscribe', '1', 'user:2');
 
-        $listener = new SyncGorseListener();
         $event    = new UserUnfollowedEvent(1, 'App\Models\User', 2);
 
-        $listener->handleUserUnfollowed($event, $gorseService);
+        $this->listener->handleUserUnfollowed($event);
     }
 
     public function test_it_handles_user_commented_event_and_inserts_feedback(): void
     {
-        $gorseService = Mockery::mock(GorseService::class);
-        $gorseService->shouldReceive('insertFeedback')
+        $this->gorseService->shouldReceive('insertFeedback')
             ->once()
             ->with(Mockery::on(function ($feedback) {
                 return $feedback instanceof GorseFeedback
@@ -123,22 +122,19 @@ class SyncGorseListenerTest extends TestCase
                     && $feedback->getItemId() === 'article:100';
             }));
 
-        $listener = new SyncGorseListener();
         $event    = new UserCommentedEvent(1, 'App\Models\Article', 100, 'content');
 
-        $listener->handleUserCommented($event, $gorseService);
+        $this->listener->handleUserCommented($event);
     }
 
     public function test_it_handles_user_uncommented_event_and_deletes_feedback(): void
     {
-        $gorseService = Mockery::mock(GorseService::class);
-        $gorseService->shouldReceive('deleteFeedback')
+        $this->gorseService->shouldReceive('deleteFeedback')
             ->once()
             ->with('comment', '1', 'article:100');
 
-        $listener = new SyncGorseListener();
         $event    = new UserUncommentedEvent(1, 'App\Models\Article', 100, 50);
 
-        $listener->handleUserUncommented($event, $gorseService);
+        $this->listener->handleUserUncommented($event);
     }
 }

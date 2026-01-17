@@ -22,10 +22,16 @@ class SyncGorseListener implements ShouldQueue
 {
     use InteractsWithQueue;
 
+    protected GorseService $gorseService;
+
+    public function __construct(GorseService $gorseService) {
+        $this->gorseService = $gorseService;
+    }
+
     /**
      * Handle user liked event.
      */
-    public function handleUserLiked(UserLikedEvent $event, GorseService $gorse): void
+    public function handleUserLiked(UserLikedEvent $event): void
     {
         $type   = strtolower(class_basename($event->likeableType));
         $itemId = "{$type}:{$event->likeableId}";
@@ -40,25 +46,25 @@ class SyncGorseListener implements ShouldQueue
             now()->toDateTimeString()
         );
 
-        $gorse->insertFeedback($feedback);
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
      * Handle user unliked event.
      */
-    public function handleUserUnliked(UserUnlikedEvent $event, GorseService $gorse): void
+    public function handleUserUnliked(UserUnlikedEvent $event): void
     {
         $type   = strtolower(class_basename($event->likeableType));
         $itemId = "{$type}:{$event->likeableId}";
         $userId = (string) $event->userId;
 
-        $gorse->deleteFeedback('like', $userId, $itemId);
+        $this->gorseService->deleteFeedback('like', $userId, $itemId);
     }
 
     /**
      * Handle user disliked event.
      */
-    public function handleUserDisliked(UserDislikedEvent $event, GorseService $gorse): void
+    public function handleUserDisliked(UserDislikedEvent $event): void
     {
         $type   = strtolower(class_basename($event->dislikeableType));
         $itemId = "{$type}:{$event->dislikeableId}";
@@ -72,25 +78,25 @@ class SyncGorseListener implements ShouldQueue
             now()->toDateTimeString()
         );
 
-        $gorse->insertFeedback($feedback);
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
      * Handle user undisliked event.
      */
-    public function handleUserUndisliked(UserUndislikedEvent $event, GorseService $gorse): void
+    public function handleUserUndisliked(UserUndislikedEvent $event): void
     {
         $type   = strtolower(class_basename($event->dislikeableType));
         $itemId = "{$type}:{$event->dislikeableId}";
         $userId = (string) $event->userId;
 
-        $gorse->deleteFeedback('dislike', $userId, $itemId);
+        $this->gorseService->deleteFeedback('dislike', $userId, $itemId);
     }
 
     /**
      * Handle user saved event.
      */
-    public function handleUserSaved(UserSavedEvent $event, GorseService $gorse): void
+    public function handleUserSaved(UserSavedEvent $event): void
     {
         $type   = strtolower(class_basename($event->saveableType));
         $itemId = "{$type}:{$event->saveableId}";
@@ -104,25 +110,25 @@ class SyncGorseListener implements ShouldQueue
             now()->toDateTimeString()
         );
 
-        $gorse->insertFeedback($feedback);
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
      * Handle user unsaved event.
      */
-    public function handleUserUnsaved(UserUnsavedEvent $event, GorseService $gorse): void
+    public function handleUserUnsaved(UserUnsavedEvent $event): void
     {
         $type   = strtolower(class_basename($event->saveableType));
         $itemId = "{$type}:{$event->saveableId}";
         $userId = (string) $event->userId;
 
-        $gorse->deleteFeedback('star', $userId, $itemId);
+        $this->gorseService->deleteFeedback('star', $userId, $itemId);
     }
 
     /**
      * Handle user followed event.
      */
-    public function handleUserFollowed(UserFollowedEvent $event, GorseService $gorse): void
+    public function handleUserFollowed(UserFollowedEvent $event): void
     {
         $type   = strtolower(class_basename($event->followableType));
         $itemId = "{$type}:{$event->followableId}";
@@ -136,25 +142,25 @@ class SyncGorseListener implements ShouldQueue
             now()->toDateTimeString()
         );
 
-        $gorse->insertFeedback($feedback);
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
      * Handle user unfollowed event.
      */
-    public function handleUserUnfollowed(UserUnfollowedEvent $event, GorseService $gorse): void
+    public function handleUserUnfollowed(UserUnfollowedEvent $event): void
     {
         $type   = strtolower(class_basename($event->followableType));
         $itemId = "{$type}:{$event->followableId}";
         $userId = (string) $event->followerId;
 
-        $gorse->deleteFeedback('subscribe', $userId, $itemId);
+        $this->gorseService->deleteFeedback('subscribe', $userId, $itemId);
     }
 
     /**
      * Handle user commented event.
      */
-    public function handleUserCommented(UserCommentedEvent $event, GorseService $gorse): void
+    public function handleUserCommented(UserCommentedEvent $event): void
     {
         $type   = strtolower(class_basename($event->commentableType));
         $itemId = "{$type}:{$event->commentableId}";
@@ -168,19 +174,19 @@ class SyncGorseListener implements ShouldQueue
             now()->toDateTimeString()
         );
 
-        $gorse->insertFeedback($feedback);
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
      * Handle user uncommented event.
      */
-    public function handleUserUncommented(UserUncommentedEvent $event, GorseService $gorse): void
+    public function handleUserUncommented(UserUncommentedEvent $event): void
     {
         $type   = strtolower(class_basename($event->commentableType));
         $itemId = "{$type}:{$event->commentableId}";
         $userId = (string) $event->userId;
 
-        $gorse->deleteFeedback('comment', $userId, $itemId);
+        $this->gorseService->deleteFeedback('comment', $userId, $itemId);
     }
 
     /**

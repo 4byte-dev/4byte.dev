@@ -3,7 +3,6 @@
 namespace Modules\React\Tests\Feature\Listeners;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Article\Models\Article;
 use Modules\React\Events\UserCommentedEvent;
 use Modules\React\Events\UserDislikedEvent;
@@ -23,7 +22,16 @@ use Tests\TestCase;
 
 class SyncDbListenerTest extends TestCase
 {
-    use RefreshDatabase;
+    protected ReactService $reactService;
+
+    protected SyncDbListener $listener;
+
+    public function setUp(): void
+    {
+        $this->reactService = app(ReactService::class);
+        $this->listener     = new SyncDbListener($this->reactService);
+        parent::setUp();
+    }
 
     public function test_it_handles_user_liked_event_and_persists_like(): void
     {
@@ -39,10 +47,7 @@ class SyncDbListenerTest extends TestCase
 
         $event = new UserLikedEvent($user->id, Article::class, $article->id);
 
-        $listener     = new SyncDbListener();
-        $reactService = app(ReactService::class);
-
-        $listener->handleUserLiked($event, $reactService);
+        $this->listener->handleUserLiked($event);
 
         $this->assertDatabaseHas('likes', [
             'user_id'       => $user->id,
@@ -86,10 +91,7 @@ class SyncDbListenerTest extends TestCase
 
         $event = new UserUnlikedEvent($user->id, Article::class, $article->id);
 
-        $listener     = new SyncDbListener();
-        $reactService = app(ReactService::class);
-
-        $listener->handleUserUnliked($event, $reactService);
+        $this->listener->handleUserUnliked($event);
 
         $this->assertDatabaseMissing('likes', [
             'user_id'       => $user->id,
@@ -97,11 +99,11 @@ class SyncDbListenerTest extends TestCase
             'likeable_type' => Article::class,
         ]);
 
-         $this->assertDatabaseHas('counts', [
-            'countable_id'   => $article->id,
-            'countable_type' => Article::class,
-            'filter'         => 'likes',
-            'count'          => 0,
+        $this->assertDatabaseHas('counts', [
+           'countable_id'   => $article->id,
+           'countable_type' => Article::class,
+           'filter'         => 'likes',
+           'count'          => 0,
         ]);
     }
 
@@ -119,10 +121,7 @@ class SyncDbListenerTest extends TestCase
 
         $event = new UserDislikedEvent($user->id, Article::class, $article->id);
 
-        $listener     = new SyncDbListener();
-        $reactService = app(ReactService::class);
-
-        $listener->handleUserDisliked($event, $reactService);
+        $this->listener->handleUserDisliked($event);
 
         $this->assertDatabaseHas('dislikes', [
             'user_id'          => $user->id,
@@ -166,10 +165,7 @@ class SyncDbListenerTest extends TestCase
 
         $event = new UserUndislikedEvent($user->id, Article::class, $article->id);
 
-        $listener     = new SyncDbListener();
-        $reactService = app(ReactService::class);
-
-        $listener->handleUserUndisliked($event, $reactService);
+        $this->listener->handleUserUndisliked($event);
 
         $this->assertDatabaseMissing('dislikes', [
             'user_id'          => $user->id,
@@ -177,11 +173,11 @@ class SyncDbListenerTest extends TestCase
             'dislikeable_type' => Article::class,
         ]);
 
-         $this->assertDatabaseHas('counts', [
-            'countable_id'   => $article->id,
-            'countable_type' => Article::class,
-            'filter'         => 'dislikes',
-            'count'          => 0,
+        $this->assertDatabaseHas('counts', [
+           'countable_id'   => $article->id,
+           'countable_type' => Article::class,
+           'filter'         => 'dislikes',
+           'count'          => 0,
         ]);
     }
 
@@ -192,10 +188,7 @@ class SyncDbListenerTest extends TestCase
 
         $event = new UserFollowedEvent($follower->id, User::class, $target->id);
 
-        $listener     = new SyncDbListener();
-        $reactService = app(ReactService::class);
-
-        $listener->handleUserFollowed($event, $reactService);
+        $this->listener->handleUserFollowed($event);
 
         $this->assertDatabaseHas('follows', [
             'follower_id'     => $follower->id,
@@ -233,10 +226,7 @@ class SyncDbListenerTest extends TestCase
 
         $event = new UserUnfollowedEvent($follower->id, User::class, $target->id);
 
-        $listener     = new SyncDbListener();
-        $reactService = app(ReactService::class);
-
-        $listener->handleUserUnfollowed($event, $reactService);
+        $this->listener->handleUserUnfollowed($event);
 
         $this->assertDatabaseMissing('follows', [
             'follower_id'     => $follower->id,
@@ -267,10 +257,7 @@ class SyncDbListenerTest extends TestCase
 
         $event = new UserCommentedEvent($user->id, Article::class, $article->id, $content);
 
-        $listener     = new SyncDbListener();
-        $reactService = app(ReactService::class);
-
-        $listener->handleUserCommented($event, $reactService);
+        $this->listener->handleUserCommented($event);
 
         $this->assertDatabaseHas('comments', [
             'user_id'          => $user->id,
@@ -292,10 +279,7 @@ class SyncDbListenerTest extends TestCase
 
         $event = new UserUncommentedEvent($user->id, Article::class, $article->id, $comment->id);
 
-        $listener     = new SyncDbListener();
-        $reactService = app(ReactService::class);
-
-        $listener->handleUserUncommented($event, $reactService);
+        $this->listener->handleUserUncommented($event);
 
         $this->assertDatabaseMissing('comments', [
             'id' => $comment->id,

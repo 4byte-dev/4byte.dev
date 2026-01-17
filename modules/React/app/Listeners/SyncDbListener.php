@@ -21,18 +21,24 @@ class SyncDbListener implements ShouldQueue
 {
     use InteractsWithQueue;
 
+    protected ReactService $reactService;
+
+    public function __construct(ReactService $reactService) {
+        $this->reactService = $reactService;
+    }
+
     /**
      * Handle user liked event.
      */
-    public function handleUserLiked(UserLikedEvent $event, ReactService $reactService): void
+    public function handleUserLiked(UserLikedEvent $event): void
     {
-        $reactService->persistDeleteDislike(
+        $this->reactService->persistDeleteDislike(
             $event->likeableType,
             $event->likeableId,
             $event->userId
         );
 
-        $reactService->persistLike(
+        $this->reactService->persistLike(
             $event->likeableType,
             $event->likeableId,
             $event->userId
@@ -42,9 +48,9 @@ class SyncDbListener implements ShouldQueue
     /**
      * Handle user unliked event.
      */
-    public function handleUserUnliked(UserUnlikedEvent $event, ReactService $reactService): void
+    public function handleUserUnliked(UserUnlikedEvent $event): void
     {
-        $reactService->persistUnlike(
+        $this->reactService->persistUnlike(
             $event->likeableType,
             $event->likeableId,
             $event->userId
@@ -54,15 +60,15 @@ class SyncDbListener implements ShouldQueue
     /**
      * Handle user disliked event.
      */
-    public function handleUserDisliked(UserDislikedEvent $event, ReactService $reactService): void
+    public function handleUserDisliked(UserDislikedEvent $event): void
     {
-        $reactService->persistUnlike(
+        $this->reactService->persistUnlike(
             $event->dislikeableType,
             $event->dislikeableId,
             $event->userId
         );
 
-        $reactService->persistDislike(
+        $this->reactService->persistDislike(
             $event->dislikeableType,
             $event->dislikeableId,
             $event->userId
@@ -72,9 +78,9 @@ class SyncDbListener implements ShouldQueue
     /**
      * Handle user undisliked event.
      */
-    public function handleUserUndisliked(UserUndislikedEvent $event, ReactService $reactService): void
+    public function handleUserUndisliked(UserUndislikedEvent $event): void
     {
-        $reactService->persistDeleteDislike(
+        $this->reactService->persistDeleteDislike(
             $event->dislikeableType,
             $event->dislikeableId,
             $event->userId
@@ -84,9 +90,9 @@ class SyncDbListener implements ShouldQueue
     /**
      * Handle user saved event.
      */
-    public function handleUserSaved(UserSavedEvent $event, ReactService $reactService): void
+    public function handleUserSaved(UserSavedEvent $event): void
     {
-        $reactService->persistSave(
+        $this->reactService->persistSave(
             $event->saveableType,
             $event->saveableId,
             $event->userId
@@ -96,9 +102,9 @@ class SyncDbListener implements ShouldQueue
     /**
      * Handle user unsaved event.
      */
-    public function handleUserUnsaved(UserUnsavedEvent $event, ReactService $reactService): void
+    public function handleUserUnsaved(UserUnsavedEvent $event): void
     {
-        $reactService->persistDeleteSave(
+        $this->reactService->persistDeleteSave(
             $event->saveableType,
             $event->saveableId,
             $event->userId
@@ -108,9 +114,9 @@ class SyncDbListener implements ShouldQueue
     /**
      * Handle user followed event.
      */
-    public function handleUserFollowed(UserFollowedEvent $event, ReactService $reactService): void
+    public function handleUserFollowed(UserFollowedEvent $event): void
     {
-        $reactService->persistFollow(
+        $this->reactService->persistFollow(
             $event->followableType,
             $event->followableId,
             $event->followerId
@@ -120,9 +126,9 @@ class SyncDbListener implements ShouldQueue
     /**
      * Handle user unfollowed event.
      */
-    public function handleUserUnfollowed(UserUnfollowedEvent $event, ReactService $reactService): void
+    public function handleUserUnfollowed(UserUnfollowedEvent $event): void
     {
-        $reactService->persistDeleteFollow(
+        $this->reactService->persistDeleteFollow(
             $event->followableType,
             $event->followableId,
             $event->followerId
@@ -132,9 +138,9 @@ class SyncDbListener implements ShouldQueue
     /**
      * Handle user commented event.
      */
-    public function handleUserCommented(UserCommentedEvent $event, ReactService $reactService): void
+    public function handleUserCommented(UserCommentedEvent $event): void
     {
-        $reactService->persistComment(
+        $this->reactService->persistComment(
             $event->commentableType,
             $event->commentableId,
             $event->content,
@@ -146,10 +152,10 @@ class SyncDbListener implements ShouldQueue
     /**
      * Handle user uncommented event.
      */
-    public function handleUserUncommented(UserUncommentedEvent $event, ReactService $reactService): void
+    public function handleUserUncommented(UserUncommentedEvent $event): void
     {
         if ($event->commentId) {
-            $reactService->persistDeleteComment($event->commentId);
+            $this->reactService->persistDeleteComment($event->commentId);
         }
     }
 
