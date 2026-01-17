@@ -6,7 +6,7 @@
         "4Byte",
         "Tag"
     ],
-    "priority": 0,
+    "priority": 4,
     "providers": [
         "Modules\\Tag\\Providers\\TagServiceProvider"
     ],

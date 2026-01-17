@@ -6,7 +6,7 @@
         "4Byte",
         "CodeSpace"
     ],
-    "priority": 0,
+    "priority": 5,
     "providers": [
         "Modules\\CodeSpace\\Providers\\CodeSpaceServiceProvider"
     ],

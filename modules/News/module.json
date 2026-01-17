@@ -6,7 +6,7 @@
         "News",
         "4Byte"
     ],
-    "priority": 0,
+    "priority": 5,
     "providers": [
         "Modules\\News\\Providers\\NewsServiceProvider"
     ],

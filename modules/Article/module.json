@@ -6,7 +6,7 @@
         "4Byte",
         "Article"
     ],
-    "priority": 0,
+    "priority": 5,
     "providers": [
         "Modules\\Article\\Providers\\ArticleServiceProvider"
     ],

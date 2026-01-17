@@ -6,7 +6,7 @@
         "4Byte",
         "Admin"
     ],
-    "priority": 0,
+    "priority": 7,
     "providers": [
         "Modules\\Admin\\Providers\\AdminServiceProvider",
         "Modules\\Admin\\Providers\\AdminPanelProvider"
