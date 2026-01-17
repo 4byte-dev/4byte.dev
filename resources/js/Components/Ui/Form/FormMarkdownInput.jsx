@@ -1,7 +1,7 @@
 import { MarkdownEditor } from "@/Components/Common/MarkdownEditor";
 import { FormControl, FormItem, FormLabel, FormMessage } from "./Form";
 
-export function FormMarkdownInput({ placeholder, label, field }) {
+export function FormMarkdownInput({ placeholder, label, field, onPaste }) {
 	return (
 		<FormItem>
 			<FormLabel>{label}</FormLabel>
@@ -12,6 +12,7 @@ export function FormMarkdownInput({ placeholder, label, field }) {
 					}}
 					value={field.value}
 					onChange={field.onChange}
+					onPaste={onPaste}
 				/>
 			</FormControl>
 			<FormMessage />

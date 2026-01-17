@@ -2,8 +2,11 @@
     "name": "Course",
     "alias": "course",
     "description": "Course module for 4Byte",
-    "keywords": [],
-    "priority": 0,
+    "keywords": [
+        "4Byte",
+        "Course"
+    ],
+    "priority": 5,
     "providers": [
         "Modules\\Course\\Providers\\CourseServiceProvider"
     ],

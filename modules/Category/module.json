@@ -6,7 +6,7 @@
         "4Byte",
         "Category"
     ],
-    "priority": 0,
+    "priority": 4,
     "providers": [
         "Modules\\Category\\Providers\\CategoryServiceProvider"
     ],

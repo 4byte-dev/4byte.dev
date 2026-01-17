@@ -104,7 +104,7 @@ class Comment extends Model
      */
     public function repliesCount(): int
     {
-        return app(ReactService::class)->getCommentRepliesCount($this->commentable_type, $this->commentable_id, $this->id);
+        return app(ReactService::class)->getCommentRepliesCount($this->id);
     }
 
     /**

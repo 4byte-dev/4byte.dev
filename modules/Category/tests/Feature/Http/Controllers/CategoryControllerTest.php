@@ -4,6 +4,7 @@ namespace Modules\Category\Tests\Feature\Http\Controllers;
 
 use App\Services\SeoService;
 use Honeystone\Seo\Contracts\BuildsMetadata;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Testing\AssertableInertia as Assert;
 use Mockery;
 use Modules\Category\Data\CategoryData;
@@ -113,5 +114,39 @@ class CategoryControllerTest extends TestCase
         );
 
         $this->assertArrayHasKey('seo', $response->original->getData());
+    }
+
+    public function test_it_can_search_categories(): void
+    {
+        $term         = 'test';
+        $categoryData = new CategoryData(
+            id: 1,
+            name: 'Test Category',
+            slug: 'test-category',
+            followers: 0,
+            isFollowing: false
+        );
+
+        $paginator = new LengthAwarePaginator(
+            collect([$categoryData]),
+            1,
+            15
+        );
+
+        $categoryService = Mockery::mock(CategoryService::class);
+        $categoryService->shouldReceive('search')
+            ->once()
+            ->with($term)
+            ->andReturn($paginator);
+
+        $this->app->instance(CategoryService::class, $categoryService);
+
+        $seoService = Mockery::mock(SeoService::class);
+        $this->app->instance(SeoService::class, $seoService);
+
+        $response = $this->get(route('category.search', ['q' => $term]));
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment(['slug' => 'test-category']);
     }
 }

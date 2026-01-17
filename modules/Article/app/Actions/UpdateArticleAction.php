@@ -31,10 +31,11 @@ class UpdateArticleAction
      * } $data
      * @param UploadedFile|null $image
      * @param int|null $userId
+     * @param array<string, ?UploadedFile> $contentImages
      */
-    public function execute(Article $article, array $data, ?UploadedFile $image = null, ?int $userId = null): Article
+    public function execute(Article $article, array $data, ?UploadedFile $image = null, ?int $userId = null, array $contentImages = []): Article
     {
-        return DB::transaction(function () use ($article, $data, $image, $userId) {
+        return DB::transaction(function () use ($article, $data, $image, $userId, $contentImages) {
             $userId ??= Auth::id();
             $title    = $data['title'];
             $isDraft  = ! ($data['published'] ?? false);
@@ -42,11 +43,23 @@ class UpdateArticleAction
             $slugGenerator = new SlugGenerator();
             $slug          = $slugGenerator->generate($title, $article->id);
 
+            $content = isset($data['content']) ? Purify::clean($data['content']) : null;
+
+            if (! empty($contentImages) && $content) {
+                foreach ($contentImages as $placeholder => $file) {
+                    if ($file instanceof UploadedFile) {
+                        $media   = $article->addMedia($file)->toMediaCollection('content');
+                        $url     = $media->getUrl();
+                        $content = str_replace($placeholder, $url, $content);
+                    }
+                }
+            }
+
             $updateData = [
                 'title'        => $title,
                 'slug'         => $slug,
                 'excerpt'      => $data['excerpt'] ?? null,
-                'content'      => isset($data['content']) ? Purify::clean($data['content']) : null,
+                'content'      => $content,
                 'status'       => $isDraft ? ArticleStatus::DRAFT : ArticleStatus::PUBLISHED,
                 'published_at' => $isDraft ? null : now(),
                 'sources'      => $data['sources'] ?? [],

@@ -4,6 +4,7 @@ namespace Modules\Tag\Tests\Feature\Http\Controllers;
 
 use App\Services\SeoService;
 use Honeystone\Seo\Contracts\BuildsMetadata;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Testing\AssertableInertia as Assert;
 use Mockery;
 use Modules\Tag\Data\TagData;
@@ -105,5 +106,39 @@ class TagControllerTest extends TestCase
         );
 
         $this->assertArrayHasKey('seo', $response->original->getData());
+    }
+
+    public function test_it_can_search_categories(): void
+    {
+        $term         = 'test';
+        $tagData      = new TagData(
+            id: 1,
+            name: 'Test Tag',
+            slug: 'test-tag',
+            followers: 0,
+            isFollowing: false
+        );
+
+        $paginator = new LengthAwarePaginator(
+            collect([$tagData]),
+            1,
+            15
+        );
+
+        $tagService = Mockery::mock(TagService::class);
+        $tagService->shouldReceive('search')
+            ->once()
+            ->with($term)
+            ->andReturn($paginator);
+
+        $this->app->instance(TagService::class, $tagService);
+
+        $seoService = Mockery::mock(SeoService::class);
+        $this->app->instance(SeoService::class, $seoService);
+
+        $response = $this->get(route('tag.search', ['q' => $term]));
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonFragment(['slug' => 'test-tag']);
     }
 }

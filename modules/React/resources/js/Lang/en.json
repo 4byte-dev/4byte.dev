@@ -9,5 +9,7 @@
     "Reply": "Reply",
     "comments": "Comments <0>{{count}}</0>",
     "replies": "{{count}} Reply",
-    "Comment must be at least 20 characters": "Comment must be at least 20 characters"
+    "Comment must be at least 20 characters": "Comment must be at least 20 characters",
+    "This comment is not ready to receive likes yet. Please try again later.": "This comment is not ready to receive likes yet. Please try again later.",
+    "This comment is not ready to receive replies yet. Please try again later.": "This comment is not ready to receive replies yet. Please try again later."
 }

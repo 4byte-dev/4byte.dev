@@ -118,76 +118,131 @@ class ReactServiceTest extends TestCase
         $this->assertEquals(0, $this->service->getDislikesCount($dislikeableType, $dislikeableId));
     }
 
-    public function test_can_insert_and_delete_save(): void
+    public function test_can_persist_and_persist_delete_save(): void
     {
         $user         = User::factory()->create();
         $saveableId   = $user->id;
         $saveableType = User::class;
 
-        $this->service->insertSave($saveableType, $saveableId, $user->id);
+        $this->service->persistSave($saveableType, $saveableId, $user->id);
+
+        $this->assertDatabaseHas('saves', [
+            'user_id'       => $user->id,
+            'saveable_id'   => $saveableId,
+            'saveable_type' => $saveableType,
+        ]);
+
+        $this->service->persistDeleteSave($saveableType, $saveableId, $user->id);
+
+        $this->assertDatabaseMissing('saves', [
+            'user_id'       => $user->id,
+            'saveable_id'   => $saveableId,
+            'saveable_type' => $saveableType,
+        ]);
+    }
+
+    public function test_can_cache_and_cache_delete_save(): void
+    {
+        $user         = User::factory()->create();
+        $saveableId   = $user->id;
+        $saveableType = User::class;
+
+        $this->service->cacheSave($saveableType, $saveableId, $user->id);
 
         $this->assertTrue($this->service->checkSaved($saveableType, $saveableId, $user->id));
 
-        $this->service->deleteSave($saveableType, $saveableId, $user->id);
+        $this->service->cacheDeleteSave($saveableType, $saveableId, $user->id);
 
         $this->assertFalse($this->service->checkSaved($saveableType, $saveableId, $user->id));
     }
 
-    public function test_can_insert_and_retrieve_comments(): void
+    public function test_can_persist_and_persist_delete_comment(): void
     {
         $user            = User::factory()->create();
         $commentableId   = $user->id;
         $commentableType = User::class;
         $content         = 'Test comment';
 
-        $commentData = $this->service->insertComment($commentableType, $commentableId, $content, $user->id);
+        $this->service->persistComment($commentableType, $commentableId, $content, $user->id);
 
-        $this->assertNotNull($commentData->id);
-        $this->assertEquals($content, $commentData->content);
-        $this->assertEquals(1, $this->service->getCommentsCount($commentableType, $commentableId));
+        $this->assertDatabaseHas('comments', [
+            'user_id'          => $user->id,
+            'commentable_id'   => $commentableId,
+            'commentable_type' => $commentableType,
+            'content'          => $content,
+        ]);
 
-        $retrievedComment = $this->service->getComment($commentData->id);
-        $this->assertEquals($commentData->content, $retrievedComment->content);
+        $commentId = \Modules\React\Models\Comment::where('content', $content)->first()->id;
 
-        $comments = $this->service->getComments($commentableType, $commentableId, 1, 10);
-        $this->assertCount(1, $comments);
+        $this->service->persistDeleteComment($commentId);
+
+        $this->assertDatabaseMissing('comments', [
+            'id' => $commentId,
+        ]);
     }
 
-    public function test_can_insert_reply_comment(): void
+    public function test_can_cache_and_cache_delete_comment(): void
     {
-         $user           = User::factory()->create();
+        $user            = User::factory()->create();
         $commentableId   = $user->id;
         $commentableType = User::class;
-        $content         = 'Parent comment';
 
-        $parentComment = $this->service->insertComment($commentableType, $commentableId, $content, $user->id);
+        $this->service->cacheComment($commentableType, $commentableId, $user->id);
 
-        $replyContent = 'Reply comment';
-        $replyComment = $this->service->insertComment($commentableType, $commentableId, $replyContent, $user->id, $parentComment->id);
+        $this->assertTrue($this->service->checkCommented($commentableType, $commentableId, $user->id));
+        $this->assertEquals(1, $this->service->getCommentsCount($commentableType, $commentableId));
 
-        $this->assertEquals($parentComment->id, $replyComment->parent);
-        $this->assertEquals(1, $this->service->getCommentRepliesCount($commentableType, $commentableId, $parentComment->id));
+        $this->service->cacheDeleteComment($commentableType, $commentableId, $user->id);
+
+        $this->assertFalse($this->service->checkCommented($commentableType, $commentableId, $user->id));
+        $this->assertEquals(0, $this->service->getCommentsCount($commentableType, $commentableId));
     }
 
-    public function test_can_insert_and_delete_follow(): void
+    public function test_can_cache_and_cache_unfollow_follow(): void
     {
-        $follower       = User::factory()->create();
-        $followableId   = $follower->id;
+        $user           = User::factory()->create();
+        $followableId   = $user->id;
         $followableType = User::class;
 
-        $target       = User::factory()->create();
-        $followableId = $target->id;
+        $this->service->cacheFollow($followableType, $followableId, $user->id);
 
-        $this->service->insertFollow($followableType, $followableId, $follower->id);
-
-        $this->assertTrue($this->service->checkFollowed($followableType, $followableId, $follower->id));
+        $this->assertTrue($this->service->checkFollowed($followableType, $followableId, $user->id));
         $this->assertEquals(1, $this->service->getFollowersCount($followableType, $followableId));
-        $this->assertEquals(1, $this->service->getFollowingsCount($follower->id));
 
-        $this->service->deleteFollow($followableType, $followableId, $follower->id);
+        $this->service->cacheDeleteFollow($followableType, $followableId, $user->id);
 
-        $this->assertFalse($this->service->checkFollowed($followableType, $followableId, $follower->id));
+        $this->assertFalse($this->service->checkFollowed($followableType, $followableId, $user->id));
         $this->assertEquals(0, $this->service->getFollowersCount($followableType, $followableId));
+    }
+
+    public function test_can_persist_and_persist_delete_follow(): void
+    {
+        $user            = User::factory()->create();
+        $followableId    = $user->id;
+        $followableType  = User::class;
+
+        $this->service->persistFollow($followableType, $followableId, $user->id);
+
+        $this->assertDatabaseHas('follows', [
+            'follower_id'          => $user->id,
+            'followable_id'        => $followableId,
+            'followable_type'      => $followableType,
+        ]);
+        $this->assertEquals(1, $this->service->getCount($followableType, $followableId, 'followers'));
+
+        $this->service->persistDeleteFollow($followableType, $followableId, $user->id);
+
+        $this->assertDatabaseMissing('follows', [
+            'follower_id'          => $user->id,
+            'followable_id'        => $followableId,
+            'followable_type'      => $followableType,
+        ]);
+        $this->assertDatabaseHas('counts', [
+            'countable_id'   => $followableId,
+            'countable_type' => $followableType,
+            'filter'         => 'followers',
+            'count'          => 0,
+        ]);
     }
 
     public function test_can_increment_and_decrement_count(): void

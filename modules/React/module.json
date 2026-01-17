@@ -6,7 +6,7 @@
         "4Byte",
         "React"
     ],
-    "priority": 0,
+    "priority": 2,
     "providers": [
         "Modules\\React\\Providers\\ReactServiceProvider"
     ],

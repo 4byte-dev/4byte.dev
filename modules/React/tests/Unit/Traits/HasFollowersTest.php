@@ -12,9 +12,7 @@ class HasFollowersTest extends TestCase
         $user     = User::factory()->create();
         $follower = User::factory()->create();
 
-        $user->followers()->create([
-            'follower_id' => $follower->id,
-        ]);
+        $follower->follow($user);
 
         $this->assertTrue($user->isFollowedBy($follower->id));
         $this->assertEquals(1, $user->followersCount());

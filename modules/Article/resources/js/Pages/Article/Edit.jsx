@@ -38,6 +38,11 @@ export default function EditArticlePage({ topTags, topCategories, article, slug 
 					payload[`sources[${index}][date]`] = source.date;
 				});
 			}
+			if (data.content_images && Object.keys(data.content_images).length > 0) {
+				Object.entries(data.content_images).forEach(([key, value]) => {
+					payload[`content_images[${key}]`] = value;
+				});
+			}
 
 			return ArticleApi.editArticle(slug, payload);
 		},

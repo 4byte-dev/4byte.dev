@@ -7,10 +7,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
+use Modules\React\Actions\CommentAction;
 use Modules\React\Actions\DislikeAction;
+use Modules\React\Actions\FollowAction;
 use Modules\React\Actions\LikeAction;
+use Modules\React\Actions\SaveAction;
 use Modules\React\Actions\UndislikeAction;
+use Modules\React\Actions\UnfollowAction;
 use Modules\React\Actions\UnlikeAction;
+use Modules\React\Actions\UnsaveAction;
 use Modules\React\Http\Requests\ReactRequest;
 use Modules\React\Services\ReactService;
 
@@ -21,7 +26,12 @@ class ReactController extends Controller
         protected LikeAction $likeAction,
         protected UnlikeAction $unlikeAction,
         protected DislikeAction $dislikeAction,
-        protected UndislikeAction $undislikeAction
+        protected UndislikeAction $undislikeAction,
+        protected SaveAction $saveAction,
+        protected UnsaveAction $unsaveAction,
+        protected FollowAction $followAction,
+        protected UnfollowAction $unfollowAction,
+        protected CommentAction $commentAction
     ) {
     }
 
@@ -34,26 +44,13 @@ class ReactController extends Controller
      */
     public function like(ReactRequest $request): JsonResponse|Response
     {
-        [$baseClass, $itemId, $type] = $request->resolveTarget();
-        $userId                      = Auth::id();
+        [$baseClass, $itemId] = $request->resolveTarget();
+        $userId               = Auth::id();
 
-        $cacheKey = "{$type}:{$itemId}:reaction";
-
-        $executed = RateLimiter::attempt(
-            key: "{$cacheKey}:{$userId}",
-            maxAttempts: 1,
-            decaySeconds: 60 * 60 * 24,
-            callback: function () use ($baseClass, $itemId, $userId) {
-                if ($this->reactService->checkLiked($baseClass, $itemId, $userId)) {
-                    $this->unlikeAction->execute($baseClass, $itemId, $userId);
-                } else {
-                    $this->likeAction->execute($baseClass, $itemId, $userId);
-                }
-            }
-        );
-
-        if (! $executed) {
-            return response()->noContent(429);
+        if ($this->reactService->checkLiked($baseClass, $itemId, $userId)) {
+            $this->unlikeAction->execute($baseClass, $itemId, $userId);
+        } else {
+            $this->likeAction->execute($baseClass, $itemId, $userId);
         }
 
         return response()->noContent(200);
@@ -68,26 +65,13 @@ class ReactController extends Controller
      */
     public function dislike(ReactRequest $request): JsonResponse|Response
     {
-        [$baseClass, $itemId, $type] = $request->resolveTarget();
-        $userId                      = Auth::id();
+        [$baseClass, $itemId] = $request->resolveTarget();
+        $userId               = Auth::id();
 
-        $cacheKey = "{$type}:{$itemId}:reaction";
-
-        $executed = RateLimiter::attempt(
-            key: "{$cacheKey}:{$userId}",
-            maxAttempts: 1,
-            decaySeconds: 60 * 60 * 24,
-            callback: function () use ($baseClass, $itemId, $userId) {
-                if ($this->reactService->checkDisliked($baseClass, $itemId, $userId)) {
-                    $this->undislikeAction->execute($baseClass, $itemId, $userId);
-                } else {
-                    $this->dislikeAction->execute($baseClass, $itemId, $userId);
-                }
-            }
-        );
-
-        if (! $executed) {
-            return response()->noContent(429);
+        if ($this->reactService->checkDisliked($baseClass, $itemId, $userId)) {
+            $this->undislikeAction->execute($baseClass, $itemId, $userId);
+        } else {
+            $this->dislikeAction->execute($baseClass, $itemId, $userId);
         }
 
         return response()->noContent(200);
@@ -105,19 +89,16 @@ class ReactController extends Controller
         [$baseClass, $itemId] = $request->resolveTarget();
         $userId               = Auth::id();
 
-        if (! $this->reactService->deleteSave($baseClass, $itemId, $userId)) {
-            $this->reactService->insertSave($baseClass, $itemId, $userId);
+        if ($this->reactService->checkSaved($baseClass, $itemId, $userId)) {
+            $this->unsaveAction->execute($baseClass, $itemId, $userId);
+        } else {
+            $this->saveAction->execute($baseClass, $itemId, $userId);
         }
 
         return response()->noContent(200);
     }
 
-    /**
-     * Create a new comment on a model.
-     *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
-     */
-    public function comment(ReactRequest $request): JsonResponse
+    public function comment(ReactRequest $request): Response
     {
         $request->validate([
             'content' => 'required|string|min:20',
@@ -129,9 +110,9 @@ class ReactController extends Controller
         $content              = $request->input('content');
         $parentId             = $request->input('parent', null);
 
-        $comment = $this->reactService->insertComment($baseClass, $itemId, $content, $userId, $parentId);
+        $this->commentAction->execute($baseClass, $itemId, $content, $userId, $parentId);
 
-        return response()->json($comment);
+        return response()->noContent(200);
     }
 
     /**
@@ -201,8 +182,10 @@ class ReactController extends Controller
             maxAttempts: 1,
             decaySeconds: 60 * 60 * 24,
             callback: function () use ($baseClass, $itemId, $userId) {
-                if (! $this->reactService->deleteFollow($baseClass, $itemId, $userId)) {
-                    $this->reactService->insertFollow($baseClass, $itemId, $userId);
+                if ($this->reactService->checkFollowed($baseClass, $itemId, $userId)) {
+                    $this->unfollowAction->execute($baseClass, $itemId, $userId);
+                } else {
+                    $this->followAction->execute($baseClass, $itemId, $userId);
                 }
             }
         );

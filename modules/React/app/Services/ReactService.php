@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 use Modules\React\Data\CommentData;
+use Modules\React\Mappers\CommentMapper;
 use Modules\React\Models\Comment;
 use Modules\React\Models\Count;
 use Modules\React\Models\Dislike;
@@ -171,33 +172,33 @@ class ReactService
         });
     }
 
-    /**
-     * Inserts a save for the given user on the specified model.
-     */
-    public function insertSave(string $saveableType, int $saveableId, int $userId): void
+    public function persistSave(string $saveableType, int $saveableId, int $userId): void
     {
-        Save::create([
+        Save::firstOrCreate([
             'user_id'       => $userId,
             'saveable_id'   => $saveableId,
             'saveable_type' => $saveableType,
         ]);
+    }
+
+    public function cacheSave(string $saveableType, int $saveableId, int $userId): void
+    {
         Cache::forever($this->cacheKey($saveableType, $saveableId, $userId, 'saved'), true);
     }
 
-    /**
-     * Deletes a save for the given user on the specified model.
-     */
-    public function deleteSave(string $saveableType, int $saveableId, int $userId): bool
+    public function persistDeleteSave(string $saveableType, int $saveableId, int $userId): bool
     {
         $deleted = Save::where('user_id', $userId)
             ->where('saveable_id', $saveableId)
             ->where('saveable_type', $saveableType)
             ->delete();
-        if ($deleted) {
-            Cache::forget($this->cacheKey($saveableType, $saveableId, $userId, 'saved'));
-        }
 
-        return $deleted;
+        return (bool) $deleted;
+    }
+
+    public function cacheDeleteSave(string $saveableType, int $saveableId, int $userId): void
+    {
+        Cache::forget($this->cacheKey($saveableType, $saveableId, $userId, 'saved'));
     }
 
     /**
@@ -219,14 +220,27 @@ class ReactService
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function insertComment(string $commentableType, int $commentableId, string $content, int $userId, ?int $parentId = null): CommentData
+    public function persistComment(string $commentableType, int $commentableId, string $content, int $userId, ?int $parentId = null): void
+    {
+        Comment::create([
+            'content'          => $content,
+            'user_id'          => $userId,
+            'parent_id'        => $parentId,
+            'commentable_id'   => $commentableId,
+            'commentable_type' => $commentableType,
+        ]);
+
+        if ($parentId) {
+            $this->incrementCountDb(Comment::class, $parentId, 'replies');
+        }
+
+        $this->incrementCountDb($commentableType, $commentableId, 'comments');
+    }
+
+    public function cacheComment(string $commentableType, int $commentableId, int $userId, ?int $parentId = null): void
     {
         if ($parentId) {
-            Comment::where('id', $parentId)
-                ->where('commentable_id', $commentableId)
-                ->where('commentable_type', $commentableType)
-                ->existsOrFail();
-            $this->incrementCount(Comment::class, $parentId, 'replies');
+            $this->incrementCountCache(Comment::class, $parentId, 'replies');
             try {
                 $replyPaginationKeys = Redis::keys($this->cacheKey($commentableType, $commentableId, 'comment', $parentId, 'replies', 'pagination') . '*');
 
@@ -238,7 +252,7 @@ class ReactService
             }
         }
 
-        $this->incrementCount($commentableType, $commentableId, 'comments');
+        $this->incrementCountCache($commentableType, $commentableId, 'comments');
         Cache::forever($this->cacheKey($commentableType, $commentableId, $userId, 'commented'), true);
 
         try {
@@ -250,16 +264,40 @@ class ReactService
         } catch (\Exception $e) {
             logger()->warning('Redis is not avaliable: ' . $e->getMessage());
         }
+    }
 
-        $comment = Comment::create([
-            'content'          => $content,
-            'user_id'          => $userId,
-            'parent_id'        => $parentId,
-            'commentable_id'   => $commentableId,
-            'commentable_type' => $commentableType,
-        ]);
+    public function persistDeleteComment(int $commentId): bool
+    {
+        return (bool) Comment::destroy($commentId);
+    }
 
-        return CommentData::fromModel($comment);
+    public function cacheDeleteComment(string $commentableType, int $commentableId, int $userId, ?int $parentId = null): void
+    {
+        if ($parentId) {
+            $this->decrementCountCache(Comment::class, $parentId, 'replies');
+            try {
+                $replyPaginationKeys = Redis::keys($this->cacheKey($commentableType, $commentableId, 'comment', $parentId, 'replies', 'pagination') . '*');
+
+                if (count($replyPaginationKeys) > 0) {
+                    Redis::del(...$replyPaginationKeys);
+                }
+            } catch (\Exception $e) {
+                logger()->warning('Redis is not avaliable: ' . $e->getMessage());
+            }
+        }
+
+        $this->decrementCountCache($commentableType, $commentableId, 'comments');
+        Cache::forget($this->cacheKey($commentableType, $commentableId, $userId, 'commented'));
+
+        try {
+            $paginationKeys = Redis::keys($this->cacheKey($commentableType, $commentableId, 'comments', 'pagination') . '*');
+
+            if (count($paginationKeys) > 0) {
+                Redis::del(...$paginationKeys);
+            }
+        } catch (\Exception $e) {
+            logger()->warning('Redis is not avaliable: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -293,15 +331,15 @@ class ReactService
             return Comment::where('id', $commentId)->first();
         });
 
-        return CommentData::fromModel($comment, false, false, false, true, true, true);
+        return CommentMapper::toData($comment, false, false, false, true, true, true);
     }
 
     /**
      * Returns a paginated collection of top-level comments for the given model.
      *
-     * @return Collection<int, CommentData>
+     * @return array<CommentData>
      */
-    public function getComments(string $commentableType, int $commentableId, int $page, int $perPage): Collection
+    public function getComments(string $commentableType, int $commentableId, int $page, int $perPage): array
     {
         $comments = Cache::rememberForever(
             $this->cacheKey($commentableType, $commentableId, 'comments', 'pagination', (string) $page, (string) $perPage),
@@ -314,13 +352,13 @@ class ReactService
                 ->get()
         );
 
-        return CommentData::collect($comments);
+        return CommentMapper::collection($comments, false, false, false, true, true, true);
     }
 
     /**
      * Returns the number of replies for a specific comment.
      */
-    public function getCommentRepliesCount(string $commentableType, int $commentableId, ?int $parentId): int
+    public function getCommentRepliesCount(?int $parentId): int
     {
         if (! $parentId) {
             return 0;
@@ -332,9 +370,9 @@ class ReactService
     /**
      * Returns a paginated collection of replies for a specific comment.
      *
-     * @return Collection<int, CommentData>
+     * @return array<CommentData>
      */
-    public function getCommentReplies(string $commentableType, int $commentableId, int $parentId, int $page, int $perPage): Collection
+    public function getCommentReplies(string $commentableType, int $commentableId, int $parentId, int $page, int $perPage): array
     {
         $comments = Cache::rememberForever(
             $this->cacheKey($commentableType, $commentableId, 'comment', $parentId, 'replies', 'pagination', $page, $perPage),
@@ -347,29 +385,35 @@ class ReactService
                 ->get()
         );
 
-        return CommentData::collect($comments);
+        return CommentMapper::collection($comments);
     }
 
     /**
      * Inserts a follow relationship for the given user.
      */
-    public function insertFollow(string $followableType, int $followableId, int $followerId): void
+    public function persistFollow(string $followableType, int $followableId, int $followerId): void
     {
-        Follow::create([
+        Follow::firstOrCreate([
             'follower_id'     => $followerId,
             'followable_id'   => $followableId,
             'followable_type' => $followableType,
         ]);
 
-        Cache::increment($this->cacheKey($followableType, $followableId, 'followers'));
-        Cache::increment($this->cacheKey(User::class, $followerId, 'followings'));
+        $this->incrementCountDb($followableType, $followableId, 'followers');
+        $this->incrementCountDb(User::class, $followerId, 'followings');
+    }
+
+    public function cacheFollow(string $followableType, int $followableId, int $followerId): void
+    {
+        $this->incrementCountCache($followableType, $followableId, 'followers');
+        $this->incrementCountCache(User::class, $followerId, 'followings');
         Cache::forever($this->cacheKey($followableType, $followableId, $followerId, 'followed'), true);
     }
 
     /**
      * Deletes a follow relationship for the given user.
      */
-    public function deleteFollow(string $followableType, int $followableId, int $followerId): bool
+    public function persistDeleteFollow(string $followableType, int $followableId, int $followerId): bool
     {
         $deleted = Follow::where('follower_id', $followerId)
             ->where('followable_id', $followableId)
@@ -377,12 +421,18 @@ class ReactService
             ->delete();
 
         if ($deleted) {
-            Cache::decrement($this->cacheKey($followableType, $followableId, 'followers'));
-            Cache::decrement($this->cacheKey(User::class, $followerId, 'followings'));
-            Cache::forget($this->cacheKey($followableType, $followableId, $followerId, 'followed'));
+            $this->decrementCountDb($followableType, $followableId, 'followers');
+            $this->decrementCountDb(User::class, $followerId, 'followings');
         }
 
         return (bool) $deleted;
+    }
+
+    public function cacheDeleteFollow(string $followableType, int $followableId, int $followerId): void
+    {
+        $this->decrementCountCache($followableType, $followableId, 'followers');
+        $this->decrementCountCache(User::class, $followerId, 'followings');
+        Cache::forget($this->cacheKey($followableType, $followableId, $followerId, 'followed'));
     }
 
     /**
@@ -390,11 +440,7 @@ class ReactService
      */
     public function getFollowersCount(string $followableType, int $followableId): int
     {
-        return Cache::rememberForever($this->cacheKey($followableType, $followableId, 'followers'), function () use ($followableId, $followableType) {
-            return Follow::where('followable_id', $followableId)
-                ->where('followable_type', $followableType)
-                ->count();
-        });
+        return $this->getCount($followableType, $followableId, 'followers');
     }
 
     /**
@@ -402,10 +448,7 @@ class ReactService
      */
     public function getFollowingsCount(int $userId): int
     {
-        return Cache::rememberForever($this->cacheKey(User::class, $userId, 'followings'), function () use ($userId) {
-            return Follow::where('follower_id', $userId)
-                ->count();
-        });
+        return $this->getCount(User::class, $userId, 'followings');
     }
 
     /**

@@ -6,7 +6,7 @@
         "Recommend",
         "4Byte"
     ],
-    "priority": 0,
+    "priority": 1,
     "providers": [
         "Modules\\Recommend\\Providers\\RecommendServiceProvider"
     ],

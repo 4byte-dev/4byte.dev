@@ -4,6 +4,7 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Cache;
 use Mockery;
 use Modules\Recommend\Services\GorseService;
 
@@ -14,7 +15,7 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
 
         $this->app->bind(GorseService::class, function () {
             $userMock = Mockery::mock(\Modules\Recommend\Classes\GorseUser::class);

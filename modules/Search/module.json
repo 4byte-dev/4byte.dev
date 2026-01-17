@@ -6,7 +6,7 @@
         "Search",
         "4Byte"
     ],
-    "priority": 0,
+    "priority": 2,
     "providers": [
         "Modules\\Search\\Providers\\SearchServiceProvider"
     ],

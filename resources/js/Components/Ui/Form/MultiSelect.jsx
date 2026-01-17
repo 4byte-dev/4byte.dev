@@ -1,7 +1,6 @@
 import * as React from "react";
 import { cva } from "class-variance-authority";
 import { CheckIcon, XCircle, ChevronDown, XIcon, WandSparkles } from "lucide-react";
-
 import { cn } from "@/Lib/Utils";
 import { Separator } from "@/Components/Ui/Separator";
 import { Button } from "@/Components/Ui/Form/Button";
@@ -18,10 +17,6 @@ import {
 } from "@/Components/Ui/Command";
 import { useTranslation } from "react-i18next";
 
-/**
- * Variants for the multi-select component to handle different styles.
- * Uses class-variance-authority (cva) to define different styles based on "variant" prop.
- */
 const multiSelectVariants = cva("m-1 transition-all duration-300 ease-in-out", {
 	variants: {
 		variant: {
@@ -73,6 +68,11 @@ export const MultiSelect = React.forwardRef(
 			deduplicateOptions = false,
 			resetOnDefaultValueChange = true,
 			closeOnSelect = false,
+			asyncSearch,
+			paginationType = "page",
+			pageSize = 20,
+			debounceMs = 300,
+			onSearchError,
 			...props
 		},
 		ref,
@@ -292,9 +292,26 @@ export const MultiSelect = React.forwardRef(
 			return deduplicateOptions ? uniqueOptions : allOptions;
 		}, [options, deduplicateOptions, isGroupedOptions]);
 
+		const selectedOptionsMap = React.useRef(new Map());
+
+		const [apiResults, setApiResults] = React.useState([]);
+		const [apiLoading, setApiLoading] = React.useState(false);
+		const [apiError, setApiError] = React.useState(null);
+		const [apiPage, setApiPage] = React.useState(1);
+		const [apiNextCursor, setApiNextCursor] = React.useState(null);
+		const [apiHasMore, setApiHasMore] = React.useState(false);
+		const cancelFetchRef = React.useRef(false);
+		const debounceRef = React.useRef(null);
+
 		const getOptionByValue = React.useCallback(
 			(value) => {
-				const option = getAllOptions().find((option) => option.value === value);
+				let option = getAllOptions().find((option) => option.value === value);
+				if (!option && asyncSearch) {
+					option = apiResults.find((option) => option.value === value);
+				}
+				if (!option) {
+					option = selectedOptionsMap.current.get(value);
+				}
 				if (!option && process.env.NODE_ENV === "development") {
 					console.warn(
 						`MultiSelect: Option with value "${value}" not found in options list`,
@@ -302,10 +319,111 @@ export const MultiSelect = React.forwardRef(
 				}
 				return option;
 			},
-			[getAllOptions],
+			[getAllOptions, asyncSearch, apiResults],
 		);
 
+		const fetchSearch = React.useCallback(
+			async (query, { reset = true, page = 1 } = {}) => {
+				if (!asyncSearch) return;
+				setApiLoading(true);
+				setApiError(null);
+				cancelFetchRef.current = false;
+				try {
+					let args = { pageSize };
+					if (paginationType === "page") {
+						args.page = page;
+					} else if (paginationType === "cursor") {
+						args.cursor = reset ? null : apiNextCursor;
+					}
+					const response = await asyncSearch(query, args);
+					if (cancelFetchRef.current) return;
+					const results = response?.results || [];
+					if (reset) {
+						setApiResults(results);
+					} else {
+						setApiResults((prev) => [...prev, ...results]);
+					}
+					if (paginationType === "cursor") {
+						setApiNextCursor(response?.nextCursor || null);
+						setApiHasMore(Boolean(response?.nextCursor));
+					} else if (paginationType === "page") {
+						const total = response?.total;
+						if (typeof total === "number") {
+							const fetchedCount = (page || apiPage) * pageSize;
+							setApiHasMore(fetchedCount < total);
+						} else {
+							setApiHasMore(results.length === pageSize);
+						}
+						setApiPage(page);
+					} else {
+						setApiHasMore(false);
+					}
+				} catch (err) {
+					if (cancelFetchRef.current) return;
+					setApiError(err);
+					if (onSearchError) onSearchError(err);
+				} finally {
+					if (!cancelFetchRef.current) setApiLoading(false);
+				}
+			},
+			[asyncSearch, paginationType, pageSize, apiNextCursor, onSearchError, apiPage],
+		);
+
+		const doDebouncedSearch = React.useCallback(
+			(query) => {
+				if (!asyncSearch) return;
+				if (debounceRef.current) clearTimeout(debounceRef.current);
+				debounceRef.current = setTimeout(() => {
+					fetchSearch(query, { reset: true, page: 1 });
+				}, debounceMs);
+			},
+			[asyncSearch, fetchSearch, debounceMs],
+		);
+
+		React.useEffect(() => {
+			if (!asyncSearch) return;
+			if (!isPopoverOpen) return;
+			const query = searchValue ?? "";
+			doDebouncedSearch(query);
+			return () => {
+				if (debounceRef.current) clearTimeout(debounceRef.current);
+				cancelFetchRef.current = true;
+			};
+		}, [searchValue, isPopoverOpen, asyncSearch, doDebouncedSearch]);
+
+		const loadMore = React.useCallback(() => {
+			if (!asyncSearch || !apiHasMore || apiLoading) return;
+			if (paginationType === "page") {
+				const nextPage = (apiPage || 1) + 1;
+				fetchSearch(searchValue ?? "", { reset: false, page: nextPage });
+			} else if (paginationType === "cursor") {
+				fetchSearch(searchValue ?? "", { reset: false });
+			}
+		}, [
+			asyncSearch,
+			apiHasMore,
+			apiLoading,
+			paginationType,
+			apiPage,
+			fetchSearch,
+			searchValue,
+		]);
+
+		React.useEffect(() => {
+			if (!isPopoverOpen) {
+				// keep results for quick re-open; if you prefer to clear on close uncomment below
+				// setApiResults([]);
+				// setApiPage(1);
+				// setApiNextCursor(null);
+			}
+		}, [isPopoverOpen]);
+
 		const filteredOptions = React.useMemo(() => {
+			if (asyncSearch) {
+				if ((apiResults?.length || 0) > 0) return apiResults;
+				if (!searchable || !searchValue) return options;
+				return apiResults;
+			}
 			if (!searchable || !searchValue) return options;
 			if (options.length === 0) return [];
 			if (isGroupedOptions(options)) {
@@ -314,18 +432,26 @@ export const MultiSelect = React.forwardRef(
 						...group,
 						options: group.options.filter(
 							(option) =>
-								option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-								option.value.toLowerCase().includes(searchValue.toLowerCase()),
+								String(option.label || "")
+									.toLowerCase()
+									.includes(searchValue.toLowerCase()) ||
+								String(option.value || "")
+									.toLowerCase()
+									.includes(searchValue.toLowerCase()),
 						),
 					}))
 					.filter((group) => group.options.length > 0);
 			}
 			return options.filter(
 				(option) =>
-					option.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-					option.value.toLowerCase().includes(searchValue.toLowerCase()),
+					String(option.label || "")
+						.toLowerCase()
+						.includes(searchValue.toLowerCase()) ||
+					String(option.value || "")
+						.toLowerCase()
+						.includes(searchValue.toLowerCase()),
 			);
-		}, [options, searchValue, searchable, isGroupedOptions]);
+		}, [options, searchValue, searchable, isGroupedOptions, asyncSearch, apiResults]);
 
 		const handleInputKeyDown = (event) => {
 			if (event.key === "Enter") {
@@ -341,6 +467,9 @@ export const MultiSelect = React.forwardRef(
 		const toggleOption = (optionValue) => {
 			if (disabled) return;
 			const option = getOptionByValue(optionValue);
+			if (option) {
+				selectedOptionsMap.current.set(optionValue, option);
+			}
 			if (option?.disabled) return;
 			const newSelectedValues = selectedValues.includes(optionValue)
 				? selectedValues.filter((value) => value !== optionValue)
@@ -460,8 +589,12 @@ export const MultiSelect = React.forwardRef(
 				if (searchValue && isPopoverOpen) {
 					const filteredCount = allOptions.filter(
 						(opt) =>
-							opt.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-							opt.value.toLowerCase().includes(searchValue.toLowerCase()),
+							String(opt.label || "")
+								.toLowerCase()
+								.includes(searchValue.toLowerCase()) ||
+							String(opt.value || "")
+								.toLowerCase()
+								.includes(searchValue.toLowerCase()),
 					).length;
 
 					announce(
@@ -473,6 +606,13 @@ export const MultiSelect = React.forwardRef(
 				prevSearchValue.current = searchValue;
 			}
 		}, [selectedValues, isPopoverOpen, searchValue, announce, getAllOptions]);
+
+		const displayedOptions = React.useMemo(() => {
+			if (asyncSearch) {
+				return apiResults || [];
+			}
+			return filteredOptions;
+		}, [asyncSearch, apiResults, filteredOptions]);
 
 		return (
 			<>
@@ -746,7 +886,7 @@ export const MultiSelect = React.forwardRef(
 						align="start"
 						onEscapeKeyDown={() => setIsPopoverOpen(false)}
 					>
-						<Command>
+						<Command shouldFilter={false}>
 							{searchable && (
 								<CommandInput
 									placeholder={t("Search options...")}
@@ -774,7 +914,7 @@ export const MultiSelect = React.forwardRef(
 								<CommandEmpty>
 									{emptyIndicator || t("No results found.")}
 								</CommandEmpty>{" "}
-								{!hideSelectAll && !searchValue && (
+								{!hideSelectAll && !searchValue && !asyncSearch && (
 									<CommandGroup>
 										<CommandItem
 											key="all"
@@ -814,6 +954,13 @@ export const MultiSelect = React.forwardRef(
 										</CommandItem>
 									</CommandGroup>
 								)}
+								{Array.isArray(displayedOptions) &&
+									displayedOptions.length === 0 &&
+									(apiLoading ? (
+										<CommandItem className="cursor-default">
+											Loading...
+										</CommandItem>
+									) : null)}
 								{isGroupedOptions(filteredOptions) ? (
 									filteredOptions.map((group) => (
 										<CommandGroup key={group.heading} heading={group.heading}>
@@ -934,6 +1081,31 @@ export const MultiSelect = React.forwardRef(
 										</CommandItem>
 									</div>
 								</CommandGroup>
+								{asyncSearch && (
+									<>
+										<CommandSeparator />
+										<CommandGroup>
+											{apiError && (
+												<CommandItem className="cursor-default">
+													{t("Error")}: {String(apiError)}
+												</CommandItem>
+											)}
+											{apiLoading && apiResults.length === 0 && (
+												<CommandItem className="cursor-default">
+													Loading...
+												</CommandItem>
+											)}
+											{apiHasMore && (
+												<CommandItem
+													onSelect={loadMore}
+													className="cursor-pointer justify-center"
+												>
+													{apiLoading ? "Loading more..." : "Load more"}
+												</CommandItem>
+											)}
+										</CommandGroup>
+									</>
+								)}
 							</CommandList>
 						</Command>
 					</PopoverContent>

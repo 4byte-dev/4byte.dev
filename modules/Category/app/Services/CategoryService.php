@@ -2,6 +2,7 @@
 
 namespace Modules\Category\Services;
 
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Modules\Category\Data\CategoryData;
 use Modules\Category\Data\CategoryProfileData;
@@ -119,5 +120,17 @@ class CategoryService
 
             return TagMapper::collection($tags);
         });
+    }
+
+    /**
+     * Search categories by slug.
+     *
+     * @return LengthAwarePaginator<int, CategoryData>
+     */
+    public function search(string $term, int $perPage = 5): LengthAwarePaginator
+    {
+        return Category::where('slug', 'like', "%{$term}%")
+            ->paginate($perPage)
+            ->through(fn ($category) => CategoryMapper::toData($category));
     }
 }

@@ -9,9 +9,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "@/Stores/AuthStore";
 
 export function CommentSubmitForm({ type, slug, parent = null, onSuccess }) {
 	const { t } = useTranslation();
+	const authStore = useAuthStore();
 
 	const commentSubmitForm = useForm({
 		resolver: zodResolver(commentSubmitSchema(t)),
@@ -23,12 +25,26 @@ export function CommentSubmitForm({ type, slug, parent = null, onSuccess }) {
 
 	const commentSubmitMutation = useMutation({
 		mutationFn: (data) => ReactApi.submitComment({ type, slug }, data),
-		onSuccess: (data) => {
+		onSuccess: () => {
+			onSuccess({
+				id: 0,
+				content: commentSubmitForm.getValues("content"),
+				parent,
+				user: {
+					id: 0,
+					name: authStore.user.name,
+					username: authStore.user.username,
+					avatar: authStore.user.avatar,
+				},
+				published_at: new Date().toISOString(),
+				replies: 0,
+				likes: 0,
+				isLiked: false,
+			});
 			commentSubmitForm.reset({
 				content: "",
 				parent,
 			});
-			onSuccess(data);
 		},
 		onError: (error) => {
 			if (error?.errors) {

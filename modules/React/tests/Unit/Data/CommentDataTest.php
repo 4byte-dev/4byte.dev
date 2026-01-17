@@ -5,6 +5,7 @@ namespace Modules\React\Tests\Unit\Data;
 use Illuminate\Support\Facades\Auth;
 use Mockery;
 use Modules\React\Data\CommentData;
+use Modules\React\Mappers\CommentMapper;
 use Modules\React\Models\Comment;
 use Modules\User\Data\UserData;
 use Modules\User\Models\User;
@@ -13,7 +14,7 @@ use Tests\TestCase;
 
 class CommentDataTest extends TestCase
 {
-    public function test_can_create_comment_data_from_model(): void
+    public function test_can_create_comment_data(): void
     {
         $user            = User::factory()->create();
         $userServiceMock = Mockery::mock(UserService::class);
@@ -45,7 +46,7 @@ class CommentDataTest extends TestCase
 
         Auth::shouldReceive('id')->andReturn(null);
 
-        $commentData = CommentData::fromModel($comment);
+        $commentData = CommentMapper::toData($comment);
 
         $this->assertInstanceOf(CommentData::class, $commentData);
         $this->assertEquals($comment->content, $commentData->content);
