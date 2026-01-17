@@ -44,7 +44,7 @@ class CreateRequest extends FormRequest
                 'sources.*.url'    => ['required', 'string', 'url'],
                 'sources.*.date'   => ['required', 'date'],
                 'content_images'   => ['nullable', 'array'],
-                'content_images.*' => ["image', 'max:{$maxSize}"],
+                'content_images.*' => ['image', "max:{$maxSize}"],
             ]);
         }
 
