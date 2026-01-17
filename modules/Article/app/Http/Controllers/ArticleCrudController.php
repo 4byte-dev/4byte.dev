@@ -63,7 +63,8 @@ class ArticleCrudController extends Controller
         $article = $this->createArticleAction->execute(
             $data,
             $request->file('image'),
-            Auth::id()
+            Auth::id(),
+            $request->allFiles()['content_images'] ?? []
         );
 
         return response()->json(['slug' => $article->slug]);
@@ -115,7 +116,8 @@ class ArticleCrudController extends Controller
             $article,
             $data,
             $request->file('image'),
-            Auth::id()
+            Auth::id(),
+            $request->allFiles()['content_images'] ?? []
         );
 
         return response()->json(['slug' => $article->slug]);

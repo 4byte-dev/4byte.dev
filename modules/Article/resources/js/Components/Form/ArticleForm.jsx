@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as React from "react";
 import { ArrowLeft, Save, Upload, X, Plus } from "lucide-react";
 import { Button } from "@/Components/Ui/Form/Button";
 import { Input } from "@/Components/Ui/Form/Input";
@@ -11,13 +12,13 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createArticleSchema } from "@Article/Validation";
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+	Form,
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
 } from "@/Components/Ui/Form/Form";
 import { FormInput } from "@/Components/Ui/Form/FormInput";
 import { FormTextareaInput } from "@/Components/Ui/Form/FormTextareaInput";
@@ -27,435 +28,467 @@ import CategoryApi from "@Category/Api";
 import TagApi from "@Tag/Api";
 
 export default function ArticleForm({
-    initialValues,
-    topTags,
-    topCategories,
-    onSubmit,
-    isSubmitting,
-    mode = "create",
-    apiErrors = null,
+	initialValues,
+	topTags,
+	topCategories,
+	onSubmit,
+	isSubmitting,
+	mode = "create",
+	apiErrors = null,
 }) {
-    const { t } = useTranslation();
-    const [imagePreview, setImagePreview] = useState(
-        initialValues?.image ? initialValues.image : "",
-    );
-    const [newSourceUrl, setNewSourceUrl] = useState("");
+	const { t } = useTranslation();
+	const [imagePreview, setImagePreview] = useState(
+		initialValues?.image ? initialValues.image : "",
+	);
+	const [newSourceUrl, setNewSourceUrl] = useState("");
+	const pendingImages = React.useRef(new Map());
 
-    const form = useForm({
-        resolver: zodResolver(createArticleSchema(t)),
-        defaultValues: {
-            title: initialValues?.title || "",
-            excerpt: initialValues?.excerpt || "",
-            content: initialValues?.content || "",
-            categories: initialValues?.categories || [],
-            tags: initialValues?.tags || [],
-            published: initialValues?.published || false,
-            image: undefined,
-            sources: initialValues?.sources || [],
-        },
-    });
+	const form = useForm({
+		resolver: zodResolver(createArticleSchema(t)),
+		defaultValues: {
+			title: initialValues?.title || "",
+			excerpt: initialValues?.excerpt || "",
+			content: initialValues?.content || "",
+			categories: initialValues?.categories || [],
+			tags: initialValues?.tags || [],
+			published: initialValues?.published || false,
+			image: undefined,
+			sources: initialValues?.sources || [],
+		},
+	});
 
-    const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-    async function asyncSearchCategories(
-        term,
-        { page = 1, pageSize = 15 }
-    ) {
-        if (!term) {
-            return {
-                results: [],
-                total: 0,
-            }
-        }
+	async function asyncSearchCategories(term, { page = 1, pageSize = 15 }) {
+		if (!term) {
+			return {
+				results: [],
+				total: 0,
+			};
+		}
 
-        const data = await queryClient.fetchQuery({
-            queryKey: [`categories-${term}-${page}-${pageSize}`],
-            queryFn: () => CategoryApi.search(term, { page, per_page: pageSize }),
-            staleTime: 5 * 60 * 1000,
-        });
+		const data = await queryClient.fetchQuery({
+			queryKey: [`categories-${term}-${page}-${pageSize}`],
+			queryFn: () => CategoryApi.search(term, { page, per_page: pageSize }),
+			staleTime: 5 * 60 * 1000,
+		});
 
-        return {
-            results: data.data.map((item) => ({
-                value: item.id,
-                label: item.name,
-            })),
-            total: data.total,
-        }
-    }
+		return {
+			results: data.data.map((item) => ({
+				value: item.id,
+				label: item.name,
+			})),
+			total: data.total,
+		};
+	}
 
-    async function asyncSearchTags(
-        term,
-        { page = 1, pageSize = 15 }
-    ) {
-        if (!term) {
-            return {
-                results: [],
-                total: 0,
-            }
-        }
+	async function asyncSearchTags(term, { page = 1, pageSize = 15 }) {
+		if (!term) {
+			return {
+				results: [],
+				total: 0,
+			};
+		}
 
-        const data = await queryClient.fetchQuery({
-            queryKey: [`tags-${term}-${page}-${pageSize}`],
-            queryFn: () => TagApi.search(term, { page, per_page: pageSize }),
-            staleTime: 5 * 60 * 1000,
-        });
+		const data = await queryClient.fetchQuery({
+			queryKey: [`tags-${term}-${page}-${pageSize}`],
+			queryFn: () => TagApi.search(term, { page, per_page: pageSize }),
+			staleTime: 5 * 60 * 1000,
+		});
 
-        return {
-            results: data.data.map((item) => ({
-                value: item.id,
-                label: item.name,
-            })),
-            total: data.total,
-        }
-    }
+		return {
+			results: data.data.map((item) => ({
+				value: item.id,
+				label: item.name,
+			})),
+			total: data.total,
+		};
+	}
 
-    useEffect(() => {
-        if (apiErrors) {
-            Object.keys(apiErrors).forEach((key) => {
-                form.setError(key, { message: apiErrors[key][0] });
-            });
-        }
-    }, [apiErrors, form]);
+	useEffect(() => {
+		if (apiErrors) {
+			Object.keys(apiErrors).forEach((key) => {
+				form.setError(key, { message: apiErrors[key][0] });
+			});
+		}
+	}, [apiErrors, form]);
 
-    const { fields, append, remove } = useFieldArray({
-        control: form.control,
-        name: "sources",
-    });
+	const { fields, append, remove } = useFieldArray({
+		control: form.control,
+		name: "sources",
+	});
 
-    const handleFormSubmit = (data) => {
-        onSubmit(data);
-    };
+	const handlePaste = (event) => {
+		const items = event.clipboardData.items;
+		for (const item of items) {
+			if (item.type.indexOf("image") === 0) {
+				event.preventDefault();
+				const file = item.getAsFile();
+				const blobUrl = URL.createObjectURL(file);
+				pendingImages.current.set(blobUrl, file);
+				const markdownImage = `![Image](${blobUrl})`;
 
-    const handleAddSource = () => {
-        if (!newSourceUrl) return;
-        append({
-            url: newSourceUrl,
-            date: new Date().toISOString().split("T")[0],
-        });
-        setNewSourceUrl("");
-    };
+				const textarea = event.target;
+				if (textarea && textarea.setRangeText) {
+					textarea.setRangeText(
+						markdownImage,
+						textarea.selectionStart,
+						textarea.selectionEnd,
+						"end",
+					);
+					const newValue = textarea.value;
+					form.setValue("content", newValue, { shouldDirty: true });
+				} else {
+					const currentContent = form.getValues("content") || "";
+					form.setValue("content", currentContent + "\n" + markdownImage, {
+						shouldDirty: true,
+					});
+				}
+			}
+		}
+	};
 
-    return (
-        <Form form={form} onSubmit={handleFormSubmit}>
-            <div className="max-w-6xl mx-auto">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center space-x-4">
-                        <Button
-                            variant="ghost"
-                            onClick={() => window.history.back()}
-                            type="button"
-                        >
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            {t("Back")}
-                        </Button>
-                        <div>
-                            <h1 className="text-3xl font-bold">
-                                {mode === "create"
-                                    ? t("Create New Article")
-                                    : t("Edit Article")}
-                            </h1>
-                            <p className="text-muted-foreground">
-                                {t("Share your knowledge with the developer community")}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Button type="submit" disabled={isSubmitting}>
-                            <Save className="h-4 w-4 mr-2" />
-                            {isSubmitting ? t("Publishing...") : t("Publish")}
-                        </Button>
-                    </div>
-                </div>
+	const handleFormSubmit = (data) => {
+		let content = data.content || "";
+		const contentImages = {};
 
-                <div className="flex flex-col gap-8">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t("Article Details")}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <FormField
-                                    control={form.control}
-                                    name="title"
-                                    render={({ field }) => (
-                                        <FormInput
-                                            label={t("Title") + " *"}
-                                            placeholder={t("Enter article title...")}
-                                            field={field}
-                                        />
-                                    )}
-                                />
-                            </div>
+		const blobRegex = /!\[.*?\]\((blob:.*?)\)/g;
+		let match;
 
-                            <div className="space-y-2">
-                                <FormField
-                                    control={form.control}
-                                    name="excerpt"
-                                    render={({ field }) => (
-                                        <FormTextareaInput
-                                            label={
-                                                t("Excerpt") +
-                                                (form.watch("published") ? " *" : "")
-                                            }
-                                            placeholder={t(
-                                                "Brief description of your article...",
-                                            )}
-                                            field={field}
-                                        />
-                                    )}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
+		while ((match = blobRegex.exec(content)) !== null) {
+			const blobUrl = match[1];
+			if (pendingImages.current.has(blobUrl)) {
+				const file = pendingImages.current.get(blobUrl);
+				const placeholder = `%img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}%`;
+				content = content.split(blobUrl).join(placeholder);
+				contentImages[placeholder] = file;
+			}
+		}
+		const finalData = { ...data, content };
+		finalData.content_images = contentImages;
+		onSubmit(finalData);
+	};
 
-                    <FormField
-                        control={form.control}
-                        name="content"
-                        render={({ field }) => (
-                            <FormMarkdownInput
-                                placeholder={t(
-                                    "Write your article content here... (Markdown supported)",
-                                )}
-                                field={field}
-                            />
-                        )}
-                    />
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t("Sources")}</CardTitle>
-                            <p className="text-sm text-muted-foreground">
-                                {t("Cite your sources and share your knowledge")}
-                            </p>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="space-y-4">
-                                {fields.map((field, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center justify-between p-4 border rounded-lg"
-                                    >
-                                        <div className="flex-1">
-                                            <div className="flex items-center space-x-4 mb-2">
-                                                <span className="font-medium border-r-2 border-foreground pr-4">
-                                                    {field.url}
-                                                </span>
-                                                <span className="font-medium">
-                                                    {field.date}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => remove(index)}
-                                            className="text-red-500 hover:text-red-700"
-                                            type="button"
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                ))}
-                            </div>
+	const handleAddSource = () => {
+		if (!newSourceUrl) return;
+		append({
+			url: newSourceUrl,
+			date: new Date().toISOString().split("T")[0],
+		});
+		setNewSourceUrl("");
+	};
 
-                            <div className="border-t pt-4">
-                                <div className="flex gap-4 items-end">
-                                    <div className="space-y-2 w-full">
-                                        <Label>{t("Source Url")}</Label>
-                                        <Input
-                                            id="account-url"
-                                            value={newSourceUrl}
-                                            onChange={(e) => setNewSourceUrl(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Enter") {
-                                                    e.preventDefault();
-                                                    handleAddSource();
-                                                }
-                                            }}
-                                            className="w-full"
-                                            type="url"
-                                        />
-                                    </div>
+	return (
+		<Form form={form} onSubmit={handleFormSubmit}>
+			<div className="max-w-6xl mx-auto">
+				<div className="flex items-center justify-between mb-8">
+					<div className="flex items-center space-x-4">
+						<Button variant="ghost" onClick={() => window.history.back()} type="button">
+							<ArrowLeft className="h-4 w-4 mr-2" />
+							{t("Back")}
+						</Button>
+						<div>
+							<h1 className="text-3xl font-bold">
+								{mode === "create" ? t("Create New Article") : t("Edit Article")}
+							</h1>
+							<p className="text-muted-foreground">
+								{t("Share your knowledge with the developer community")}
+							</p>
+						</div>
+					</div>
+					<div className="flex items-center space-x-2">
+						<Button type="submit" disabled={isSubmitting}>
+							<Save className="h-4 w-4 mr-2" />
+							{isSubmitting ? t("Publishing...") : t("Publish")}
+						</Button>
+					</div>
+				</div>
 
-                                    <Button
-                                        disabled={!newSourceUrl}
-                                        type="button"
-                                        onClick={handleAddSource}
-                                    >
-                                        <Plus className="h-4 w-4 mr-2" />
-                                        {t("Add Source")}
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+				<div className="flex flex-col gap-8">
+					<Card>
+						<CardHeader>
+							<CardTitle>{t("Article Details")}</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<div className="space-y-2">
+								<FormField
+									control={form.control}
+									name="title"
+									render={({ field }) => (
+										<FormInput
+											label={t("Title") + " *"}
+											placeholder={t("Enter article title...")}
+											field={field}
+										/>
+									)}
+								/>
+							</div>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t("Publishing")}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="published"
-                                render={({ field }) => (
-                                    <FormItem className="flex items-center justify-between space-y-0">
-                                        <div className="space-y-0.5">
-                                            <FormLabel>{t("Publish immediately")}</FormLabel>
-                                            <FormDescription>
-                                                {t("Make article visible to everyone")}
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                        </CardContent>
-                    </Card>
+							<div className="space-y-2">
+								<FormField
+									control={form.control}
+									name="excerpt"
+									render={({ field }) => (
+										<FormTextareaInput
+											label={
+												t("Excerpt") + (form.watch("published") ? " *" : "")
+											}
+											placeholder={t("Brief description of your article...")}
+											field={field}
+										/>
+									)}
+								/>
+							</div>
+						</CardContent>
+					</Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                {t("Cover Image")} {form.watch("published") ? "*" : ""}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <FormField
-                                control={form.control}
-                                name="image"
-                                // eslint-disable-next-line no-unused-vars
-                                render={({ field: { value, onChange, ...fieldProps } }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <div
-                                                className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center bg-no-repeat bg-cover bg-center"
-                                                style={{
-                                                    backgroundImage: `url(${imagePreview})`,
-                                                }}
-                                            >
-                                                {!imagePreview ? (
-                                                    <>
-                                                        <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                                                        <p className="text-muted-foreground mb-4">
-                                                            {t(
-                                                                "Drag and drop an image, or click to browse",
-                                                            )}
-                                                        </p>
-                                                    </>
-                                                ) : (
-                                                    <div className="h-32"></div>
-                                                )}
-                                                <FormLabel
-                                                    htmlFor="cover-input"
-                                                    className="cursor-pointer"
-                                                >
-                                                    <div className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
-                                                        <Upload className="h-4 w-4 mr-2" />
-                                                        {t("Change Cover")}
-                                                    </div>
-                                                </FormLabel>
-                                                <Input
-                                                    {...fieldProps}
-                                                    id="cover-input"
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="hidden"
-                                                    onChange={(event) => {
-                                                        const file =
-                                                            event.target.files &&
-                                                            event.target.files[0];
-                                                        if (file) {
-                                                            onChange(file);
-                                                            setImagePreview(
-                                                                URL.createObjectURL(file),
-                                                            );
-                                                        }
-                                                    }}
-                                                />
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </CardContent>
-                    </Card>
+					<FormField
+						control={form.control}
+						name="content"
+						render={({ field }) => (
+							<FormMarkdownInput
+								placeholder={t(
+									"Write your article content here... (Markdown supported)",
+								)}
+								field={field}
+								onPaste={handlePaste}
+							/>
+						)}
+					/>
+					<Card>
+						<CardHeader>
+							<CardTitle>{t("Sources")}</CardTitle>
+							<p className="text-sm text-muted-foreground">
+								{t("Cite your sources and share your knowledge")}
+							</p>
+						</CardHeader>
+						<CardContent className="space-y-6">
+							<div className="space-y-4">
+								{fields.map((field, index) => (
+									<div
+										key={index}
+										className="flex items-center justify-between p-4 border rounded-lg"
+									>
+										<div className="flex-1">
+											<div className="flex items-center space-x-4 mb-2">
+												<span className="font-medium border-r-2 border-foreground pr-4">
+													{field.url}
+												</span>
+												<span className="font-medium">{field.date}</span>
+											</div>
+										</div>
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => remove(index)}
+											className="text-red-500 hover:text-red-700"
+											type="button"
+										>
+											<X className="h-4 w-4" />
+										</Button>
+									</div>
+								))}
+							</div>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                {t("Categories")} {form.watch("published") ? "*" : ""}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <FormField
-                                control={form.control}
-                                name="categories"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <MultiSelect
-                                                options={topCategories.map((c) => ({
-                                                    label: `${c.data.name} (${c.total})`,
-                                                    value: c.data.slug,
-                                                }))}
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
-                                                hideSelectAll
-                                                placeholder={t("Select Options")}
-                                                pageSize={5}
-                                                debounceMs={300}
-                                                asyncSearch={asyncSearchCategories}
-                                                paginationType="page"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </CardContent>
-                    </Card>
+							<div className="border-t pt-4">
+								<div className="flex gap-4 items-end">
+									<div className="space-y-2 w-full">
+										<Label>{t("Source Url")}</Label>
+										<Input
+											id="account-url"
+											value={newSourceUrl}
+											onChange={(e) => setNewSourceUrl(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													e.preventDefault();
+													handleAddSource();
+												}
+											}}
+											className="w-full"
+											type="url"
+										/>
+									</div>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>
-                                {t("Tags")} {form.watch("published") ? "*" : ""}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <FormField
-                                control={form.control}
-                                name="tags"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <MultiSelect
-                                                options={topTags.map((c) => ({
-                                                    label: `${c.data.name} (${c.total})`,
-                                                    value: c.data.slug,
-                                                }))}
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
-                                                hideSelectAll
-                                                placeholder={t("Select Options")}
-                                                pageSize={5}
-                                                debounceMs={300}
-                                                asyncSearch={asyncSearchTags}
-                                                paginationType="page"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        </Form>
-    );
+									<Button
+										disabled={!newSourceUrl}
+										type="button"
+										onClick={handleAddSource}
+									>
+										<Plus className="h-4 w-4 mr-2" />
+										{t("Add Source")}
+									</Button>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardHeader>
+							<CardTitle>{t("Publishing")}</CardTitle>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<FormField
+								control={form.control}
+								name="published"
+								render={({ field }) => (
+									<FormItem className="flex items-center justify-between space-y-0">
+										<div className="space-y-0.5">
+											<FormLabel>{t("Publish immediately")}</FormLabel>
+											<FormDescription>
+												{t("Make article visible to everyone")}
+											</FormDescription>
+										</div>
+										<FormControl>
+											<Switch
+												checked={field.value}
+												onCheckedChange={field.onChange}
+											/>
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardHeader>
+							<CardTitle>
+								{t("Cover Image")} {form.watch("published") ? "*" : ""}
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<FormField
+								control={form.control}
+								name="image"
+								// eslint-disable-next-line no-unused-vars
+								render={({ field: { value, onChange, ...fieldProps } }) => (
+									<FormItem>
+										<FormControl>
+											<div
+												className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center bg-no-repeat bg-cover bg-center"
+												style={{
+													backgroundImage: `url(${imagePreview})`,
+												}}
+											>
+												{!imagePreview ? (
+													<>
+														<Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+														<p className="text-muted-foreground mb-4">
+															{t(
+																"Drag and drop an image, or click to browse",
+															)}
+														</p>
+													</>
+												) : (
+													<div className="h-32"></div>
+												)}
+												<FormLabel
+													htmlFor="cover-input"
+													className="cursor-pointer"
+												>
+													<div className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+														<Upload className="h-4 w-4 mr-2" />
+														{t("Change Cover")}
+													</div>
+												</FormLabel>
+												<Input
+													{...fieldProps}
+													id="cover-input"
+													type="file"
+													accept="image/*"
+													className="hidden"
+													onChange={(event) => {
+														const file =
+															event.target.files &&
+															event.target.files[0];
+														if (file) {
+															onChange(file);
+															setImagePreview(
+																URL.createObjectURL(file),
+															);
+														}
+													}}
+												/>
+											</div>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardHeader>
+							<CardTitle>
+								{t("Categories")} {form.watch("published") ? "*" : ""}
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<FormField
+								control={form.control}
+								name="categories"
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<MultiSelect
+												options={topCategories.map((c) => ({
+													label: `${c.data.name} (${c.total})`,
+													value: c.data.slug,
+												}))}
+												onValueChange={field.onChange}
+												defaultValue={field.value}
+												hideSelectAll
+												placeholder={t("Select Options")}
+												pageSize={5}
+												debounceMs={300}
+												asyncSearch={asyncSearchCategories}
+												paginationType="page"
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardHeader>
+							<CardTitle>
+								{t("Tags")} {form.watch("published") ? "*" : ""}
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<FormField
+								control={form.control}
+								name="tags"
+								render={({ field }) => (
+									<FormItem>
+										<FormControl>
+											<MultiSelect
+												options={topTags.map((c) => ({
+													label: `${c.data.name} (${c.total})`,
+													value: c.data.slug,
+												}))}
+												onValueChange={field.onChange}
+												defaultValue={field.value}
+												hideSelectAll
+												placeholder={t("Select Options")}
+												pageSize={5}
+												debounceMs={300}
+												asyncSearch={asyncSearchTags}
+												paginationType="page"
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
+		</Form>
+	);
 }
