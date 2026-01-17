@@ -44,26 +44,13 @@ class ReactController extends Controller
      */
     public function like(ReactRequest $request): JsonResponse|Response
     {
-        [$baseClass, $itemId, $type] = $request->resolveTarget();
-        $userId                      = Auth::id();
+        [$baseClass, $itemId] = $request->resolveTarget();
+        $userId               = Auth::id();
 
-        $cacheKey = "{$type}:{$itemId}:reaction";
-
-        $executed = RateLimiter::attempt(
-            key: "{$cacheKey}:{$userId}",
-            maxAttempts: 1,
-            decaySeconds: 60 * 60 * 24,
-            callback: function () use ($baseClass, $itemId, $userId) {
-                if ($this->reactService->checkLiked($baseClass, $itemId, $userId)) {
-                    $this->unlikeAction->execute($baseClass, $itemId, $userId);
-                } else {
-                    $this->likeAction->execute($baseClass, $itemId, $userId);
-                }
-            }
-        );
-
-        if (! $executed) {
-            return response()->noContent(429);
+        if ($this->reactService->checkLiked($baseClass, $itemId, $userId)) {
+            $this->unlikeAction->execute($baseClass, $itemId, $userId);
+        } else {
+            $this->likeAction->execute($baseClass, $itemId, $userId);
         }
 
         return response()->noContent(200);
@@ -78,26 +65,13 @@ class ReactController extends Controller
      */
     public function dislike(ReactRequest $request): JsonResponse|Response
     {
-        [$baseClass, $itemId, $type] = $request->resolveTarget();
-        $userId                      = Auth::id();
+        [$baseClass, $itemId] = $request->resolveTarget();
+        $userId               = Auth::id();
 
-        $cacheKey = "{$type}:{$itemId}:reaction";
-
-        $executed = RateLimiter::attempt(
-            key: "{$cacheKey}:{$userId}",
-            maxAttempts: 1,
-            decaySeconds: 60 * 60 * 24,
-            callback: function () use ($baseClass, $itemId, $userId) {
-                if ($this->reactService->checkDisliked($baseClass, $itemId, $userId)) {
-                    $this->undislikeAction->execute($baseClass, $itemId, $userId);
-                } else {
-                    $this->dislikeAction->execute($baseClass, $itemId, $userId);
-                }
-            }
-        );
-
-        if (! $executed) {
-            return response()->noContent(429);
+        if ($this->reactService->checkDisliked($baseClass, $itemId, $userId)) {
+            $this->undislikeAction->execute($baseClass, $itemId, $userId);
+        } else {
+            $this->dislikeAction->execute($baseClass, $itemId, $userId);
         }
 
         return response()->noContent(200);
