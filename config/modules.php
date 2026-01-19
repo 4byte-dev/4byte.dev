@@ -57,7 +57,7 @@ return [
                 'MODULE_NAMESPACE',
                 'PROVIDER_NAMESPACE',
                 'APP_FOLDER_NAME',
-                'APP_NAME' => fn () =>  config('app.name'),
+                'APP_NAME' =>   env('APP_NAME'),
             ],
         ],
         'gitkeep' => false,
