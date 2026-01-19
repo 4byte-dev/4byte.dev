@@ -98,12 +98,16 @@ USER ${USER}
 
 COPY --link --chown=${WWWUSER}:${WWWUSER} . .
 
-RUN composer install \
-    --no-dev \
-    --no-interaction \
-    --no-autoloader \
-    --no-ansi \
-    --no-scripts
+RUN php \
+    -d opcache.enable_cli=0 \
+    -d opcache.preload= \
+    /usr/bin/composer install \
+        --no-dev \
+        --no-interaction \
+        --no-ansi \
+        --no-scripts \
+        --optimize-autoloader \
+        --audit
 
 ###########################################
 # Build frontend assets with Bun
