@@ -46,7 +46,7 @@ return [
             'views/index' => ['LOWER_NAME'],
             'views/master' => ['LOWER_NAME', 'STUDLY_NAME', 'KEBAB_NAME'],
             'scaffold/config' => ['STUDLY_NAME'],
-            'scaffold/provider' => ['SEEDERS_PATH' => fn () =>  database_path('seeders')],
+            'scaffold/provider' => ['SEEDERS_PATH' => database_path('seeders')],
             'route-provider' => ['STUDLY_NAME', 'LOWER_NAME'],
             'composer' => [
                 'LOWER_NAME',
