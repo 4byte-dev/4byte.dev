@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
 use Modules\React\Actions\CommentAction;
 use Modules\React\Actions\DislikeAction;
 use Modules\React\Actions\FollowAction;
@@ -175,23 +174,10 @@ class ReactController extends Controller
         [$baseClass, $itemId, $type] = $request->resolveTarget();
         $userId                      = Auth::id();
 
-        $cacheKey = "{$type}:{$itemId}:follow";
-
-        $executed = RateLimiter::attempt(
-            key: "{$cacheKey}:{$userId}",
-            maxAttempts: 1,
-            decaySeconds: 60 * 60 * 24,
-            callback: function () use ($baseClass, $itemId, $userId) {
-                if ($this->reactService->checkFollowed($baseClass, $itemId, $userId)) {
-                    $this->unfollowAction->execute($baseClass, $itemId, $userId);
-                } else {
-                    $this->followAction->execute($baseClass, $itemId, $userId);
-                }
-            }
-        );
-
-        if (! $executed) {
-            return response()->noContent(429);
+        if ($this->reactService->checkFollowed($baseClass, $itemId, $userId)) {
+            $this->unfollowAction->execute($baseClass, $itemId, $userId);
+        } else {
+            $this->followAction->execute($baseClass, $itemId, $userId);
         }
 
         return response()->noContent(200);
