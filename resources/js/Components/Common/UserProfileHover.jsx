@@ -7,7 +7,6 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/Components/Ui/H
 import { Link } from "@inertiajs/react";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { Trans, useTranslation } from "react-i18next";
-import { toast } from "@/Hooks/useToast";
 import { useMutation } from "@tanstack/react-query";
 import ReactApi from "@React/Api";
 import UserApi from "@User/Api";
@@ -64,16 +63,22 @@ export function UserProfileHover({ username, children }) {
 
 	const followMutation = useMutation({
 		mutationFn: () => ReactApi.follow({ type: "user", slug: username }),
-		onSuccess: () => {
+		onMutate: () => {
+			const previousState = {
+				isFollowing,
+				followers,
+			};
+
 			setIsFollowing(!isFollowing);
 			setFollowers(isFollowing ? followers - 1 : followers + 1);
+
+			return { previousState };
 		},
-		onError: () => {
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same user once a day"),
-				variant: "destructive",
-			});
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsFollowing(context.previousState.isFollowing);
+				setFollowers(context.previousState.followers);
+			}
 		},
 	});
 

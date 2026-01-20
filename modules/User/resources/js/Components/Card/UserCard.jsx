@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/Components/Ui/Card";
 import { Trans, useTranslation } from "react-i18next";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { Button } from "@/Components/Ui/Form/Button";
-import { toast } from "@/Hooks/useToast";
 import { Settings, UserCheck, UserPlus } from "lucide-react";
 import { Link } from "@inertiajs/react";
 import { useMutation } from "@tanstack/react-query";
@@ -37,16 +36,22 @@ export function UserCard({ username }) {
 
 	const followMutation = useMutation({
 		mutationFn: () => ReactApi.follow({ type: "user", slug: user.username }),
-		onSuccess: () => {
+		onMutate: () => {
+			const previousState = {
+				isFollowing,
+				followers,
+			};
+
 			setIsFollowing(!isFollowing);
 			setFollowers(isFollowing ? followers - 1 : followers + 1);
+
+			return { previousState };
 		},
-		onError: () => {
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same user once a day"),
-				variant: "destructive",
-			});
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsFollowing(context.previousState.isFollowing);
+				setFollowers(context.previousState.followers);
+			}
 		},
 	});
 
