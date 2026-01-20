@@ -5,7 +5,6 @@ import { Button } from "@/Components/Ui/Form/Button";
 import { Separator } from "@/Components/Ui/Separator";
 import { UserProfileHover } from "@/Components/Common/UserProfileHover";
 import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
-import Feed from "@/Components/Content/Feed";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { toast } from "@/Hooks/useToast";
 import { ImageSlider } from "@/Components/Common/ImageSlider";
@@ -20,10 +19,7 @@ export default function EntryPage({ entry }) {
 	const [likes, setLikes] = useState(Number(entry.likes));
 	const [dislikes, setDislikes] = useState(Number(entry.dislikes));
 	const [isSaved, setIsSaved] = useState(entry.isSaved);
-
 	const [isCopied, setIsCopied] = useState(false);
-	const [isFeedVisible, setIsFeedVisible] = useState(false);
-	const [isFeedLoading, setIsFeedLoading] = useState(false);
 	const [isCommentsVisible, setIsCommentsVisible] = useState(false);
 	const feedTriggerRef = useRef(null);
 	const commentsTriggerRef = useRef(null);
@@ -122,32 +118,6 @@ export default function EntryPage({ entry }) {
 			}, 1500);
 		}
 	};
-
-	useEffect(() => {
-		if (!isCommentsVisible) return;
-
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry.isIntersecting) {
-					setIsFeedVisible(true);
-					setIsFeedLoading(false);
-					observer.disconnect();
-				}
-			},
-			{
-				rootMargin: "50px",
-			},
-		);
-
-		if (feedTriggerRef.current) {
-			setIsFeedLoading(true);
-			observer.observe(feedTriggerRef.current);
-		}
-
-		return () => {
-			observer.disconnect();
-		};
-	}, [isCommentsVisible]);
 
 	useEffect(() => {
 		const observer = new IntersectionObserver(
@@ -272,15 +242,8 @@ export default function EntryPage({ entry }) {
 					<Comments commentsCounts={entry.comments} type="entry" slug={entry.slug} />
 				)}
 
-				{isFeedLoading && (
-					<div className="flex justify-center py-8">
-						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-					</div>
-				)}
-
 				<div ref={feedTriggerRef} className="h-10"></div>
 			</div>
-			{isFeedVisible && <Feed hasNavigation hasSidebar filters={{ entry: entry.slug }} />}
 		</div>
 	);
 }
