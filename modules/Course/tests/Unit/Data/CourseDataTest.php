@@ -11,6 +11,7 @@ use Modules\Course\Models\Course;
 use Modules\Course\Tests\TestCase;
 use Modules\Tag\Data\TagData;
 use Modules\User\Data\UserData;
+use Modules\User\Mappers\UserMapper;
 use Modules\User\Models\User;
 
 class CourseDataTest extends TestCase
@@ -130,7 +131,7 @@ class CourseDataTest extends TestCase
             'username' => 'username',
         ]);
 
-        $user = UserData::fromModel($user);
+        $user = UserMapper::toData($user);
 
         $courseData = CourseData::fromModel($course, $user);
 
@@ -164,7 +165,7 @@ class CourseDataTest extends TestCase
 
         $user = User::factory()->create();
 
-        $user = UserData::fromModel($user);
+        $user = UserMapper::toData($user);
 
         $courseData = CourseData::fromModel($course, $user, true);
 
@@ -176,7 +177,7 @@ class CourseDataTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         /** @var Course|MockInterface $course */
         $course             = Mockery::mock(Course::class)->makePartial();
@@ -219,7 +220,7 @@ class CourseDataTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         /** @var Course|MockInterface $course */
         $course             = Mockery::mock(Course::class)->makePartial();

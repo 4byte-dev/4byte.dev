@@ -10,6 +10,7 @@ use Modules\Entry\Data\EntryData;
 use Modules\Entry\Models\Entry;
 use Modules\Entry\Tests\TestCase;
 use Modules\User\Data\UserData;
+use Modules\User\Mappers\UserMapper;
 
 class EntryDataTest extends TestCase
 {
@@ -90,7 +91,7 @@ class EntryDataTest extends TestCase
             'username' => 'username',
         ]);
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         $entryData = EntryData::fromModel($entry, $userData);
 
@@ -117,7 +118,7 @@ class EntryDataTest extends TestCase
         $entry = Entry::factory()->create();
         $user  = User::factory()->create();
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         $entryData = EntryData::fromModel($entry, $userData, true);
 
@@ -129,7 +130,7 @@ class EntryDataTest extends TestCase
         $entry = Entry::factory()->create();
         $user  = User::factory()->create();
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         $entryData = EntryData::fromModel(
             entry: $entry,
@@ -146,7 +147,7 @@ class EntryDataTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         /** @var Entry|MockInterface $entry */
         $entry             = Mockery::mock(Entry::class)->makePartial();
@@ -201,7 +202,7 @@ class EntryDataTest extends TestCase
     public function test_it_sets_like_states_as_false_for_guest_user(): void
     {
         $user     = User::factory()->create();
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         /** @var Entry|MockInterface $entry */
         $entry             = Mockery::mock(Entry::class)->makePartial();

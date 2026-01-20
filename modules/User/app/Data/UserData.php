@@ -3,39 +3,19 @@
 namespace Modules\User\Data;
 
 use DateTime;
-use Illuminate\Support\Facades\Auth;
-use Modules\User\Models\User;
-use Spatie\LaravelData\Data;
 
-class UserData extends Data
+readonly class UserData
 {
     public function __construct(
-        public int $id,
-        public string $name,
-        public string $username,
-        public ?string $avatar,
-        public int $followers,
-        public int $followings,
-        public bool $isFollowing,
-        public DateTime $created_at,
-        public string $type = 'user'
+        public readonly int $id,
+        public readonly string $name,
+        public readonly string $username,
+        public readonly ?string $avatar,
+        public readonly int $followers,
+        public readonly int $followings,
+        public readonly bool $isFollowing,
+        public readonly DateTime $created_at,
+        public readonly string $type = 'user'
     ) {
-    }
-
-    /**
-     * Create a UserData instance from a User model.
-     */
-    public static function fromModel(User $user, bool $setId = false): self
-    {
-        return new self(
-            id: $setId ? $user->id : 0,
-            name: $user->name,
-            username: $user->username,
-            avatar: $user->getAvatarImage(),
-            followers: $user->followersCount(),
-            followings: $user->followingsCount(),
-            isFollowing: $user->isFollowedBy(Auth::id()),
-            created_at: $user->created_at
-        );
     }
 }
