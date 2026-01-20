@@ -25,14 +25,14 @@ class PageServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->registerObservers();
         $this->registerPolicies();
-        $this->registerSearch();
+        $this->registerObservers();
         $this->registerCommands();
         $this->registerTranslations();
         $this->registerPublishableResources();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
         $this->loadFactoriesFrom(module_path($this->name, 'database/factories'));
+        $this->registerSearch();
     }
 
     /**

@@ -31,10 +31,13 @@ class ReactServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerPolicies();
         $this->registerTranslations();
         $this->registerPublishableResources();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
         $this->loadFactoriesFrom(module_path($this->name, 'database/factories'));
+        $this->registerReact();
+        $this->registerFeed();
     }
 
     /**
