@@ -122,4 +122,65 @@ export function initCoreThemes() {
 			"--ce-input-border": "#cecece",
 		},
 	});
+
+	pluginRegistry.registerTheme({
+		id: "theme-defaults-4byte",
+		label: "4Byte",
+		type: "dark",
+		colors: {
+			"--ce-focus-border": "#fafafa",
+			"--ce-foreground": "#fafafa",
+			"--ce-widget-shadow": "0 0 8px 2px rgba(0, 0, 0, 0.6)",
+
+			"--ce-activityBar-background": "#0a0a0a",
+			"--ce-activityBar-foreground": "#fafafa",
+			"--ce-activityBar-inactiveForeground": "#858585",
+			"--ce-activityBar-border": "#262626",
+			"--ce-activityBar-activeBorder": "#fafafa",
+			"--ce-activityBarBadge-background": "#fafafa",
+			"--ce-activityBarBadge-foreground": "#0a0a0a",
+
+			"--ce-sideBar-background": "#0a0a0a",
+			"--ce-sideBar-foreground": "#fafafa",
+			"--ce-sideBar-border": "#262626",
+			"--ce-sideBarTitle-foreground": "#bbbbbb",
+			"--ce-sideBarSectionHeader-background": "#0a0a0a",
+			"--ce-sideBarSectionHeader-foreground": "#fafafa",
+
+			"--ce-list-activeSelectionBackground": "#262626",
+			"--ce-list-activeSelectionForeground": "#fafafa",
+			"--ce-list-hoverBackground": "#262626",
+			"--ce-list-hoverForeground": "#fafafa",
+
+			"--ce-editorGroupHeader-tabsBackground": "#0a0a0a",
+			"--ce-editorGroup-border": "#262626",
+			"--ce-tab-activeBackground": "#0a0a0a",
+			"--ce-tab-activeForeground": "#fafafa",
+			"--ce-tab-activeBorderTop": "#fafafa",
+			"--ce-tab-inactiveBackground": "#0a0a0a",
+			"--ce-tab-inactiveForeground": "#969696",
+			"--ce-tab-border": "#262626",
+
+			"--ce-editor-background": "#0a0a0a",
+			"--ce-editor-foreground": "#fafafa",
+			"--ce-editorLineNumber-foreground": "#858585",
+			"--ce-editorLineNumber-activeForeground": "#c6c6c6",
+
+			"--ce-statusBar-background": "#0a0a0a",
+			"--ce-statusBar-foreground": "#fafafa",
+			"--ce-statusBarItem-hoverBackground": "rgba(255, 255, 255, 0.12)",
+			"--ce-statusBar-border": "#262626",
+
+			"--ce-panel-background": "#0a0a0a",
+			"--ce-panel-border": "#262626",
+			"--ce-panelTitle-activeForeground": "#fafafa",
+			"--ce-panelTitle-inactiveForeground": "#e7e7e799",
+			"--ce-panelTitle-activeBorder": "#fafafa",
+
+			"--ce-input-background": "#0a0a0a",
+			"--ce-input-foreground": "#fafafa",
+			"--ce-input-placeholderForeground": "#a6a6a6",
+			"--ce-input-border": "#262626",
+		},
+	});
 }
