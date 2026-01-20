@@ -30,7 +30,11 @@ export default function TitleBar() {
 					<Menu size={16} />
 				</div>
 				<span className="font-bold text-sm tracking-wide">
-					{siteStore.getLogo() || siteStore.title}
+					{siteStore.getLogo() ? (
+						<img src={siteStore.getLogo()} alt={siteStore.title} className="h-4" />
+					) : (
+						<span className="font-bold text-md">{siteStore.title}</span>
+					)}
 				</span>
 			</div>
 
