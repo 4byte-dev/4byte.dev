@@ -32,7 +32,7 @@ export default function TitleBar() {
 				</div>
 				<span className="font-bold text-sm tracking-wide">
 					{siteStore.getLogo() ? (
-						<img src={siteStore.getLogo()} alt={siteStore.title} className="h-4" />
+						<img src={siteStore.getLogo()} alt={siteStore.title} className="h-6" />
 					) : (
 						<span className="font-bold text-md">{siteStore.title}</span>
 					)}
