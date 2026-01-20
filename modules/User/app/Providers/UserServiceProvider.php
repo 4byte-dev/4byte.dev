@@ -28,7 +28,12 @@ class UserServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerObservers();
+        $this->registerPolicies();
         $this->registerPublishableResources();
+        $this->registerSearch();
+        $this->registerReact();
+        $this->registerFeed();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
         $this->loadFactoriesFrom(module_path($this->name, 'database/factories'));
     }
