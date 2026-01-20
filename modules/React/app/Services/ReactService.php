@@ -535,7 +535,9 @@ class ReactService
         Count::where('countable_type', $countableType)
             ->where('countable_id', $countableId)
             ->where('filter', $filter)
-            ->update(['count' => DB::raw("GREATEST(count - {$amount}, 0)")]);
+            ->update([
+                'count' => DB::raw("CASE WHEN count - {$amount} < 0 THEN 0 ELSE count - {$amount} END"),
+            ]);
     }
 
     public function decrementCountCache(string $countableType, int $countableId, string $filter, int $amount = 1): void
