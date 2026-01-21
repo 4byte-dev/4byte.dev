@@ -16,8 +16,6 @@ import {
 	ThumbsUp,
 	Trash,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { toast } from "@/Hooks/useToast";
 import { Link } from "@inertiajs/react";
 import { useMutation } from "@tanstack/react-query";
 import ReactApi from "@React/Api";
@@ -43,30 +41,42 @@ export function EntryCard({
 	const [isCopied, setIsCopied] = useState(false);
 	const [likes, setLikes] = useState(initialLikes);
 	const [dislikes, setDislikes] = useState(initialDislikes);
-	const { t } = useTranslation();
 	const hasMedia = media && media.length > 0;
 
 	const likeMutation = useMutation({
 		mutationFn: () => ReactApi.like({ type: "entry", slug: slug }),
-		onSuccess: () => {
-			if (isLiked) {
-				setIsLiked(false);
-				setLikes(likes - 1);
-			} else {
+		onMutate: async () => {
+			const previousState = {
+				isLiked,
+				likes,
+				isDisliked,
+				dislikes,
+			};
+
+			setIsLiked((prev) => {
+				if (prev) {
+					setLikes((l) => l - 1);
+					return false;
+				}
+
 				if (isDisliked) {
 					setIsDisliked(false);
-					setDislikes(dislikes - 1);
+					setDislikes((d) => d - 1);
 				}
-				setIsLiked(true);
-				setLikes(likes + 1);
-			}
-		},
-		onError: () => {
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same entry once a day"),
-				variant: "destructive",
+
+				setLikes((l) => l + 1);
+				return true;
 			});
+
+			return { previousState };
+		},
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsLiked(context.previousState.isLiked);
+				setLikes(context.previousState.likes);
+				setIsDisliked(context.previousState.isDisliked);
+				setDislikes(context.previousState.dislikes);
+			}
 		},
 	});
 
@@ -78,38 +88,59 @@ export function EntryCard({
 
 	const dislikeMutation = useMutation({
 		mutationFn: () => ReactApi.dislike({ type: "entry", slug: slug }),
-		onSuccess: () => {
-			if (isDisliked) {
-				setIsDisliked(false);
-				setDislikes(dislikes - 1);
-			} else {
-				if (isLiked) {
-					setIsLiked(false);
-					setLikes(likes - 1);
+		onMutate: async () => {
+			const previousState = {
+				isLiked,
+				likes,
+				isDisliked,
+				dislikes,
+			};
+
+			setIsDisliked((disliked) => {
+				const willDislike = !disliked;
+
+				if (willDislike) {
+					if (isLiked) {
+						setIsLiked(false);
+						setLikes((l) => l - 1);
+					}
+
+					setDislikes((d) => d + 1);
+				} else {
+					setDislikes((d) => d - 1);
 				}
-				setIsDisliked(true);
-				setDislikes(dislikes + 1);
-			}
-		},
-		onError: () => {
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same entry once a day"),
-				variant: "destructive",
+
+				return willDislike;
 			});
+
+			return { previousState };
+		},
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsLiked(context.previousState.isLiked);
+				setLikes(context.previousState.likes);
+				setIsDisliked(context.previousState.isDisliked);
+				setDislikes(context.previousState.dislikes);
+			}
 		},
 	});
 
 	const handleDislike = () => {
 		if (!authStore.isAuthenticated) return;
-
 		dislikeMutation.mutate();
 	};
 
 	const saveMutation = useMutation({
 		mutationFn: () => ReactApi.save({ type: "entry", slug: slug }),
-		onSuccess: () => {
+		onMutate: async () => {
+			const previousState = { isSaved };
 			setIsSaved(!isSaved);
+			return { previousState };
+		},
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsSaved(context.previousState.isSaved);
+			}
 		},
 	});
 

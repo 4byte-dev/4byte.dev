@@ -10,6 +10,7 @@ import { Button } from "@/Components/Ui/Form/Button";
 import { Menu, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSiteStore } from "@/Stores/SiteStore";
+import { Link } from "@inertiajs/react";
 
 export default function TitleBar() {
 	const { setQuickOpen, toggleSidebar, togglePanel, layout, activeFile, name } = useEditorStore();
@@ -30,7 +31,11 @@ export default function TitleBar() {
 					<Menu size={16} />
 				</div>
 				<span className="font-bold text-sm tracking-wide">
-					{siteStore.getLogo() || siteStore.title}
+					{siteStore.getLogo() ? (
+						<img src={siteStore.getLogo()} alt={siteStore.title} className="h-6" />
+					) : (
+						<span className="font-bold text-md">{siteStore.title}</span>
+					)}
 				</span>
 			</div>
 
@@ -173,15 +178,16 @@ export default function TitleBar() {
 			</div>
 
 			<div className="flex items-center">
-				<Button
-					variant="ghost"
-					size="sm"
-					className="h-9 w-12 rounded-none hover:bg-red-500 hover:text-white"
-					onClick={() => (window.location.href = "/")}
-					title="Close Editor"
-				>
-					<X size={16} />
-				</Button>
+				<Link href={route("home.view")}>
+					<Button
+						variant="ghost"
+						size="sm"
+						className="h-9 w-12 rounded-none hover:bg-red-500 hover:text-white"
+						title="Close Editor"
+					>
+						<X size={16} />
+					</Button>
+				</Link>
 			</div>
 		</div>
 	);

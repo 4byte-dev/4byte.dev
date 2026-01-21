@@ -5,6 +5,7 @@ namespace Modules\User\Services;
 use Illuminate\Support\Facades\Cache;
 use Modules\User\Data\UserData;
 use Modules\User\Data\UserProfileData;
+use Modules\User\Mappers\UserMapper;
 use Modules\User\Models\User;
 use Modules\User\Models\UserProfile;
 
@@ -23,7 +24,7 @@ class UserService
                 ->findOrFail($userId);
         });
 
-        return UserData::fromModel($user);
+        return UserMapper::toData($user);
     }
 
     /**
@@ -54,7 +55,7 @@ class UserService
                 ->select(['id', 'role', 'bio', 'location', 'website', 'socials'])
                 ->firstOrFail();
 
-            return UserProfileData::fromModel($userProfile);
+            return UserMapper::toProfileData($userProfile);
         });
     }
 }

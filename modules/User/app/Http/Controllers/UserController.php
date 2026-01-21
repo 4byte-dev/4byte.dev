@@ -21,8 +21,8 @@ use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use Modules\User\Data\UserProfileData;
 use Modules\User\Jobs\DeleteAccountJob;
+use Modules\User\Mappers\UserMapper;
 use Modules\User\Services\SessionService;
 use Modules\User\Services\UserService;
 
@@ -146,7 +146,7 @@ class UserController extends Controller
             'email'    => $user->email,
             'avatar'   => $user->getAvatarImage(),
         ];
-        $profile  = UserProfileData::fromModel($profileModel);
+        $profile  = UserMapper::toProfileData($profileModel);
         $sessions = SessionService::getUserSessions();
 
         return Inertia::render('User/Settings', [

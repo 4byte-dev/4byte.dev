@@ -21,7 +21,6 @@ import Feed from "@/Components/Content/Feed";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { Card, CardContent } from "@/Components/Ui/Card";
 import { useTranslation } from "react-i18next";
-import { toast } from "@/Hooks/useToast";
 import { Comments } from "@React/Components/Comments";
 import { useMutation } from "@tanstack/react-query";
 import ReactApi from "@React/Api";
@@ -77,12 +76,6 @@ export default function ArticlePage({ article }) {
 				setIsDisliked(context.previousState.isDisliked);
 				setDislikes(context.previousState.dislikes);
 			}
-
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same article once a day"),
-				variant: "destructive",
-			});
 		},
 	});
 
@@ -127,12 +120,6 @@ export default function ArticlePage({ article }) {
 				setIsDisliked(context.previousState.isDisliked);
 				setDislikes(context.previousState.dislikes);
 			}
-
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same article once a day"),
-				variant: "destructive",
-			});
 		},
 	});
 

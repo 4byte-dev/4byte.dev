@@ -10,6 +10,7 @@ use Modules\Page\Data\PageData;
 use Modules\Page\Models\Page;
 use Modules\Page\Tests\TestCase;
 use Modules\User\Data\UserData;
+use Modules\User\Mappers\UserMapper;
 
 class PageDataTest extends TestCase
 {
@@ -82,7 +83,7 @@ class PageDataTest extends TestCase
             'username' => 'username',
         ]);
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         $pageData = PageData::fromModel($page, $userData);
 
@@ -105,7 +106,7 @@ class PageDataTest extends TestCase
         $page = Page::factory()->create();
 
         $user     = User::factory()->create();
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         $pageData = PageData::fromModel($page, $userData, true);
 
@@ -117,7 +118,7 @@ class PageDataTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         /** @var Page|MockInterface $page */
         $page        = Mockery::mock(Page::class)->makePartial();

@@ -28,7 +28,7 @@ export const useEditorStore = create((set) => ({
 	activeFile: "index.html",
 	openFiles: ["index.html"],
 	consoleLogs: [],
-	theme: localStorage.getItem("ce-theme") || "theme-defaults-dark",
+	theme: localStorage.getItem("ce-theme") || "theme-defaults-4byte",
 
 	toggleSidebar: () =>
 		set((state) => ({

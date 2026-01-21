@@ -16,7 +16,6 @@ import { Link } from "@inertiajs/react";
 import Feed from "@/Components/Content/Feed";
 import { Trans, useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/Ui/Tabs";
-import { toast } from "@/Hooks/useToast";
 import { useDevice } from "@/Hooks/useDevice";
 import ReactApi from "@React/Api";
 import { useMutation } from "@tanstack/react-query";
@@ -47,16 +46,22 @@ export default function UserProfilePage({ user, profile }) {
 
 	const followMutation = useMutation({
 		mutationFn: () => ReactApi.follow({ type: "user", slug: user.username }),
-		onSuccess: () => {
+		onMutate: () => {
+			const previousState = {
+				isFollowing,
+				followers,
+			};
+
 			setIsFollowing(!isFollowing);
 			setFollowers(isFollowing ? followers - 1 : followers + 1);
+
+			return { previousState };
 		},
-		onError: () => {
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same user once a day"),
-				variant: "destructive",
-			});
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsFollowing(context.previousState.isFollowing);
+				setFollowers(context.previousState.followers);
+			}
 		},
 	});
 

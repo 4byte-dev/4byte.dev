@@ -27,9 +27,11 @@ class CategoryServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
         $this->registerObservers();
+        $this->registerPublishableResources();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
         $this->loadFactoriesFrom(module_path($this->name, 'database/factories'));
-        $this->registerPublishableResources();
+        $this->registerReact();
+        $this->registerFeed();
     }
 
     /**

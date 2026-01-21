@@ -21,9 +21,9 @@ import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
 import { Link } from "@inertiajs/react";
 import { useState } from "react";
 import { useAuthStore } from "@/Stores/AuthStore";
-import { toast, useToast } from "@/Hooks/useToast";
 import ReactApi from "@React/Api";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 export default function TutorialPage({ course, cirriculum }) {
 	const [isLiked, setIsLiked] = useState(course.isLiked);
@@ -32,13 +32,19 @@ export default function TutorialPage({ course, cirriculum }) {
 	const [dislikes, setDislikes] = useState(Number(course.dislikes));
 	const [isSaved, setIsSaved] = useState(course.isSaved);
 	const [isCopied, setIsCopied] = useState(false);
-
 	const authStore = useAuthStore();
-	const { t } = useToast();
+	const { t } = useTranslation();
 
 	const likeMutation = useMutation({
 		mutationFn: () => ReactApi.like({ type: "course", slug: course.slug }),
-		onSuccess: () => {
+		onMutate: async () => {
+			const previousState = {
+				isLiked,
+				likes,
+				isDisliked,
+				dislikes,
+			};
+
 			setIsLiked((prev) => {
 				if (prev) {
 					setLikes((l) => l - 1);
@@ -53,13 +59,16 @@ export default function TutorialPage({ course, cirriculum }) {
 				setLikes((l) => l + 1);
 				return true;
 			});
+
+			return { previousState };
 		},
-		onError: () => {
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same course once a day"),
-				variant: "destructive",
-			});
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsLiked(context.previousState.isLiked);
+				setLikes(context.previousState.likes);
+				setIsDisliked(context.previousState.isDisliked);
+				setDislikes(context.previousState.dislikes);
+			}
 		},
 	});
 
@@ -70,7 +79,14 @@ export default function TutorialPage({ course, cirriculum }) {
 
 	const dislikeMutation = useMutation({
 		mutationFn: () => ReactApi.dislike({ type: "course", slug: course.slug }),
-		onSuccess: () => {
+		onMutate: async () => {
+			const previousState = {
+				isLiked,
+				likes,
+				isDisliked,
+				dislikes,
+			};
+
 			setIsDisliked((disliked) => {
 				const willDislike = !disliked;
 
@@ -87,13 +103,16 @@ export default function TutorialPage({ course, cirriculum }) {
 
 				return willDislike;
 			});
+
+			return { previousState };
 		},
-		onError: () => {
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same course once a day"),
-				variant: "destructive",
-			});
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsLiked(context.previousState.isLiked);
+				setLikes(context.previousState.likes);
+				setIsDisliked(context.previousState.isDisliked);
+				setDislikes(context.previousState.dislikes);
+			}
 		},
 	});
 
@@ -104,8 +123,15 @@ export default function TutorialPage({ course, cirriculum }) {
 
 	const saveMutation = useMutation({
 		mutationFn: () => ReactApi.save({ type: "course", slug: course.slug }),
-		onSuccess: () => {
+		onMutate: async () => {
+			const previousState = { isSaved };
 			setIsSaved(!isSaved);
+			return { previousState };
+		},
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsSaved(context.previousState.isSaved);
+			}
 		},
 	});
 

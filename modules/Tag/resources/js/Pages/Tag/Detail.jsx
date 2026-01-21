@@ -6,8 +6,6 @@ import { Badge } from "@/Components/Ui/Badge";
 import { Link } from "@inertiajs/react";
 import { useAuthStore } from "@/Stores/AuthStore";
 import Feed from "@/Components/Content/Feed";
-import { toast } from "@/Hooks/useToast";
-import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import ReactApi from "@React/Api";
 
@@ -15,20 +13,25 @@ export default function TagDetailPage({ tag, profile, articles, news, tags }) {
 	const [isFollowing, setIsFollowing] = useState(tag.isFollowing);
 	const [followers, setFollowers] = useState(Number(tag.followers));
 	const authStore = useAuthStore();
-	const { t } = useTranslation();
 
 	const followMutation = useMutation({
 		mutationFn: () => ReactApi.follow({ type: "tag", slug: tag.slug }),
-		onSuccess: () => {
+		onMutate: () => {
+			const previousState = {
+				isFollowing,
+				followers,
+			};
+
 			setIsFollowing(!isFollowing);
 			setFollowers(isFollowing ? followers - 1 : followers + 1);
+
+			return { previousState };
 		},
-		onError: () => {
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same tag once a day"),
-				variant: "destructive",
-			});
+		onError: (err, newTodo, context) => {
+			if (context?.previousState) {
+				setIsFollowing(context.previousState.isFollowing);
+				setFollowers(context.previousState.followers);
+			}
 		},
 	});
 

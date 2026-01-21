@@ -12,6 +12,7 @@ use Modules\News\Models\News;
 use Modules\News\Tests\TestCase;
 use Modules\Tag\Data\TagData;
 use Modules\User\Data\UserData;
+use Modules\User\Mappers\UserMapper;
 
 class NewsDataTest extends TestCase
 {
@@ -102,7 +103,7 @@ class NewsDataTest extends TestCase
             'username' => 'username',
         ]);
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         $newsData = NewsMapper::toData($news, $userData);
 
@@ -124,7 +125,7 @@ class NewsDataTest extends TestCase
 
         $user = User::factory()->create();
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         $newsData = NewsMapper::toData($news, $userData, true);
 
@@ -136,7 +137,7 @@ class NewsDataTest extends TestCase
         $news = News::factory()->create();
         $user = User::factory()->create();
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         Gate::shouldReceive('allows')
             ->with('update', $news)

@@ -9,6 +9,7 @@ use Modules\Article\Mappers\ArticleMapper;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 use Modules\User\Data\UserData;
+use Modules\User\Mappers\UserMapper;
 
 class ArticleMapperTest extends TestCase
 {
@@ -26,7 +27,7 @@ class ArticleMapperTest extends TestCase
             'username' => 'username',
         ]);
 
-        $user = UserData::fromModel($user);
+        $user = UserMapper::toData($user);
 
         $articleData = ArticleMapper::toData($article, $user);
 
@@ -60,7 +61,7 @@ class ArticleMapperTest extends TestCase
 
         $user = User::factory()->create();
 
-        $user = UserData::fromModel($user);
+        $user = UserMapper::toData($user);
 
         $articleData = ArticleMapper::toData($article, $user, true);
 
@@ -72,7 +73,7 @@ class ArticleMapperTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         /** @var Article|MockInterface $article */
         $article        = Mockery::mock(Article::class)->makePartial();
@@ -114,7 +115,7 @@ class ArticleMapperTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         /** @var Article|MockInterface $article */
         $article        = Mockery::mock(Article::class)->makePartial();

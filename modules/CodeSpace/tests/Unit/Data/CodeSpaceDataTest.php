@@ -6,6 +6,7 @@ use Modules\CodeSpace\Data\CodeSpaceData;
 use Modules\CodeSpace\Models\CodeSpace;
 use Modules\CodeSpace\Tests\TestCase;
 use Modules\User\Data\UserData;
+use Modules\User\Mappers\UserMapper;
 use Modules\User\Models\User;
 
 class CodeSpaceDataTest extends TestCase
@@ -70,7 +71,7 @@ class CodeSpaceDataTest extends TestCase
 
         $user = User::factory()->create();
 
-        $userData = UserData::fromModel($user);
+        $userData = UserMapper::toData($user);
 
         $data = CodeSpaceData::fromModel($codeSpace, $userData, true);
 

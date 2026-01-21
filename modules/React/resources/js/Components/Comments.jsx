@@ -86,8 +86,12 @@ export function Comments({ commentsCounts: initialCommentsCounts, type, slug }) 
 
 	const likeMutation = useMutation({
 		mutationFn: ({ commentId }) => ReactApi.like({ type: "comment", slug: commentId }),
-		onSuccess: (_, { commentId, parentId }) => {
+		onMutate: (_, { commentId, parentId }) => {
+			let previousState;
+
 			if (!parentId) {
+				previousState = [...comments];
+
 				setComments((prev) =>
 					prev.map((c) =>
 						c.id === commentId
@@ -100,6 +104,8 @@ export function Comments({ commentsCounts: initialCommentsCounts, type, slug }) 
 					),
 				);
 			} else {
+				previousState = { ...replies };
+
 				setReplies((prevReplies) => ({
 					...prevReplies,
 					[parentId]: prevReplies[parentId].map((reply) =>
@@ -113,13 +119,17 @@ export function Comments({ commentsCounts: initialCommentsCounts, type, slug }) 
 					),
 				}));
 			}
+
+			return { previousState };
 		},
-		onError: () => {
-			toast({
-				title: t("Error"),
-				description: t("You can react to the same comment once a day"),
-				variant: "destructive",
-			});
+		onError: (err, _variables, context) => {
+			if (context?.previousState) {
+				if (_variables.parentId) {
+					setReplies(context.previousState);
+				} else {
+					setComments(context.previousState);
+				}
+			}
 		},
 	});
 

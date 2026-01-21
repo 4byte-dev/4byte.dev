@@ -9,11 +9,20 @@ function buildResources(files) {
 	const result = {};
 
 	for (const path in files) {
-		const lang = path.match(/([^/]+)\.json$/)?.[1];
-		if (!lang) continue;
+		const langMatch = path.match(/\/([^/]+)\.json$/);
+		if (!langMatch) continue;
 
+		const lang = langMatch[1];
 		result[lang] ??= {};
-		Object.assign(result[lang], files[path]);
+
+		const data = files[path].default ?? files[path];
+
+		if (data.default) {
+			Object.assign(result[lang], data.default, data);
+			delete result[lang].default;
+		} else {
+			Object.assign(result[lang], data);
+		}
 	}
 
 	return result;
