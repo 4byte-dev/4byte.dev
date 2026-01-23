@@ -11,10 +11,12 @@ import { Menu, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSiteStore } from "@/Stores/SiteStore";
 import { Link } from "@inertiajs/react";
+import { useAuthStore } from "@/Stores/AuthStore";
 
 export default function TitleBar() {
 	const { setQuickOpen, toggleSidebar, togglePanel, layout, activeFile, name } = useEditorStore();
 	const siteStore = useSiteStore();
+	const authStore = useAuthStore();
 	const { t } = useTranslation();
 
 	const triggerSave = () => setQuickOpen(true, "save");
@@ -64,14 +66,20 @@ export default function TitleBar() {
 						>
 							{t("New Folder")}
 						</DropdownMenuItem>
-						<DropdownMenuSeparator className="bg-[var(--ce-panel-border)]" />
-						<DropdownMenuItem onClick={triggerLoad}>
-							{t("Open Project...")}
-						</DropdownMenuItem>
-						<DropdownMenuSeparator className="bg-[var(--ce-panel-border)]" />
-						<DropdownMenuItem onClick={triggerSave}>
-							{t("Save Project")}
-						</DropdownMenuItem>
+						{authStore.isAuthenticated ? (
+							<>
+								<DropdownMenuSeparator className="bg-[var(--ce-panel-border)]" />
+								<DropdownMenuItem onClick={triggerLoad}>
+									{t("Open Project...")}
+								</DropdownMenuItem>
+								<DropdownMenuSeparator className="bg-[var(--ce-panel-border)]" />
+								<DropdownMenuItem onClick={triggerSave}>
+									{t("Save Project")}
+								</DropdownMenuItem>
+							</>
+						) : (
+							<></>
+						)}
 					</DropdownMenuContent>
 				</DropdownMenu>
 
@@ -115,7 +123,7 @@ export default function TitleBar() {
 						<DropdownMenuItem onClick={triggerCommandPalette}>
 							{t("Command Palette...")}
 						</DropdownMenuItem>
-						<DropdownMenuItem onClick={triggerTheme}>Themes...</DropdownMenuItem>
+						<DropdownMenuItem onClick={triggerTheme}>{t("Themes...")}</DropdownMenuItem>
 						<DropdownMenuSeparator className="bg-[var(--ce-panel-border)]" />
 						<DropdownMenuItem
 							onClick={() =>
@@ -143,7 +151,7 @@ export default function TitleBar() {
 							{layout.panelVisible ? t("Close Panel") : t("Open Panel")}
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={toggleSidebar}>
-							{layout.sidebarVisible ? t("Close Sidebar") : "Open Sidebar"}
+							{layout.sidebarVisible ? t("Close Sidebar") : t("Open Sidebar")}
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
