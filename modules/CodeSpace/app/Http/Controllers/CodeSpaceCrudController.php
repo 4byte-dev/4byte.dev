@@ -6,18 +6,19 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Modules\CodeSpace\Actions\CreateCodeSpaceAction;
+use Modules\CodeSpace\Actions\EditCodeSpaceAction;
 use Modules\CodeSpace\Http\Requests\CreateRequest;
 use Modules\CodeSpace\Models\CodeSpace;
 use Modules\CodeSpace\Services\CodeSpaceService;
 
 class CodeSpaceCrudController extends Controller
 {
-    protected CodeSpaceService $codeSpaceService;
-
-    public function __construct(CodeSpaceService $codeSpaceService)
-    {
-        $this->codeSpaceService = $codeSpaceService;
+    public function __construct(
+        protected CodeSpaceService $codeSpaceService,
+        protected CreateCodeSpaceAction $createCodeSpaceAction,
+        protected EditCodeSpaceAction $editCodeSpaceAction,
+    ) {
     }
 
     /**
@@ -39,16 +40,9 @@ class CodeSpaceCrudController extends Controller
     {
         $data = $request->validated();
 
-        $slug = Str::uuid();
+        $codeSpace = $this->createCodeSpaceAction->execute($data);
 
-        CodeSpace::create([
-            'name'         => $data['name'],
-            'slug'         => $slug,
-            'files'        => $data['files'],
-            'user_id'      => Auth::id(),
-        ]);
-
-        return response()->json(['slug' => $slug]);
+        return response()->json(['slug' => $codeSpace->slug]);
     }
 
     /**
@@ -58,10 +52,7 @@ class CodeSpaceCrudController extends Controller
     {
         $data = $request->validated();
 
-        $code->update([
-            'name'  => $data['name'],
-            'files' => $data['files'],
-        ]);
+        $this->editCodeSpaceAction->execute($code, $data);
 
         return response()->json(['slug' => $code->slug]);
     }
