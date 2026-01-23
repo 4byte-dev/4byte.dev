@@ -8,12 +8,10 @@ class GorseUser implements JsonSerializable
 {
     /**
      * @param array<int, string> $labels
-     * @param array<int, string>|null $subscribe
      */
     public function __construct(
         private readonly string $userId,
         private array $labels,
-        private readonly ?array $subscribe,
         private readonly ?string $comment
     ) {
     }
@@ -34,16 +32,6 @@ class GorseUser implements JsonSerializable
     public function getLabels(): array
     {
         return $this->labels;
-    }
-
-    /**
-     * Get subscriptions of the user.
-     *
-     * @return array<int, string>
-     */
-    public function getSubscribe(): array
-    {
-        return $this->subscribe;
     }
 
     /**
@@ -76,7 +64,6 @@ class GorseUser implements JsonSerializable
      * @return array{
      *     UserId: string,
      *     Labels: array<int, string>,
-     *     Subscribe: array<int, string>,
      *     Comment: string
      * }
      */
@@ -85,7 +72,6 @@ class GorseUser implements JsonSerializable
         return [
             'UserId'    => $this->userId,
             'Labels'    => $this->labels,
-            'Subscribe' => $this->subscribe,
             'Comment'   => $this->comment,
         ];
     }
@@ -96,7 +82,6 @@ class GorseUser implements JsonSerializable
      * @param array{
      *     UserId: string,
      *     Labels: array<int, string>,
-     *     Subscribe: array<int, string>,
      *     Comment: string
      * } $json
      */
@@ -105,7 +90,6 @@ class GorseUser implements JsonSerializable
         return new self(
             $json['UserId'],
             $json['Labels'],
-            $json['Subscribe'],
             $json['Comment']
         );
     }

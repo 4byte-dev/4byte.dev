@@ -12,7 +12,6 @@ class GorseUserTest extends TestCase
         $user = new GorseUser(
             'user1',
             ['label1'],
-            ['sub1'],
             'comment'
         );
 
@@ -20,7 +19,6 @@ class GorseUserTest extends TestCase
 
         $this->assertSame('user1', $decoded['UserId']);
         $this->assertSame(['label1'], $decoded['Labels']);
-        $this->assertSame(['sub1'], $decoded['Subscribe']);
         $this->assertSame('comment', $decoded['Comment']);
     }
 
@@ -29,19 +27,17 @@ class GorseUserTest extends TestCase
         $user = GorseUser::fromJSON([
             'UserId'    => 'user1',
             'Labels'    => ['label1'],
-            'Subscribe' => ['sub1'],
             'Comment'   => 'comment',
         ]);
 
         $this->assertEquals('user1', $user->getUserId());
         $this->assertEquals(['label1'], $user->getLabels());
-        $this->assertEquals(['sub1'], $user->getSubscribe());
         $this->assertEquals('comment', $user->getComment());
     }
 
     public function test_add_label(): void
     {
-        $user = new GorseUser('user1', [], null, null);
+        $user = new GorseUser('user1', [], null);
 
         $user->addLabel('new-label');
 
@@ -50,7 +46,7 @@ class GorseUserTest extends TestCase
 
     public function test_remove_label(): void
     {
-        $user = new GorseUser('user1', ['label1', 'label2'], null, null);
+        $user = new GorseUser('user1', ['label1', 'label2'], null);
 
         $user->removeLabel('label1');
 

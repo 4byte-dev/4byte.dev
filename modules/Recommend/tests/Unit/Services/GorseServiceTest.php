@@ -29,7 +29,7 @@ class GorseServiceTest extends TestCase
             'http://gorse:8088/api/user' => Http::response(['RowAffected' => 1]),
         ]);
 
-        $user   = new GorseUser('user1', [], [], null);
+        $user   = new GorseUser('user1', [], null);
         $result = $this->service->insertUser($user);
 
         $this->assertNotNull($result);
@@ -42,7 +42,6 @@ class GorseServiceTest extends TestCase
             'http://gorse:8088/api/user/user1' => Http::response([
                 'UserId'    => 'user1',
                 'Labels'    => ['a', 'b'],
-                'Subscribe' => [],
                 'Comment'   => '',
             ]),
         ]);
