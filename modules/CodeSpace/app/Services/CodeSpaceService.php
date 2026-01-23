@@ -4,6 +4,7 @@ namespace Modules\CodeSpace\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Modules\CodeSpace\Data\CodeSpaceData;
+use Modules\CodeSpace\Mappers\CodeSpaceMapper;
 use Modules\CodeSpace\Models\CodeSpace;
 use Modules\User\Services\UserService;
 
@@ -31,7 +32,7 @@ class CodeSpaceService
 
         $user = $this->userService->getData($codeSpace->user_id);
 
-        return CodeSpaceData::fromModel($codeSpace, $user);
+        return CodeSpaceMapper::toData($codeSpace, $user);
     }
 
     /**
@@ -58,10 +59,11 @@ class CodeSpaceService
         $codeSpaces = Cache::rememberForever("codespace:{$userId}:codespaces", function () use ($userId) {
             return CodeSpace::where('user_id', $userId)
                 ->select('id', 'name', 'slug', 'updated_at')
-                ->get()
-                ->toArray();
+                ->get();
         });
 
-        return CodeSpaceData::collect($codeSpaces);
+        $user = $this->userService->getData($userId);
+
+        return CodeSpaceMapper::collection($codeSpaces, $user);
     }
 }
