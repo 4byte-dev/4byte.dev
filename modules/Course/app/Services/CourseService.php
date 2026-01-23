@@ -5,6 +5,7 @@ namespace Modules\Course\Services;
 use Illuminate\Support\Facades\Cache;
 use Modules\Course\Data\CourseData;
 use Modules\Course\Data\CourseLessonData;
+use Modules\Course\Mappers\CourseMapper;
 use Modules\Course\Models\Course;
 use Modules\Course\Models\CourseChapter;
 use Modules\Course\Models\CourseLesson;
@@ -36,7 +37,7 @@ class CourseService
 
         $user = $this->userService->getData($course->user_id);
 
-        return CourseData::fromModel($course, $user);
+        return CourseMapper::toData($course, $user);
     }
 
     /**
@@ -117,7 +118,7 @@ class CourseService
                 ->findOrFail($lessonId);
         });
 
-        return CourseLessonData::fromModel($lesson);
+        return CourseMapper::toLessonData($lesson);
     }
 
     /**
@@ -135,6 +136,6 @@ class CourseService
                 ->findOrFail($lessonId);
         });
 
-        return CourseLessonData::fromModel($lesson);
+        return CourseMapper::toLessonData($lesson);
     }
 }
