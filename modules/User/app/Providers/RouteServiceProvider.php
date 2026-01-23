@@ -39,7 +39,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes(): void
     {
-        Route::middleware(['web', 'auth', BatchLogsActivity::class])
+        Route::middleware(['web', BatchLogsActivity::class])
             ->prefix('api')
             ->name('api.')
             ->group(module_path($this->name, '/routes/api.php'));
