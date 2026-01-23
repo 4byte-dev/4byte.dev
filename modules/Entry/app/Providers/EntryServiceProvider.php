@@ -5,7 +5,6 @@ namespace Modules\Entry\Providers;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Modules\Entry\Models\Entry;
-use Modules\Entry\Observers\EntryObserver;
 use Modules\Entry\Policies\EntryPolicy;
 use Modules\Entry\Services\EntryService;
 use Modules\React\Services\ReactService;
@@ -26,7 +25,6 @@ class EntryServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-        $this->registerObservers();
         $this->registerPublishableResources();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
         $this->loadFactoriesFrom(module_path($this->name, 'database/factories'));
@@ -40,6 +38,7 @@ class EntryServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->register(RouteServiceProvider::class);
+        $this->app->register(EventServiceProvider::class);
     }
 
     /**
@@ -60,14 +59,6 @@ class EntryServiceProvider extends ServiceProvider
     protected function registerPolicies(): void
     {
         Gate::policy(Entry::class, EntryPolicy::class);
-    }
-
-    /**
-     * Register model observers.
-     */
-    protected function registerObservers(): void
-    {
-        Entry::observe(EntryObserver::class);
     }
 
     /**

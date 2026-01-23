@@ -45,7 +45,7 @@ class UpdateArticleAction
 
             $content = isset($data['content']) ? Purify::clean($data['content']) : null;
 
-            if (! empty($contentImages) && $content) {
+            if (\count($contentImages) > 0 && $content) {
                 foreach ($contentImages as $placeholder => $file) {
                     if ($file instanceof UploadedFile) {
                         $media   = $article->addMedia($file)->toMediaCollection('content');

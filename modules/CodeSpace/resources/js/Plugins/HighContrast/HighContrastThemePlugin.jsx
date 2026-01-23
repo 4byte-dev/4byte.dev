@@ -76,6 +76,10 @@ const HighContrastThemePlugin = {
 			store.setTheme("theme-hc-black");
 		});
 	},
+	deactivate: () => {
+		const store = useEditorStore.getState();
+		store.setTheme("theme-defaults-4byte");
+	},
 };
 
 pluginRegistry.registerPlugin(HighContrastThemePlugin);

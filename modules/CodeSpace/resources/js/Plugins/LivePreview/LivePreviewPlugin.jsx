@@ -108,6 +108,13 @@ const LivePreviewPlugin = {
 			when: (ctx) => ctx.type === "file" && ctx.path.endsWith(".html"),
 		});
 	},
+	deactivate: () => {
+		const store = useEditorStore.getState();
+
+		if (store.layout.editorSplitVisible) {
+			store.setEditorSplit(false, null);
+		}
+	},
 };
 
 pluginRegistry.registerPlugin(LivePreviewPlugin);

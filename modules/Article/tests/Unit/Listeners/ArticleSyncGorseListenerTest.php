@@ -5,8 +5,9 @@ namespace Modules\Article\Tests\Unit\Listeners;
 use Carbon\Carbon;
 use Mockery;
 use Modules\Article\Enums\ArticleStatus;
+use Modules\Article\Events\ArticleDeletedEvent;
 use Modules\Article\Events\ArticlePublishedEvent;
-use Modules\Article\Listeners\ArticlePublishedGorseListener;
+use Modules\Article\Listeners\ArticleSyncGorseListener;
 use Modules\Article\Models\Article;
 use Modules\Article\Tests\TestCase;
 use Modules\Category\Models\Category;
@@ -14,7 +15,7 @@ use Modules\Recommend\Classes\GorseItem;
 use Modules\Recommend\Services\GorseService;
 use Modules\Tag\Models\Tag;
 
-class ArticlePublishedGorseListenerTest extends TestCase
+class ArticleSyncGorseListenerTest extends TestCase
 {
     public function test_listener_inserts_article_to_gorse(): void
     {
@@ -54,7 +55,21 @@ class ArticlePublishedGorseListenerTest extends TestCase
                 return $actualJson === $expectedJson;
             }));
 
-        $listener = new ArticlePublishedGorseListener();
-        $listener->handle($event, $gorseService);
+        $listener = new ArticleSyncGorseListener($gorseService);
+        $listener->handleArticlePublished($event);
+    }
+
+    public function test_listener_deletes_item_from_gorse(): void
+    {
+        $article = Article::factory()->create();
+        $event   = new ArticleDeletedEvent($article);
+
+        $gorseService = Mockery::mock(GorseService::class);
+        $gorseService->shouldReceive('deleteItem')
+            ->once()
+            ->with("article:{$article->id}");
+
+        $listener = new ArticleSyncGorseListener($gorseService);
+        $listener->handleArticleDeleted($event);
     }
 }

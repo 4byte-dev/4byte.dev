@@ -43,7 +43,7 @@ class UploadRecommendations extends Command
     {
         User::all()->each(function ($user) {
             $this->gorseService->insertUser(
-                new GorseUser((string) $user->id, ['article', 'entry', 'news'], [], $user->username)
+                new GorseUser((string) $user->id, ['article', 'entry', 'news'], $user->username)
             );
         });
         $this->info('✅ Users uploaded successfully!');

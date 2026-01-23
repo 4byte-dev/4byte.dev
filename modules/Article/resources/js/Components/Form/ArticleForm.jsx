@@ -75,7 +75,7 @@ export default function ArticleForm({
 
 		return {
 			results: data.data.map((item) => ({
-				value: item.id,
+				value: item.slug,
 				label: item.name,
 			})),
 			total: data.total,
@@ -98,7 +98,7 @@ export default function ArticleForm({
 
 		return {
 			results: data.data.map((item) => ({
-				value: item.id,
+				value: item.slug,
 				label: item.name,
 			})),
 			total: data.total,
@@ -433,8 +433,8 @@ export default function ArticleForm({
 										<FormControl>
 											<MultiSelect
 												options={topCategories.map((c) => ({
-													label: `${c.data.name} (${c.total})`,
-													value: c.data.slug,
+													label: `${c.name}`,
+													value: c.slug,
 												}))}
 												onValueChange={field.onChange}
 												defaultValue={field.value}
@@ -468,8 +468,8 @@ export default function ArticleForm({
 										<FormControl>
 											<MultiSelect
 												options={topTags.map((c) => ({
-													label: `${c.data.name} (${c.total})`,
-													value: c.data.slug,
+													label: `${c.name}`,
+													value: c.slug,
 												}))}
 												onValueChange={field.onChange}
 												defaultValue={field.value}

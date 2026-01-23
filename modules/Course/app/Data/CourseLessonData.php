@@ -3,44 +3,20 @@
 namespace Modules\Course\Data;
 
 use DateTime;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
-use Modules\Course\Models\CourseLesson;
-use Spatie\LaravelData\Data;
 
-class CourseLessonData extends Data
+readonly class CourseLessonData
 {
     public function __construct(
-        public ?int $id,
-        public string $title,
-        public string $slug,
-        public ?string $content,
-        public ?string $video_url,
-        public ?DateTime $published_at,
-        public bool $isSaved,
-        public bool $canUpdate,
-        public bool $canDelete,
-        public string $type = 'lesson'
+        public readonly ?int $id,
+        public readonly string $title,
+        public readonly string $slug,
+        public readonly ?string $content,
+        public readonly ?string $video_url,
+        public readonly ?DateTime $published_at,
+        public readonly bool $isSaved,
+        public readonly bool $canUpdate,
+        public readonly bool $canDelete,
+        public readonly string $type = 'lesson'
     ) {
-    }
-
-    /**
-     * Create a TagData instance from a Tag model.
-     */
-    public static function fromModel(CourseLesson $lesson, bool $setId = false): self
-    {
-        $userId = Auth::id();
-
-        return new self(
-            id: $setId ? $lesson->id : 0,
-            title: $lesson->title,
-            slug: $lesson->slug,
-            content: $lesson->content,
-            video_url: $lesson->video_url,
-            published_at: $lesson->published_at,
-            isSaved: $lesson->isSavedBy($userId),
-            canUpdate: Gate::allows('update', $lesson),
-            canDelete: Gate::allows('delete', $lesson)
-        );
     }
 }

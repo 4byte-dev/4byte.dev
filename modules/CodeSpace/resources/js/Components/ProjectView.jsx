@@ -6,6 +6,7 @@ import { Modal, ModalContent, ModalTitle, ModalDescription } from "@/Components/
 import { Button } from "@/Components/Ui/Form/Button";
 import { Separator } from "@/Components/Ui/Separator";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "@/Stores/AuthStore";
 
 export default function ProjectView() {
 	const { loadTemplate, layout, setModal, setQuickOpen } = useEditorStore();
@@ -13,6 +14,7 @@ export default function ProjectView() {
 	const setTemplateModalOpen = (val) => setModal("template", val);
 	const [selectedTemplate, setSelectedTemplate] = useState(null);
 	const [message, setMessage] = useState(null);
+	const authStore = useAuthStore();
 	const { t } = useTranslation();
 
 	const handleTemplateClick = (key) => {
@@ -35,48 +37,52 @@ export default function ProjectView() {
 	return (
 		<div className="flex flex-col h-full bg-[var(--ce-sideBar-background)] text-[var(--ce-sideBar-foreground)]">
 			<div className="p-4 space-y-4 overflow-y-auto flex-1">
-				<div className="space-y-3">
-					<h3 className="text-xs font-semibold opacity-70 uppercase tracking-wider">
-						{t("Storage")}
-					</h3>
+				{authStore.isAuthenticated && (
+					<>
+						<div className="space-y-3">
+							<h3 className="text-xs font-semibold opacity-70 uppercase tracking-wider">
+								{t("Storage")}
+							</h3>
 
-					<div className="flex gap-2">
-						<Button onClick={triggerSave} className="flex-1 gap-2" size="sm">
-							<Save size={16} />
-							{t("Save")}
-						</Button>
+							<div className="flex gap-2">
+								<Button onClick={triggerSave} className="flex-1 gap-2" size="sm">
+									<Save size={16} />
+									{t("Save")}
+								</Button>
 
-						<Button
-							onClick={triggerLoad}
-							variant="secondary"
-							className="flex-1 gap-2"
-							size="sm"
-						>
-							<Upload size={16} />
-							{t("Load")}
-						</Button>
-					</div>
+								<Button
+									onClick={triggerLoad}
+									variant="secondary"
+									className="flex-1 gap-2"
+									size="sm"
+								>
+									<Upload size={16} />
+									{t("Load")}
+								</Button>
+							</div>
 
-					<div className="text-[10px] opacity-50 text-center">
-						{t("Managed via Command Palette")}
-					</div>
+							<div className="text-[10px] opacity-50 text-center">
+								{t("Managed via Command Palette")}
+							</div>
 
-					{message && (
-						<div
-							className={`text-xs p-2 rounded ${
-								message.type === "success"
-									? "bg-green-500/20 text-green-400"
-									: message.type === "error"
-										? "bg-red-500/20 text-red-400"
-										: "bg-blue-500/20 text-blue-400"
-							}`}
-						>
-							{message.text}
+							{message && (
+								<div
+									className={`text-xs p-2 rounded ${
+										message.type === "success"
+											? "bg-green-500/20 text-green-400"
+											: message.type === "error"
+												? "bg-red-500/20 text-red-400"
+												: "bg-blue-500/20 text-blue-400"
+									}`}
+								>
+									{message.text}
+								</div>
+							)}
 						</div>
-					)}
-				</div>
 
-				<Separator className="bg-[var(--ce-sideBar-border)] opacity-50" />
+						<Separator className="bg-[var(--ce-sideBar-border)] opacity-50" />
+					</>
+				)}
 
 				<div className="space-y-3">
 					<h3 className="text-xs font-semibold opacity-70 uppercase tracking-wider flex items-center gap-2">

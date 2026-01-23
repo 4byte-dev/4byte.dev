@@ -2,7 +2,7 @@
 
 namespace Modules\CodeSpace\Tests\Unit\Data;
 
-use Modules\CodeSpace\Data\CodeSpaceData;
+use Modules\CodeSpace\Mappers\CodeSpaceMapper;
 use Modules\CodeSpace\Models\CodeSpace;
 use Modules\CodeSpace\Tests\TestCase;
 use Modules\User\Data\UserData;
@@ -29,7 +29,7 @@ class CodeSpaceDataTest extends TestCase
             created_at: now()
         );
 
-        $data = CodeSpaceData::fromModel($codeSpace, $userData, true, true);
+        $data = CodeSpaceMapper::toData($codeSpace, $userData, true, true);
 
         $this->assertEquals($codeSpace->id, $data->id);
         $this->assertEquals($codeSpace->name, $data->name);
@@ -56,7 +56,7 @@ class CodeSpaceDataTest extends TestCase
             created_at: now()
         );
 
-        $data = CodeSpaceData::fromModel($codeSpace, $userData);
+        $data = CodeSpaceMapper::toData($codeSpace, $userData);
 
         $this->assertEquals(0, $data->id);
         $this->assertEquals($codeSpace->name, $data->name);
@@ -73,7 +73,7 @@ class CodeSpaceDataTest extends TestCase
 
         $userData = UserMapper::toData($user);
 
-        $data = CodeSpaceData::fromModel($codeSpace, $userData, true);
+        $data = CodeSpaceMapper::toData($codeSpace, $userData, true);
 
         $this->assertEquals($codeSpace->id, $data->id);
     }

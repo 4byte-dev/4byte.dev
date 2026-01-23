@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Mockery;
 use Mockery\MockInterface;
 use Modules\Page\Data\PageData;
+use Modules\Page\Mappers\PageMapper;
 use Modules\Page\Models\Page;
 use Modules\Page\Tests\TestCase;
 use Modules\User\Data\UserData;
@@ -85,7 +86,7 @@ class PageDataTest extends TestCase
 
         $userData = UserMapper::toData($user);
 
-        $pageData = PageData::fromModel($page, $userData);
+        $pageData = PageMapper::toData($page, $userData);
 
         $this->assertSame(0, $pageData->id);
         $this->assertSame('Test Page', $pageData->title);
@@ -108,7 +109,7 @@ class PageDataTest extends TestCase
         $user     = User::factory()->create();
         $userData = UserMapper::toData($user);
 
-        $pageData = PageData::fromModel($page, $userData, true);
+        $pageData = PageMapper::toData($page, $userData, true);
 
         $this->assertSame($page->id, $pageData->id);
     }
@@ -126,7 +127,7 @@ class PageDataTest extends TestCase
         $page->title = 'Permission Page';
         $page->slug  = 'permission-page';
 
-        $data = PageData::fromModel($page, $userData, true);
+        $data = PageMapper::toData($page, $userData, true);
 
         $this->assertSame(5, $data->id);
         $this->assertFalse($data->canUpdate);

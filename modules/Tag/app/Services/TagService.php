@@ -71,7 +71,7 @@ class TagService
         return Cache::rememberForever("tag:{$tagId}:profile", function () use ($tagId) {
             $profile = TagProfile::where('tag_id', $tagId)
                 ->select(['id', 'description', 'color'])
-                ->with('categories:name,slug')
+                ->with('categories:id,name,slug')
                 ->firstOrFail();
 
             return TagMapper::toProfileData($profile);

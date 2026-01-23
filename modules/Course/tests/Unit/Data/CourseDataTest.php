@@ -7,6 +7,7 @@ use Mockery;
 use Mockery\MockInterface;
 use Modules\Category\Data\CategoryData;
 use Modules\Course\Data\CourseData;
+use Modules\Course\Mappers\CourseMapper;
 use Modules\Course\Models\Course;
 use Modules\Course\Tests\TestCase;
 use Modules\Tag\Data\TagData;
@@ -133,7 +134,7 @@ class CourseDataTest extends TestCase
 
         $user = UserMapper::toData($user);
 
-        $courseData = CourseData::fromModel($course, $user);
+        $courseData = CourseMapper::toData($course, $user);
 
         $this->assertSame(0, $courseData->id);
 
@@ -167,7 +168,7 @@ class CourseDataTest extends TestCase
 
         $user = UserMapper::toData($user);
 
-        $courseData = CourseData::fromModel($course, $user, true);
+        $courseData = CourseMapper::toData($course, $user, true);
 
         $this->assertSame($course->id, $courseData->id);
     }
@@ -207,7 +208,7 @@ class CourseDataTest extends TestCase
             ->with($user->id)
             ->andReturn(false);
 
-        $data = CourseData::fromModel($course, $userData, true);
+        $data = CourseMapper::toData($course, $userData, true);
 
         $this->assertSame(10, $data->id);
         $this->assertSame(15, $data->likes);
@@ -250,7 +251,7 @@ class CourseDataTest extends TestCase
             ->with(null)
             ->andReturn(false);
 
-        $data = CourseData::fromModel($course, $userData);
+        $data = CourseMapper::toData($course, $userData, true);
 
         $this->assertFalse($data->isLiked);
         $this->assertFalse($data->isDisliked);

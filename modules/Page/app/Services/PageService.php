@@ -4,6 +4,7 @@ namespace Modules\Page\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Modules\Page\Data\PageData;
+use Modules\Page\Mappers\PageMapper;
 use Modules\Page\Models\Page;
 use Modules\User\Services\UserService;
 
@@ -32,7 +33,7 @@ class PageService
 
         $user = $this->userService->getData($page->user_id);
 
-        return PageData::fromModel($page, $user);
+        return PageMapper::toData($page, $user);
     }
 
     /**

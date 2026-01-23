@@ -12,7 +12,7 @@ use Modules\React\Events\UserUncommentedEvent;
 use Modules\React\Events\UserUndislikedEvent;
 use Modules\React\Events\UserUnfollowedEvent;
 use Modules\React\Events\UserUnlikedEvent;
-use Modules\React\Listeners\SyncDbListener;
+use Modules\React\Listeners\ReactSyncDbListener;
 use Modules\React\Models\Comment;
 use Modules\React\Models\Dislike;
 use Modules\React\Models\Follow;
@@ -20,16 +20,16 @@ use Modules\React\Models\Like;
 use Modules\React\Services\ReactService;
 use Tests\TestCase;
 
-class SyncDbListenerTest extends TestCase
+class ReactSyncDbListenerTest extends TestCase
 {
     protected ReactService $reactService;
 
-    protected SyncDbListener $listener;
+    protected ReactSyncDbListener $listener;
 
     public function setUp(): void
     {
         $this->reactService = app(ReactService::class);
-        $this->listener     = new SyncDbListener($this->reactService);
+        $this->listener     = new ReactSyncDbListener($this->reactService);
         parent::setUp();
     }
 

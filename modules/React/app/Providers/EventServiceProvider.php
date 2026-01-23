@@ -3,8 +3,8 @@
 namespace Modules\React\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Modules\React\Listeners\SyncDbListener;
-use Modules\React\Listeners\SyncGorseListener;
+use Modules\React\Listeners\ReactSyncDbListener;
+use Modules\React\Listeners\ReactSyncGorseListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -14,8 +14,8 @@ class EventServiceProvider extends ServiceProvider
      * @var array<string>
      */
     protected $subscribe = [
-        SyncGorseListener::class,
-        SyncDbListener::class,
+        ReactSyncGorseListener::class,
+        ReactSyncDbListener::class,
     ];
 
     /**

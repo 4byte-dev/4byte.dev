@@ -11,22 +11,22 @@ use Modules\React\Events\UserUncommentedEvent;
 use Modules\React\Events\UserUndislikedEvent;
 use Modules\React\Events\UserUnfollowedEvent;
 use Modules\React\Events\UserUnlikedEvent;
-use Modules\React\Listeners\SyncGorseListener;
+use Modules\React\Listeners\ReactSyncGorseListener;
 use Modules\Recommend\Classes\GorseFeedback;
 use Modules\Recommend\Services\GorseService;
 use Tests\TestCase;
 
-class SyncGorseListenerTest extends TestCase
+class ReactSyncGorseListenerTest extends TestCase
 {
     /** @var Mockery\MockInterface&GorseService */
     protected GorseService $gorseService;
 
-    protected SyncGorseListener $listener;
+    protected ReactSyncGorseListener $listener;
 
     public function setUp(): void
     {
         $this->gorseService = Mockery::mock(GorseService::class);
-        $this->listener     = new SyncGorseListener($this->gorseService);
+        $this->listener     = new ReactSyncGorseListener($this->gorseService);
         parent::setUp();
     }
 

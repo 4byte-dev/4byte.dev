@@ -75,9 +75,9 @@ class ArticleCrudController extends Controller
      */
     public function edit(Article $article): Response
     {
-        $topCategories = $this->feedService->categories();
+        $topCategories = $article->categories->map->only(['name', 'slug'])->toArray() + $this->feedService->categories();
 
-        $topTags = $this->feedService->tags();
+        $topTags = $article->tags->map->only(['name', 'slug'])->toArray() + $this->feedService->tags();
 
         return Inertia::render('Article/Edit', [
             'topCategories' => $topCategories,

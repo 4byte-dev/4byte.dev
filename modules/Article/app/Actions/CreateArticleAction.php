@@ -60,7 +60,7 @@ class CreateArticleAction
                 $article->addMedia($image)->toMediaCollection('cover');
             }
 
-            if (! empty($contentImages) && $content) {
+            if (\count($contentImages) > 0 && $content) {
                 foreach ($contentImages as $placeholder => $file) {
                     if ($file instanceof UploadedFile) {
                         $media   = $article->addMedia($file)->toMediaCollection('content');
@@ -71,12 +71,12 @@ class CreateArticleAction
                 $article->update(['content' => $content]);
             }
 
-            if (! empty($data['categories'])) {
+            if (isset($data['categories']) && \count($data['categories']) > 0) {
                 $categoryIds = Category::whereIn('slug', $data['categories'])->pluck('id')->toArray();
                 $article->categories()->sync($categoryIds);
             }
 
-            if (! empty($data['tags'])) {
+            if (isset($data['tags']) && \count($data['tags']) > 0) {
                 $tagIds = Tag::whereIn('slug', $data['tags'])->pluck('id')->toArray();
                 $article->tags()->sync($tagIds);
             }

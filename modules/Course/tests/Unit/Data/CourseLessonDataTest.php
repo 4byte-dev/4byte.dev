@@ -6,6 +6,7 @@ use Illuminate\Support\Carbon;
 use Mockery;
 use Mockery\MockInterface;
 use Modules\Course\Data\CourseLessonData;
+use Modules\Course\Mappers\CourseMapper;
 use Modules\Course\Models\CourseLesson;
 use Modules\Course\Tests\TestCase;
 use Modules\User\Models\User;
@@ -50,7 +51,7 @@ class CourseLessonDataTest extends TestCase
             'content' => 'Test Content',
         ]);
 
-        $lessonData = CourseLessonData::fromModel($lesson);
+        $lessonData = CourseMapper::toLessonData($lesson);
 
         $this->assertSame(0, $lessonData->id);
 
@@ -68,7 +69,7 @@ class CourseLessonDataTest extends TestCase
     {
         $lesson = CourseLesson::factory()->create();
 
-        $lessonData = CourseLessonData::fromModel($lesson, true);
+        $lessonData = CourseMapper::toLessonData($lesson, true);
 
         $this->assertSame($lesson->id, $lessonData->id);
     }
@@ -89,7 +90,7 @@ class CourseLessonDataTest extends TestCase
             ->with($user->id)
             ->andReturn(true);
 
-        $data = CourseLessonData::fromModel($lesson, true);
+        $data = CourseMapper::toLessonData($lesson, true);
 
         $this->assertSame(10, $data->id);
         $this->assertTrue($data->isSaved);
@@ -110,7 +111,7 @@ class CourseLessonDataTest extends TestCase
             ->with(null)
             ->andReturn(false);
 
-        $data = CourseLessonData::fromModel($lesson);
+        $data = CourseMapper::toLessonData($lesson);
 
         $this->assertFalse($data->isSaved);
     }
