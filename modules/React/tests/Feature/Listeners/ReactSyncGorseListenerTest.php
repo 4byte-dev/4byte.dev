@@ -16,7 +16,7 @@ use Modules\Recommend\Classes\GorseFeedback;
 use Modules\Recommend\Services\GorseService;
 use Tests\TestCase;
 
-class SyncGorseListenerTest extends TestCase
+class ReactSyncGorseListenerTest extends TestCase
 {
     /** @var Mockery\MockInterface&GorseService */
     protected GorseService $gorseService;

@@ -20,7 +20,7 @@ use Modules\React\Models\Like;
 use Modules\React\Services\ReactService;
 use Tests\TestCase;
 
-class SyncDbListenerTest extends TestCase
+class ReactSyncDbListenerTest extends TestCase
 {
     protected ReactService $reactService;
 

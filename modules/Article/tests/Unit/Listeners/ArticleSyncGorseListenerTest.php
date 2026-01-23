@@ -15,7 +15,7 @@ use Modules\Recommend\Classes\GorseItem;
 use Modules\Recommend\Services\GorseService;
 use Modules\Tag\Models\Tag;
 
-class ArticlePublishedGorseListenerTest extends TestCase
+class ArticleSyncGorseListenerTest extends TestCase
 {
     public function test_listener_inserts_article_to_gorse(): void
     {
