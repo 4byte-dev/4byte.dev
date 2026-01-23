@@ -15,16 +15,18 @@ use Modules\React\Events\UserUndislikedEvent;
 use Modules\React\Events\UserUnfollowedEvent;
 use Modules\React\Events\UserUnlikedEvent;
 use Modules\React\Events\UserUnsavedEvent;
-use Modules\React\Services\ReactService;
+use Modules\Recommend\Classes\GorseFeedback;
+use Modules\Recommend\Services\GorseService;
 
-class SyncDbListener implements ShouldQueue
+class ReactSyncGorseListener implements ShouldQueue
 {
     use InteractsWithQueue;
 
-    protected ReactService $reactService;
+    protected GorseService $gorseService;
 
-    public function __construct(ReactService $reactService) {
-        $this->reactService = $reactService;
+    public function __construct(GorseService $gorseService)
+    {
+        $this->gorseService = $gorseService;
     }
 
     /**
@@ -32,17 +34,20 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserLiked(UserLikedEvent $event): void
     {
-        $this->reactService->persistDeleteDislike(
-            $event->likeableType,
-            $event->likeableId,
-            $event->userId
+        $type   = strtolower(class_basename($event->likeableType));
+        $itemId = "{$type}:{$event->likeableId}";
+
+        $userId = (string) $event->userId;
+
+        $feedback = new GorseFeedback(
+            'like',
+            $userId,
+            $itemId,
+            '',
+            now()->toDateTimeString()
         );
 
-        $this->reactService->persistLike(
-            $event->likeableType,
-            $event->likeableId,
-            $event->userId
-        );
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
@@ -50,11 +55,11 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserUnliked(UserUnlikedEvent $event): void
     {
-        $this->reactService->persistUnlike(
-            $event->likeableType,
-            $event->likeableId,
-            $event->userId
-        );
+        $type   = strtolower(class_basename($event->likeableType));
+        $itemId = "{$type}:{$event->likeableId}";
+        $userId = (string) $event->userId;
+
+        $this->gorseService->deleteFeedback('like', $userId, $itemId);
     }
 
     /**
@@ -62,17 +67,19 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserDisliked(UserDislikedEvent $event): void
     {
-        $this->reactService->persistUnlike(
-            $event->dislikeableType,
-            $event->dislikeableId,
-            $event->userId
+        $type   = strtolower(class_basename($event->dislikeableType));
+        $itemId = "{$type}:{$event->dislikeableId}";
+        $userId = (string) $event->userId;
+
+        $feedback = new GorseFeedback(
+            'dislike',
+            $userId,
+            $itemId,
+            '',
+            now()->toDateTimeString()
         );
 
-        $this->reactService->persistDislike(
-            $event->dislikeableType,
-            $event->dislikeableId,
-            $event->userId
-        );
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
@@ -80,11 +87,11 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserUndisliked(UserUndislikedEvent $event): void
     {
-        $this->reactService->persistDeleteDislike(
-            $event->dislikeableType,
-            $event->dislikeableId,
-            $event->userId
-        );
+        $type   = strtolower(class_basename($event->dislikeableType));
+        $itemId = "{$type}:{$event->dislikeableId}";
+        $userId = (string) $event->userId;
+
+        $this->gorseService->deleteFeedback('dislike', $userId, $itemId);
     }
 
     /**
@@ -92,11 +99,19 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserSaved(UserSavedEvent $event): void
     {
-        $this->reactService->persistSave(
-            $event->saveableType,
-            $event->saveableId,
-            $event->userId
+        $type   = strtolower(class_basename($event->saveableType));
+        $itemId = "{$type}:{$event->saveableId}";
+        $userId = (string) $event->userId;
+
+        $feedback = new GorseFeedback(
+            'star',
+            $userId,
+            $itemId,
+            '',
+            now()->toDateTimeString()
         );
+
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
@@ -104,11 +119,11 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserUnsaved(UserUnsavedEvent $event): void
     {
-        $this->reactService->persistDeleteSave(
-            $event->saveableType,
-            $event->saveableId,
-            $event->userId
-        );
+        $type   = strtolower(class_basename($event->saveableType));
+        $itemId = "{$type}:{$event->saveableId}";
+        $userId = (string) $event->userId;
+
+        $this->gorseService->deleteFeedback('star', $userId, $itemId);
     }
 
     /**
@@ -116,11 +131,19 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserFollowed(UserFollowedEvent $event): void
     {
-        $this->reactService->persistFollow(
-            $event->followableType,
-            $event->followableId,
-            $event->followerId
+        $type   = strtolower(class_basename($event->followableType));
+        $itemId = "{$type}:{$event->followableId}";
+        $userId = (string) $event->followerId;
+
+        $feedback = new GorseFeedback(
+            'subscribe',
+            $userId,
+            $itemId,
+            '',
+            now()->toDateTimeString()
         );
+
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
@@ -128,11 +151,11 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserUnfollowed(UserUnfollowedEvent $event): void
     {
-        $this->reactService->persistDeleteFollow(
-            $event->followableType,
-            $event->followableId,
-            $event->followerId
-        );
+        $type   = strtolower(class_basename($event->followableType));
+        $itemId = "{$type}:{$event->followableId}";
+        $userId = (string) $event->followerId;
+
+        $this->gorseService->deleteFeedback('subscribe', $userId, $itemId);
     }
 
     /**
@@ -140,13 +163,19 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserCommented(UserCommentedEvent $event): void
     {
-        $this->reactService->persistComment(
-            $event->commentableType,
-            $event->commentableId,
-            $event->content,
-            $event->userId,
-            $event->parentId
+        $type   = strtolower(class_basename($event->commentableType));
+        $itemId = "{$type}:{$event->commentableId}";
+        $userId = (string) $event->userId;
+
+        $feedback = new GorseFeedback(
+            'comment',
+            $userId,
+            $itemId,
+            '',
+            now()->toDateTimeString()
         );
+
+        $this->gorseService->insertFeedback($feedback);
     }
 
     /**
@@ -154,9 +183,11 @@ class SyncDbListener implements ShouldQueue
      */
     public function handleUserUncommented(UserUncommentedEvent $event): void
     {
-        if ($event->commentId) {
-            $this->reactService->persistDeleteComment($event->commentId);
-        }
+        $type   = strtolower(class_basename($event->commentableType));
+        $itemId = "{$type}:{$event->commentableId}";
+        $userId = (string) $event->userId;
+
+        $this->gorseService->deleteFeedback('comment', $userId, $itemId);
     }
 
     /**
