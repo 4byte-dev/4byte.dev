@@ -169,6 +169,17 @@ class PluginRegistry {
 
 	_deactivatePlugin(id) {
 		console.log(`[PluginRegistry] Deactivating ${id}`);
+		const plugin = this.plugins.get(id);
+		if (!plugin) return;
+
+		if (plugin?.deactivate) {
+			try {
+				plugin.deactivate();
+			} catch (e) {
+				console.error(`Error deactivating plugin ${id}`, e);
+			}
+		}
+
 		const resources = this.pluginResources.get(id);
 		if (!resources) return;
 
