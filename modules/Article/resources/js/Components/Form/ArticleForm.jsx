@@ -75,7 +75,7 @@ export default function ArticleForm({
 
 		return {
 			results: data.data.map((item) => ({
-				value: item.id,
+				value: item.slug,
 				label: item.name,
 			})),
 			total: data.total,
@@ -98,7 +98,7 @@ export default function ArticleForm({
 
 		return {
 			results: data.data.map((item) => ({
-				value: item.id,
+				value: item.slug,
 				label: item.name,
 			})),
 			total: data.total,
