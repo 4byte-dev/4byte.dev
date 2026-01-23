@@ -10,9 +10,11 @@ export function CategoryPreview({ name, slug, total }) {
 					<Tag className="h-3 w-3 text-muted-foreground" />
 					<span className="text-sm">{name}</span>
 				</div>
-				<Badge variant="secondary" className="text-xs">
-					{total}
-				</Badge>
+				{total && (
+					<Badge variant="secondary" className="text-xs">
+						{total}
+					</Badge>
+				)}
 			</div>
 		</Link>
 	);

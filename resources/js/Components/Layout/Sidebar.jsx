@@ -45,10 +45,7 @@ export function Sidebar() {
 				</CollapsibleTrigger>
 				<CollapsibleContent className="space-y-2 mt-3">
 					{data.tags.map((tag) => (
-						<ContentPreviewCard
-							key={tag.data.slug}
-							item={{ ...tag.data, total: tag.total }}
-						/>
+						<ContentPreviewCard key={tag.slug} item={tag} />
 					))}
 				</CollapsibleContent>
 			</Collapsible>
@@ -69,10 +66,7 @@ export function Sidebar() {
 				</CollapsibleTrigger>
 				<CollapsibleContent className="space-y-2 mt-3">
 					{data.categories.map((category) => (
-						<ContentPreviewCard
-							key={category.data.slug}
-							item={{ ...category.data, total: category.total }}
-						/>
+						<ContentPreviewCard key={category.slug} item={category} />
 					))}
 				</CollapsibleContent>
 			</Collapsible>
