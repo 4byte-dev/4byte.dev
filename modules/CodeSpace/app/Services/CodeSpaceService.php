@@ -56,11 +56,9 @@ class CodeSpaceService
      */
     public function listCodes(int $userId): array
     {
-        $codeSpaces = Cache::rememberForever("codespace:{$userId}:codespaces", function () use ($userId) {
-            return CodeSpace::where('user_id', $userId)
-                ->select('id', 'name', 'slug', 'updated_at')
-                ->get();
-        });
+        $codeSpaces = CodeSpace::where('user_id', $userId)
+            ->select('id', 'name', 'slug', 'updated_at')
+            ->get();
 
         $user = $this->userService->getData($userId);
 
