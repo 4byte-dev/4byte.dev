@@ -5,6 +5,7 @@ namespace Modules\Entry\Actions;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Modules\Entry\Events\EntryPublishedEvent;
 use Modules\Entry\Models\Entry;
 
 class CreateEntryAction
@@ -24,6 +25,8 @@ class CreateEntryAction
                         $fileAdder->toMediaCollection('content');
                     });
             }
+
+            event(new EntryPublishedEvent($entry));
 
             return $entry;
         });
