@@ -4,6 +4,7 @@ namespace Modules\Entry\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Modules\Entry\Data\EntryData;
+use Modules\Entry\Mappers\EntryMapper;
 use Modules\Entry\Models\Entry;
 use Modules\User\Services\UserService;
 
@@ -30,7 +31,7 @@ class EntryService
 
         $user = $this->userService->getData($entry->user_id);
 
-        return EntryData::fromModel($entry, $user);
+        return EntryMapper::toData($entry, $user);
     }
 
     /**

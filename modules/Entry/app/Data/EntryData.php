@@ -3,58 +3,29 @@
 namespace Modules\Entry\Data;
 
 use DateTime;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
-use Modules\Entry\Models\Entry;
 use Modules\User\Data\UserData;
-use Spatie\LaravelData\Data;
 
-class EntryData extends Data
+readonly class EntryData
 {
     /**
      * @param ?array<int, array{image: string, responsive: string|array<int, string>, srcset: string}> $media
      */
     public function __construct(
-        public ?int $id,
-        public string $slug,
-        public ?string $content,
-        public ?array $media,
-        public UserData $user,
-        public int $likes,
-        public int $dislikes,
-        public int $comments,
-        public bool $isLiked,
-        public bool $isDisliked,
-        public bool $isSaved,
-        public bool $canUpdate,
-        public bool $canDelete,
-        public ?DateTime $published_at,
-        public string $type = 'entry'
+        public readonly ?int $id,
+        public readonly string $slug,
+        public readonly ?string $content,
+        public readonly ?array $media,
+        public readonly UserData $user,
+        public readonly int $likes,
+        public readonly int $dislikes,
+        public readonly int $comments,
+        public readonly bool $isLiked,
+        public readonly bool $isDisliked,
+        public readonly bool $isSaved,
+        public readonly bool $canUpdate,
+        public readonly bool $canDelete,
+        public readonly ?DateTime $published_at,
+        public readonly string $type = 'entry'
     ) {
-    }
-
-    /**
-     * Create a TagData instance from a Tag model.
-     */
-    public static function fromModel(Entry $entry, UserData $user, bool $setId = false, bool $setPublished = true): self
-    {
-        $userId = Auth::id();
-
-        return new self(
-            id: $setId ? $entry->id : 0,
-            slug: $entry->slug,
-            content: $entry->content,
-            media: $entry->getContentImages(),
-            user: $user,
-            likes: $entry->likesCount(),
-            dislikes: $entry->dislikesCount(),
-            comments: $entry->commentsCount(),
-            isLiked: $entry->isLikedBy($userId),
-            isDisliked: $entry->isDislikedBy($userId),
-            isSaved: $entry->isSavedBy($userId),
-            canUpdate: Gate::allows('update', $entry),
-            canDelete: Gate::allows('delete', $entry),
-            published_at: $setPublished ? $entry->created_at : null,
-        );
     }
 }

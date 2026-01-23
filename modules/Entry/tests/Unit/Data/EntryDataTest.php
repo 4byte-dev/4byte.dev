@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Mockery;
 use Mockery\MockInterface;
 use Modules\Entry\Data\EntryData;
+use Modules\Entry\Mappers\EntryMapper;
 use Modules\Entry\Models\Entry;
 use Modules\Entry\Tests\TestCase;
 use Modules\User\Data\UserData;
@@ -93,7 +94,7 @@ class EntryDataTest extends TestCase
 
         $userData = UserMapper::toData($user);
 
-        $entryData = EntryData::fromModel($entry, $userData);
+        $entryData = EntryMapper::toData($entry, $userData);
 
         $this->assertSame(0, $entryData->id);
         $this->assertSame($entry->slug, $entryData->slug);
@@ -120,7 +121,7 @@ class EntryDataTest extends TestCase
 
         $userData = UserMapper::toData($user);
 
-        $entryData = EntryData::fromModel($entry, $userData, true);
+        $entryData = EntryMapper::toData($entry, $userData, setId: true);
 
         $this->assertSame($entry->id, $entryData->id);
     }
@@ -132,7 +133,7 @@ class EntryDataTest extends TestCase
 
         $userData = UserMapper::toData($user);
 
-        $entryData = EntryData::fromModel(
+        $entryData = EntryMapper::toData(
             entry: $entry,
             user: $userData,
             setId: false,
@@ -187,7 +188,7 @@ class EntryDataTest extends TestCase
             ->with($user->id)
             ->andReturn(true);
 
-        $data = EntryData::fromModel($entry, $userData, true);
+        $data = EntryMapper::toData($entry, $userData, setId: true);
 
         $this->assertSame(10, $data->id);
         $this->assertSame(20, $data->likes);
@@ -242,7 +243,7 @@ class EntryDataTest extends TestCase
             ->with(null)
             ->andReturn(false);
 
-        $data = EntryData::fromModel($entry, $userData);
+        $data = EntryMapper::toData($entry, $userData);
 
         $this->assertFalse($data->isLiked);
         $this->assertFalse($data->isDisliked);
