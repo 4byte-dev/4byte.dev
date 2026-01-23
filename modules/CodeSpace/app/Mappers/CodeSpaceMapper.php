@@ -24,7 +24,7 @@ class CodeSpaceMapper
     }
 
     /**
-     * @param iterable<CodeSpace> $tags
+     * @param iterable<CodeSpace> $codeSpaces
      * @param bool $setId
      *
      * @return array<CodeSpaceData>

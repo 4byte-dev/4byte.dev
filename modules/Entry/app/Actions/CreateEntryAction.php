@@ -2,6 +2,7 @@
 
 namespace Modules\Entry\Actions;
 
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -10,7 +11,13 @@ use Modules\Entry\Models\Entry;
 
 class CreateEntryAction
 {
-    public function execute($data): Entry
+    /**
+     * @param array{
+     *     content?: string,
+     *     media?: array<int, UploadedFile>
+     * } $data
+     */
+    public function execute(array $data): Entry
     {
         return DB::transaction(function () use ($data) {
             $entry = Entry::create([

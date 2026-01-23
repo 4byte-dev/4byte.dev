@@ -80,7 +80,7 @@ class FeedService
     /**
      * Get popular categories based on content count.
      *
-     * @return array<int, array{name: string, slug: string|null, total: int}>
+     * @return array<int, array{name: string, slug: string}>
      */
     public function categories(): array
     {
