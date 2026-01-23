@@ -20,14 +20,12 @@ class CreateCodeSpaceAction
         return DB::transaction(function () use ($data) {
             $slug = Str::uuid();
 
-            $codeSpace = CodeSpace::create([
+            return CodeSpace::create([
                 'name'         => $data['name'],
                 'slug'         => $slug,
                 'files'        => $data['files'],
                 'user_id'      => Auth::id(),
             ]);
-
-            return $codeSpace;
         });
     }
 }

@@ -171,7 +171,7 @@ class ReactController extends Controller
      */
     public function follow(ReactRequest $request): JsonResponse|Response
     {
-        [$baseClass, $itemId, $type] = $request->resolveTarget();
+        [$baseClass, $itemId]        = $request->resolveTarget();
         $userId                      = Auth::id();
 
         if ($this->reactService->checkFollowed($baseClass, $itemId, $userId)) {

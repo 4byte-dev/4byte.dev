@@ -5,7 +5,6 @@ namespace Modules\React\Services;
 use App\Models\User;
 use DB;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 use Modules\React\Data\CommentData;
