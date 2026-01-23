@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Entry\Events\EntryDeletedEvent;
 use Modules\Entry\Models\Entry;
 
-class CreateEntryAction
+class DeleteEntryAction
 {
     public function execute(Entry $entry): Entry
     {
