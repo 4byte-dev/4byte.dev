@@ -88,10 +88,7 @@ class FeedService
             $categoryTotals = $this->getTotals('category');
 
             return $categoryTotals->map(function ($cat) {
-                return [
-                    'data'  => $this->categoryService->getData($cat->category_id),
-                    'total' => $cat->total,
-                ];
+                return $this->categoryService->getData($cat->category_id);
             })->all();
         });
     }
@@ -107,10 +104,7 @@ class FeedService
             $tagTotals = $this->getTotals('tag');
 
             return $tagTotals->map(function ($tag) {
-                return [
-                    'data'  => $this->tagService->getData($tag->tag_id),
-                    'total' => $tag->total,
-                ];
+                return $this->tagService->getData($tag->tag_id);
             })->all();
         });
     }
