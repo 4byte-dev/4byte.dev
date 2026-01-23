@@ -3,11 +3,9 @@
 namespace Modules\Article\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Modules\Article\Events\ArticleDeletedEvent;
 use Modules\Article\Events\ArticlePublishedEvent;
-use Modules\Article\Listeners\ArticleDeletedListener;
-use Modules\Article\Listeners\ArticlePublishedGorseListener;
 use Modules\Article\Listeners\ArticlePublishedListener;
+use Modules\Article\Listeners\ArticleSyncGorseListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -19,11 +17,16 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         ArticlePublishedEvent::class => [
             ArticlePublishedListener::class,
-            ArticlePublishedGorseListener::class,
         ],
-        ArticleDeletedEvent::class => [
-            ArticleDeletedListener::class,
-        ],
+    ];
+
+    /**
+     * The subscriber classes to register.
+     *
+     * @var array<string>
+     */
+    protected $subscribe = [
+        ArticleSyncGorseListener::class,
     ];
 
     /**
