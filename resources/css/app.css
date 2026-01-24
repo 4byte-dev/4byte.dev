@@ -52,6 +52,9 @@ html {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --crepe-shadow-1: #000;
+    --crepe-color-surface: #ebe7e7;
+    --crepe-color-outline: #000;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -78,6 +81,9 @@ html {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --crepe-shadow-1: #fff;
+    --crepe-color-surface: #1e1e1e;
+    --crepe-color-outline: #fff;
   }
 }
 
@@ -96,36 +102,6 @@ html {
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;             /* WebKit */
-}
-
-.w-md-editor-toolbar li > button {
-  height: 30px !important;
-  width: 30px !important;
-}
-
-.w-md-editor-toolbar li > button svg {
-  height: 20px !important;
-  width: 20px !important;
-}
-
-.w-md-editor-toolbar {
-  background: transparent !important;
-  padding: 5px !important;
-}
-
-.w-md-editor-toolbar-child.active {
-  width: 100px !important;
-}
-
-.wmde-markdown {
-  background-color: transparent !important;
-}
-
-.w-md-editor-text-pre > code,
-.w-md-editor-text-input,
-.wmde-markdown-color .code-line {
-  font-size: 20px !important;
-  line-height: 21px !important;
 }
 
 pre {
