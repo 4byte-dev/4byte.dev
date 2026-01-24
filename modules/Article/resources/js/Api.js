@@ -7,9 +7,10 @@ export default {
 		});
 	},
 	editArticle: (slug, data) => {
+		data["_method"] = "PUT";
 		return ApiService.fetchJson(route("api.article.update", { slug }), data, {
-			method: "PUT",
-			isMultipart: true
+			method: "POST",
+			isMultipart: true,
 		});
 	},
 };

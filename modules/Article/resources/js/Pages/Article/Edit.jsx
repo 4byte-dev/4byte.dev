@@ -52,9 +52,11 @@ export default function EditArticlePage({ topTags, topCategories, article, slug 
 					method: "get",
 				});
 			} else {
-				router.visit(route("article.edit", { article: response.slug }), {
-					method: "get",
-				});
+				if (response.slug !== slug) {
+					router.visit(route("article.edit", { article: response.slug }), {
+						method: "get",
+					});
+				}
 			}
 		},
 		onError: (error) => {
