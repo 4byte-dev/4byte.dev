@@ -33,11 +33,8 @@ class SearchController extends Controller
 
         $q = $request->input('q');
 
-        $results = $this->searchService->search($q);
-
         return Inertia::render('Search/Detail', [
             'q'       => $q,
-            'results' => $results,
         ])->withViewData(['seo' => $this->seoService->getSearchSEO($q)]);
     }
 
@@ -47,12 +44,15 @@ class SearchController extends Controller
     public function search(Request $request): JsonResponse
     {
         $request->validate([
-            'q' => 'required|string|min:3',
+            'q'    => 'required|string|min:3',
+            'page' => 'sometimes|integer|min:1',
         ]);
 
-        $q = $request->input('q');
+        $page   = $request->get('page', 1);
+        $limit  = $request->get('limit', 10);
+        $q      = $request->input('q');
 
-        $results = $this->searchService->search($q);
+        $results = $this->searchService->search($q, $page, $limit);
 
         return response()->json($results);
     }

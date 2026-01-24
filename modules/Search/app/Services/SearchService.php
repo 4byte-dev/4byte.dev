@@ -68,12 +68,17 @@ class SearchService
      *
      * @return array<int, array<string, mixed>>
      */
-    public function search(string $query): array
+    public function search(string $query, int $page = 1, int $perPage = 10): array
     {
         $searchQueries = [];
+        $offset        = ($page - 1) * $perPage;
 
         foreach (array_keys(self::$handlers) as $index) {
-            $searchQueries[] = (new SearchQuery())->setIndexUid($index)->setQuery($query);
+            $searchQueries[] = (new SearchQuery())
+                ->setIndexUid($index)
+                ->setQuery($query)
+                ->setLimit($perPage)
+                ->setOffset($offset);
         }
 
         $results  = $this->client->multiSearch($searchQueries);

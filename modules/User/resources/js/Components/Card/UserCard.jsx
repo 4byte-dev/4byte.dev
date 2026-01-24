@@ -1,5 +1,5 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/Components/Ui/Avatar";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/Components/Ui/Card";
 import { Trans, useTranslation } from "react-i18next";
 import { useAuthStore } from "@/Stores/AuthStore";
@@ -7,32 +7,15 @@ import { Button } from "@/Components/Ui/Form/Button";
 import { Settings, UserCheck, UserPlus } from "lucide-react";
 import { Link } from "@inertiajs/react";
 import { useMutation } from "@tanstack/react-query";
-import UserApi from "@User/Api";
 import ReactApi from "@React/Api";
 
-export function UserCard({ username }) {
+export function UserCard(user) {
 	const [isFollowing, setIsFollowing] = useState(false);
 	const [followers, setFollowers] = useState(0);
-	const [user, setUser] = useState({});
-	const [profile, setProfile] = useState({});
 	const authStore = useAuthStore();
 	const { t } = useTranslation();
 
 	const isOwnProfile = authStore.isAuthenticated && user.username === authStore.user.username;
-
-	const previewMutation = useMutation({
-		mutationFn: () => UserApi.preview({ username }),
-		onSuccess: (response) => {
-			setUser(response.user);
-			setProfile(response.profile);
-			setFollowers(Number(response.user.followers));
-			setIsFollowing(response.user.isFollowing);
-		},
-	});
-
-	useEffect(() => {
-		previewMutation.mutate();
-	}, []);
 
 	const followMutation = useMutation({
 		mutationFn: () => ReactApi.follow({ type: "user", slug: user.username }),
@@ -59,90 +42,79 @@ export function UserCard({ username }) {
 		followMutation.mutate();
 	};
 
-	if (previewMutation.isPending) {
-		return (
-			<div className="flex justify-center py-8">
-				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-			</div>
-		);
-	}
-
 	return (
-		<Card className="mb-8 relative h-64 mb-48 md:mb-24">
-			<img
-				src={profile.cover.image || "/img/wallpaper-dark.jpg"}
-				srcSet={profile.cover.srcset}
-				alt="Cover"
-				className="absolute inset-0 w-full h-full object-cover object-center"
-			/>
-			<Button className="absolute right-1 top-1" variant="outline" asChild>
-				<Link className="flex" href={route("user.view", { username })}>
-					<Settings className="h-4 w-4 mr-2" />
-					{t("View Profile")}
-				</Link>
-			</Button>
-			<CardContent className="ph-6 absolute -bottom-56 md:-bottom-32 left-0 w-full">
-				<div className="flex flex-col md:flex-row md:items-start items-center md:items-center md:space-y-4 md:space-y-0 md:space-x-6 w-full">
-					<div className="h-38 w-38 bg-background rounded-full p-3">
-						<Avatar className="h-36 w-36">
-							<AvatarImage src={user.avatar} alt={user.name} />
-							<AvatarFallback className="text-4xl">
-								{user.name
-									.split(" ")
-									.map((n) => n[0])
-									.join("")}
-							</AvatarFallback>
-						</Avatar>
-					</div>
-					<div className="flex justify-between md:pt-6 w-full -pt-8 md:flex-row flex-col items-center">
-						<div>
-							<div className="flex items-center justify-center md:justify-start flex-wrap max-w-md">
-								<h1 className="text-3xl font-bold">{user.name}</h1>
-								<p className="text-muted-foreground ms-2 md:ms-0">
+		<Card className="mb-8">
+			<CardContent className="px-2 py-2">
+				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+					<div className="flex flex-col md:flex-row items-center md:items-center gap-1">
+						<div className="bg-background rounded-full p-3 shadow-sm">
+							<Avatar className="h-20 w-20">
+								<AvatarImage src={user.avatar} alt={user.name} />
+								<AvatarFallback className="text-2xl">
+									{user.name
+										.split(" ")
+										.map((n) => n[0])
+										.join("")}
+								</AvatarFallback>
+							</Avatar>
+						</div>
+
+						<div className="text-center md:text-left">
+							<div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
+								<h1 className="text-xl font-semibold">{user.name}</h1>
+								<span className="text-muted-foreground text-sm">
 									@{user.username}
-								</p>
+								</span>
 							</div>
-							<div className="flex-1">
-								<div className="flex items-center space-x-6 text-sm justify-center md:justify-start">
-									<span>
-										<Trans
-											i18nKey="followers"
-											values={{ count: followers.toLocaleString() }}
-											components={{ strong: <strong /> }}
-										/>
-									</span>
-									<span>
-										<Trans
-											i18nKey="followings"
-											values={{
-												count: user.followings.toLocaleString(),
-											}}
-											components={{ strong: <strong /> }}
-										/>
-									</span>
-								</div>
+
+							<div className="flex justify-center md:justify-start gap-6 mt-2 text-sm">
+								<span>
+									<Trans
+										i18nKey="followers"
+										values={{ count: followers.toLocaleString() }}
+										components={{ strong: <strong /> }}
+									/>
+								</span>
+								<span>
+									<Trans
+										i18nKey="followings"
+										values={{ count: user.followings.toLocaleString() }}
+										components={{ strong: <strong /> }}
+									/>
+								</span>
 							</div>
 						</div>
-						<div className="pt-2">
-							{!isOwnProfile && authStore.isAuthenticated && (
-								<Button
-									onClick={handleFollow}
-									variant={isFollowing ? "outline" : "default"}
-								>
-									{isFollowing ? (
-										<>
-											<UserCheck className="h-4 w-4 mr-2" />
-											{t("Following")}
-										</>
-									) : (
-										<>
-											<UserPlus className="h-4 w-4 mr-2" />
-											{t("Follow")}
-										</>
-									)}
-								</Button>
-							)}
-						</div>
+					</div>
+
+					<div className="flex gap-3 justify-center md:justify-end">
+						{!isOwnProfile && authStore.isAuthenticated && (
+							<Button
+								onClick={handleFollow}
+								variant={isFollowing ? "outline" : "default"}
+							>
+								{isFollowing ? (
+									<>
+										<UserCheck className="h-4 w-4 mr-2" />
+										{t("Following")}
+									</>
+								) : (
+									<>
+										<UserPlus className="h-4 w-4 mr-2" />
+										{t("Follow")}
+									</>
+								)}
+							</Button>
+						)}
+
+						<Button variant="outline" asChild>
+							<Link
+								className="flex items-center"
+								href={route("user.view", { username: user.username })}
+							>
+								<Settings className="h-4 w-4 mr-2" />
+								{t("View Profile")}
+							</Link>
+						</Button>
 					</div>
 				</div>
 			</CardContent>
