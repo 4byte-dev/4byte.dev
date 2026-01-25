@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/Components/Ui/Card";
 import { Badge } from "@/Components/Ui/Badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/Ui/Tabs";
 import { UserProfileHover } from "@/Components/Common/UserProfileHover";
-import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
+import MarkdownRenderer from "@/Components/Markdown/MarkdownRenderer";
 import { Link } from "@inertiajs/react";
 import { useState } from "react";
 import { useAuthStore } from "@/Stores/AuthStore";

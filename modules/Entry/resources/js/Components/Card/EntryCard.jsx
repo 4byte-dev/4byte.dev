@@ -2,7 +2,7 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/Components/Ui/Card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/Components/Ui/Avatar";
 import { UserProfileHover } from "@/Components/Common/UserProfileHover";
 import { ImageSlider } from "@/Components/Common/ImageSlider";
-import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
+import MarkdownRenderer from "@/Components/Markdown/MarkdownRenderer";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { useState } from "react";
 import { Button } from "@/Components/Ui/Form/Button";

@@ -5,7 +5,7 @@ import { SidebarOverlay, SidebarRoot } from "@/Components/Ui/Sidebar";
 import { useSidebar } from "@/Contexts/SidebarContext";
 import { useDevice } from "@/Hooks/useDevice";
 import { CourseSidebar } from "@/Components/Sidebar/CourseSidebar";
-import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
+import MarkdownRenderer from "@/Components/Markdown/MarkdownRenderer";
 import { Link } from "@inertiajs/react";
 import ReactPlayer from "react-player";
 import { Trans, useTranslation } from "react-i18next";

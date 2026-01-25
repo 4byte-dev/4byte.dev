@@ -17,7 +17,7 @@ import { Badge } from "@/Components/Ui/Badge";
 import { Separator } from "@/Components/Ui/Separator";
 import { UserProfileHover } from "@/Components/Common/UserProfileHover";
 import { Link } from "@inertiajs/react";
-import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
+import MarkdownRenderer from "@/Components/Markdown/MarkdownRenderer";
 import Feed from "@/Components/Content/Feed";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { Card, CardContent } from "@/Components/Ui/Card";

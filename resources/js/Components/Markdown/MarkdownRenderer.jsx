@@ -5,8 +5,8 @@ import parse from "html-react-parser";
 import DOMPurify from "dompurify";
 import { useTranslation } from "react-i18next";
 import { slugify } from "@/Lib/Utils";
-import { markedCodeGroup, initCodeGroups } from "@/Lib/MarkedCodeGroup";
-import { markedEmoji } from "@/Lib/MarkedEmoji";
+import { markedCodeGroup, initCodeGroups } from "@/Components/Markdown/MarkedCodeGroup";
+import { markedEmoji } from "@/Components/Markdown/MarkedEmoji";
 
 export default function MarkdownRenderer({ content }) {
 	const { t } = useTranslation();
