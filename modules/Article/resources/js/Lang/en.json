@@ -30,5 +30,6 @@
     "Tags": "Tags",
     "Sources": "Sources",
     "Done": "Done",
-    "On this page": "On this page"
+    "On this page": "On this page",
+    "read_time": "{{minute}} read time"
 }

@@ -30,5 +30,6 @@
     "Tags": "Etiketler",
     "Sources": "Kaynaklar",
     "Done": "Bitti",
-    "On this page": "Bu sayfada"
+    "On this page": "Bu sayfada",
+    "read_time": "{{minute}} okuma süresi"
 }

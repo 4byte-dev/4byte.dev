@@ -9,6 +9,7 @@ import {
 	ThumbsUp,
 	ThumbsDown,
 	Check,
+	Clock,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/Components/Ui/Avatar";
 import { Button } from "@/Components/Ui/Form/Button";
@@ -20,11 +21,12 @@ import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
 import Feed from "@/Components/Content/Feed";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { Card, CardContent } from "@/Components/Ui/Card";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Comments } from "@React/Components/Comments";
 import { useMutation } from "@tanstack/react-query";
 import ReactApi from "@React/Api";
 import TableOfContents from "@Article/Components/TableOfContents";
+import { calculateReadingTime } from "@Article/Utils";
 
 export default function ArticlePage({ article }) {
 	const [isLiked, setIsLiked] = useState(article.isLiked);
@@ -266,11 +268,23 @@ export default function ArticlePage({ article }) {
 									</div>
 								</UserProfileHover>
 
-								<div className="flex items-center space-x-4 text-sm text-muted-foreground">
+								<div className="flex flex-col justify-center text-sm text-muted-foreground">
 									<div className="flex items-center space-x-1">
 										<Calendar className="h-4 w-4" />
 										<span>
 											{new Date(article.published_at).toLocaleDateString()}
+										</span>
+									</div>
+
+									<div className="flex items-center space-x-1">
+										<Clock className="h-4 w-4" />{" "}
+										<span>
+											<Trans
+												i18nKey="read_time"
+												values={{
+													minute: calculateReadingTime(article.content),
+												}}
+											/>
 										</span>
 									</div>
 								</div>
