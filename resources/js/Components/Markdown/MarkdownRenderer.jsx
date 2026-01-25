@@ -1,80 +1,30 @@
-import React, { useEffect } from "react";
-import { marked } from "marked";
-import hljs from "highlight.js";
+import { useEffect, useMemo } from "react";
 import parse from "html-react-parser";
-import DOMPurify from "dompurify";
 import { useTranslation } from "react-i18next";
-import { slugify } from "@/Lib/Utils";
-import { markedCodeGroup, initCodeGroups } from "@/Components/Markdown/MarkedCodeGroup";
-import { markedEmoji } from "@/Components/Markdown/MarkedEmoji";
-import { markedCodeSpace } from "./MarkedCodeSpace";
-import CodeSpacePage from "@CodeSpace/Pages/CodeSpace/Detail";
+import { createMarked } from "./Core/CreateMarked";
+import { sanitize } from "./Core/Sanitize";
+import { HighlightCode } from "./Lifecycles/Highlight";
+import { AttachCopyButtons } from "./Lifecycles/CopyButton";
+import { CodeSpacePlugin } from "./Plugins/CodeSpace/CodeSpacePlugin";
+import { CodeGroupPlugin } from "./Plugins/CodeGroup/CodeGroupPlugin";
+import { EmojiPlugin } from "./Plugins/Emoji/EmojiPlugin";
 
 export default function MarkdownRenderer({ content }) {
 	const { t } = useTranslation();
-	const renderer = new marked.Renderer();
-
-	renderer.heading = function (text) {
-		const id = slugify(text.text);
-
-		return `<h${text.depth} id="${id}">
-              <a href="#${id}" class="no-underline relative before:content-[''] before:absolute before:bottom-0 before:left-0 before:w-0 before:h-[2px] before:bg-foreground before:transition-all hover:before:w-full">${text.text}</a>
-            </h${text.depth}>`;
-	};
-
-	markedCodeGroup(marked);
-	markedEmoji(marked);
-	markedCodeSpace(marked);
-
-	const html = marked(content, {
-		renderer,
-	});
-	const clean = DOMPurify.sanitize(html);
+	const marked = useMemo(() => createMarked([CodeGroupPlugin, CodeSpacePlugin, EmojiPlugin]), []);
+	const html = useMemo(() => sanitize(marked(content)), [content]);
 
 	useEffect(() => {
-		initCodeGroups();
-		document.querySelectorAll("pre code").forEach((block) => {
-			document.querySelectorAll("pre code").forEach((block) => {
-				if (!block.dataset.highlighted) {
-					hljs.highlightElement(block);
-				}
-			});
-
-			if (!block.parentElement.querySelector(".copy-btn")) {
-				const btn = document.createElement("button");
-				btn.innerText = t("Copy");
-				btn.className =
-					"copy-btn absolute top-2 right-2 bg-gray-800 text-white text-xs px-2 py-1 rounded hover:bg-gray-700";
-				btn.onclick = () => {
-					navigator.clipboard.writeText(block.innerText);
-					btn.innerText = t("Copied!");
-					setTimeout(() => (btn.innerText = t("Copy")), 1500);
-				};
-
-				block.parentElement.style.position = "relative";
-				block.parentElement.appendChild(btn);
-			}
-		});
+		HighlightCode();
+		AttachCopyButtons(t);
+		CodeGroupPlugin.lifecycle();
 	}, [content]);
 
 	return (
 		<div className="prose dark:prose-invert max-w-none">
-			{parse(clean, {
+			{parse(html, {
 				replace(domNode) {
-					if (
-						domNode.type === "tag" &&
-						domNode.name === "div" &&
-						domNode.attribs?.["data-codespace"] !== undefined
-					) {
-						const props = {};
-						Object.entries(domNode.attribs).forEach(([key, value]) => {
-							if (key.startsWith("data-") && key !== "data-codespace") {
-								props[key.replace("data-", "")] = value;
-							}
-						});
-
-						return <CodeSpacePage embed {...props} />;
-					}
+					return CodeSpacePlugin.replace(domNode);
 				},
 			})}
 		</div>
