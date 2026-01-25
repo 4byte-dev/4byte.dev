@@ -21,7 +21,11 @@ export const stripMarkdown = (markdown) => {
 		.replace(/^\s*\d+\.\s+/gm, "")
 		.replace(/~{2}(.*?)~{2}/g, "$1");
 
-	return text.replace(/\n/g, " ").replace(/\s+/g, " ").trim();
+	return text
+		.replace(/[<>]/g, "")
+		.replace(/\n/g, " ")
+		.replace(/\s+/g, " ")
+		.trim();
 };
 
 export function calculateReadingTime(markdown) {
