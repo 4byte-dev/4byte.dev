@@ -128,7 +128,7 @@ class FeedService
             $result = $callback($value);
 
             if ($result !== null && $result !== '') {
-                $filters[] = $result;
+                $filters[] = "{$key}:{$result}";
             }
         }
 

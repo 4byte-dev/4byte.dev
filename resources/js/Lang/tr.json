@@ -67,5 +67,6 @@
     "yearsAgo_plural": "{{count}} yıl",
     "justNow": "az önce",
     "ago": "önce",
-    "Stay updated with the latest articles, events, tutorials, and developer news": "En son makaleler, etkinlikler, eğitimler ve geliştirici haberlerinden haberdar olun"
+    "Stay updated with the latest articles, events, tutorials, and developer news": "En son makaleler, etkinlikler, eğitimler ve geliştirici haberlerinden haberdar olun",
+    "Write your article content here... (Markdown supported)": "Makale içeriğinizi buraya yazın... (Markdown destekleniyor)"
 }

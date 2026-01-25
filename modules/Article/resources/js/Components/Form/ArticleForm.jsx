@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import * as React from "react";
-import { ArrowLeft, Save, Upload, X, Plus } from "lucide-react";
+import { ArrowLeft, Save, Upload, X, Plus, Settings, PanelRight } from "lucide-react"; // Yeni ikonlar eklendi
 import { Button } from "@/Components/Ui/Form/Button";
 import { Input } from "@/Components/Ui/Form/Input";
 import { Label } from "@/Components/Ui/Form/Label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/Components/Ui/Card";
+import { Card, CardContent } from "@/Components/Ui/Card";
 import { Switch } from "@/Components/Ui/Form/Switch";
 import { useTranslation } from "react-i18next";
 import { MultiSelect } from "@/Components/Ui/Form/MultiSelect";
@@ -20,12 +20,13 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/Components/Ui/Form/Form";
-import { FormInput } from "@/Components/Ui/Form/FormInput";
 import { FormTextareaInput } from "@/Components/Ui/Form/FormTextareaInput";
 import { FormMarkdownInput } from "@/Components/Ui/Form/FormMarkdownInput";
 import { useQueryClient } from "@tanstack/react-query";
 import CategoryApi from "@Category/Api";
 import TagApi from "@Tag/Api";
+import clsx from "clsx";
+import { stripMarkdown } from "@Article/Utils";
 
 export default function ArticleForm({
 	initialValues,
@@ -41,7 +42,11 @@ export default function ArticleForm({
 		initialValues?.image ? initialValues.image : "",
 	);
 	const [newSourceUrl, setNewSourceUrl] = useState("");
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const pendingImages = React.useRef(new Map());
+	const [isExcerptTouched, setIsExcerptTouched] = useState(
+		!!initialValues?.excerpt && initialValues.excerpt.length > 0,
+	);
 
 	const form = useForm({
 		resolver: zodResolver(createArticleSchema(t)),
@@ -59,48 +64,44 @@ export default function ArticleForm({
 
 	const queryClient = useQueryClient();
 
-	async function asyncSearchCategories(term, { page = 1, pageSize = 15 }) {
-		if (!term) {
-			return {
-				results: [],
-				total: 0,
-			};
-		}
+	const contentValue = form.watch("content");
 
+	useEffect(() => {
+		if (!isExcerptTouched && contentValue) {
+			const plainText = stripMarkdown(contentValue);
+			let newExcerpt = plainText.substring(0, 150);
+			if (plainText.length > 150) {
+				newExcerpt += "...";
+			}
+			form.setValue("excerpt", newExcerpt, {
+				shouldDirty: true,
+				shouldValidate: contentValue.length > 50,
+			});
+		}
+	}, [contentValue, isExcerptTouched, form]);
+
+	async function asyncSearchCategories(term, { page = 1, pageSize = 15 }) {
+		if (!term) return { results: [], total: 0 };
 		const data = await queryClient.fetchQuery({
 			queryKey: [`categories-${term}-${page}-${pageSize}`],
 			queryFn: () => CategoryApi.search(term, { page, per_page: pageSize }),
 			staleTime: 5 * 60 * 1000,
 		});
-
 		return {
-			results: data.data.map((item) => ({
-				value: item.slug,
-				label: item.name,
-			})),
+			results: data.data.map((item) => ({ value: item.slug, label: item.name })),
 			total: data.total,
 		};
 	}
 
 	async function asyncSearchTags(term, { page = 1, pageSize = 15 }) {
-		if (!term) {
-			return {
-				results: [],
-				total: 0,
-			};
-		}
-
+		if (!term) return { results: [], total: 0 };
 		const data = await queryClient.fetchQuery({
 			queryKey: [`tags-${term}-${page}-${pageSize}`],
 			queryFn: () => TagApi.search(term, { page, per_page: pageSize }),
 			staleTime: 5 * 60 * 1000,
 		});
-
 		return {
-			results: data.data.map((item) => ({
-				value: item.slug,
-				label: item.name,
-			})),
+			results: data.data.map((item) => ({ value: item.slug, label: item.name })),
 			total: data.total,
 		};
 	}
@@ -109,6 +110,9 @@ export default function ArticleForm({
 		if (apiErrors) {
 			Object.keys(apiErrors).forEach((key) => {
 				form.setError(key, { message: apiErrors[key][0] });
+				if (["categories", "tags", "excerpt", "image"].includes(key)) {
+					setIsSidebarOpen(true);
+				}
 			});
 		}
 	}, [apiErrors, form]);
@@ -118,40 +122,18 @@ export default function ArticleForm({
 		name: "sources",
 	});
 
-	const handlePaste = (event) => {
-		const items = event.clipboardData.items;
-		for (const item of items) {
-			if (item.type.indexOf("image") === 0) {
-				event.preventDefault();
-				const file = item.getAsFile();
-				const blobUrl = URL.createObjectURL(file);
-				pendingImages.current.set(blobUrl, file);
-				const markdownImage = `![Image](${blobUrl})`;
-
-				const textarea = event.target;
-				if (textarea && textarea.setRangeText) {
-					textarea.setRangeText(
-						markdownImage,
-						textarea.selectionStart,
-						textarea.selectionEnd,
-						"end",
-					);
-					const newValue = textarea.value;
-					form.setValue("content", newValue, { shouldDirty: true });
-				} else {
-					const currentContent = form.getValues("content") || "";
-					form.setValue("content", currentContent + "\n" + markdownImage, {
-						shouldDirty: true,
-					});
-				}
-			}
+	const handleOnImageUpload = (blobUrl, file) => {
+		pendingImages.current.set(blobUrl, file);
+		const currentCover = form.getValues("image");
+		if (!currentCover && !imagePreview) {
+			form.setValue("image", file, { shouldDirty: true, shouldValidate: true });
+			setImagePreview(blobUrl);
 		}
 	};
 
 	const handleFormSubmit = (data) => {
 		let content = data.content || "";
 		const contentImages = {};
-
 		const blobRegex = /!\[.*?\]\((blob:.*?)\)/g;
 		let match;
 
@@ -180,122 +162,317 @@ export default function ArticleForm({
 
 	return (
 		<Form form={form} onSubmit={handleFormSubmit}>
-			<div className="max-w-6xl mx-auto">
-				<div className="flex items-center justify-between mb-8">
-					<div className="flex items-center space-x-4">
-						<Button variant="ghost" onClick={() => window.history.back()} type="button">
-							<ArrowLeft className="h-4 w-4 mr-2" />
-							{t("Back")}
+			<div className="relative flex min-h-screen flex-col bg-background">
+				<header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+					<div className="flex items-center gap-4">
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => window.history.back()}
+							type="button"
+						>
+							<ArrowLeft className="h-5 w-5" />
 						</Button>
-						<div>
-							<h1 className="text-3xl font-bold">
-								{mode === "create" ? t("Create New Article") : t("Edit Article")}
-							</h1>
-							<p className="text-muted-foreground">
-								{t("Share your knowledge with the developer community")}
-							</p>
+						<div className="hidden md:block text-sm text-muted-foreground">
+							{mode === "create"
+								? form.watch("published")
+									? t("Publishing new article")
+									: t("Drafting new article")
+								: t("Editing article")}
 						</div>
 					</div>
-					<div className="flex items-center space-x-2">
-						<Button type="submit" disabled={isSubmitting}>
+
+					<div className="flex items-center gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							type="button"
+							onClick={() => setIsSidebarOpen(true)}
+							className={isSidebarOpen ? "bg-accent" : ""}
+						>
+							<PanelRight className="h-4 w-4 mr-2" />
+							{t("Details")}
+						</Button>
+
+						<Button type="submit" disabled={isSubmitting} size="sm">
 							<Save className="h-4 w-4 mr-2" />
-							{isSubmitting ? t("Publishing...") : t("Publish")}
+							{isSubmitting ? t("Saving...") : t("Publish")}
 						</Button>
 					</div>
-				</div>
+				</header>
 
-				<div className="flex flex-col gap-8">
-					<Card>
-						<CardHeader>
-							<CardTitle>{t("Article Details")}</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<div className="space-y-2">
+				<main className="flex-1 w-full max-w-6xl mx-auto py-10 px-6">
+					<div className="space-y-6">
+						<FormField
+							control={form.control}
+							name="title"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<input
+											{...field}
+											placeholder={t("Article Title")}
+											className="w-full text-center bg-transparent text-4xl font-bold placeholder:text-muted-foreground/50 focus:outline-none border-none p-0"
+											autoComplete="off"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="content"
+							render={({ field }) => (
+								<FormMarkdownInput
+									onImageUpload={handleOnImageUpload}
+									field={field}
+									className="min-h-[500px] border-none shadow-none focus-within:ring-0 px-0"
+								/>
+							)}
+						/>
+					</div>
+				</main>
+
+				{isSidebarOpen && (
+					<div
+						className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
+						onClick={() => setIsSidebarOpen(false)}
+					/>
+				)}
+
+				<div
+					className={clsx(
+						"fixed inset-y-0 right-0 z-50 w-full md:w-[450px] bg-background border-l shadow-2xl transition-transform duration-300 ease-in-out transform overflow-y-auto",
+						isSidebarOpen ? "translate-x-0" : "translate-x-full",
+					)}
+				>
+					<div className="flex flex-col h-full">
+						<div className="flex items-center justify-between p-6 border-b">
+							<h2 className="text-lg font-semibold flex items-center gap-2">
+								<Settings className="w-5 h-5" />
+								{t("Article Settings")}
+							</h2>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setIsSidebarOpen(false)}
+								type="button"
+							>
+								<X className="h-5 w-5" />
+							</Button>
+						</div>
+
+						<div className="flex-1 p-6 space-y-8">
+							<div className="space-y-4">
+								<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+									{t("Status")}
+								</h3>
 								<FormField
 									control={form.control}
-									name="title"
+									name="published"
 									render={({ field }) => (
-										<FormInput
-											label={t("Title") + " *"}
-											placeholder={t("Enter article title...")}
-											field={field}
-										/>
+										<Card className="border-dashed">
+											<CardContent className="pt-6 flex items-center justify-between">
+												<div className="space-y-0.5">
+													<FormLabel>
+														{t("Publish immediately")}
+													</FormLabel>
+													<FormDescription className="text-xs">
+														{field.value
+															? t("Public to everyone")
+															: t("Draft mode")}
+													</FormDescription>
+												</div>
+												<FormControl>
+													<Switch
+														checked={field.value}
+														onCheckedChange={field.onChange}
+													/>
+												</FormControl>
+											</CardContent>
+										</Card>
 									)}
 								/>
 							</div>
 
-							<div className="space-y-2">
+							<div className="space-y-4">
+								<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+									{t("Metadata")}
+								</h3>
 								<FormField
 									control={form.control}
 									name="excerpt"
 									render={({ field }) => (
 										<FormTextareaInput
-											label={
-												t("Excerpt") + (form.watch("published") ? " *" : "")
-											}
-											placeholder={t("Brief description of your article...")}
-											field={field}
+											label={t("Excerpt")}
+											placeholder={t(
+												"Write a short description for SEO and cards...",
+											)}
+											field={{
+												...field,
+												onChange: (e) => {
+													setIsExcerptTouched(true);
+													field.onChange(e);
+												},
+											}}
+											className="resize-none h-24"
 										/>
 									)}
 								/>
 							</div>
-						</CardContent>
-					</Card>
 
-					<FormField
-						control={form.control}
-						name="content"
-						render={({ field }) => (
-							<FormMarkdownInput
-								placeholder={t(
-									"Write your article content here... (Markdown supported)",
-								)}
-								field={field}
-								onPaste={handlePaste}
-							/>
-						)}
-					/>
-					<Card>
-						<CardHeader>
-							<CardTitle>{t("Sources")}</CardTitle>
-							<p className="text-sm text-muted-foreground">
-								{t("Cite your sources and share your knowledge")}
-							</p>
-						</CardHeader>
-						<CardContent className="space-y-6">
 							<div className="space-y-4">
-								{fields.map((field, index) => (
-									<div
-										key={index}
-										className="flex items-center justify-between p-4 border rounded-lg"
-									>
-										<div className="flex-1">
-											<div className="flex items-center space-x-4 mb-2">
-												<span className="font-medium border-r-2 border-foreground pr-4">
-													{field.url}
-												</span>
-												<span className="font-medium">{field.date}</span>
-											</div>
-										</div>
-										<Button
-											variant="ghost"
-											size="sm"
-											onClick={() => remove(index)}
-											className="text-red-500 hover:text-red-700"
-											type="button"
-										>
-											<X className="h-4 w-4" />
-										</Button>
-									</div>
-								))}
+								<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+									{t("Cover Image")}
+								</h3>
+								<FormField
+									control={form.control}
+									name="image"
+									// eslint-disable-next-line no-unused-vars
+									render={({ field: { value, onChange, ...fieldProps } }) => (
+										<FormItem>
+											<FormControl>
+												<div className="group relative border-2 border-dashed border-muted-foreground/25 rounded-lg overflow-hidden hover:border-muted-foreground/50 transition-colors">
+													{imagePreview ? (
+														<div className="relative h-48 w-full">
+															<img
+																src={imagePreview}
+																alt="Preview"
+																className="w-full h-full object-cover"
+															/>
+															<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+																<Label
+																	htmlFor="sidebar-cover-input"
+																	className="cursor-pointer text-white flex items-center gap-2 hover:underline"
+																>
+																	<Upload className="w-4 h-4" />{" "}
+																	{t("Change")}
+																</Label>
+															</div>
+														</div>
+													) : (
+														<div className="h-32 flex flex-col items-center justify-center text-center p-4">
+															<Upload className="h-8 w-8 text-muted-foreground mb-2" />
+															<p className="text-sm text-muted-foreground">
+																{t("Upload cover image")}
+															</p>
+															<Label
+																htmlFor="sidebar-cover-input"
+																className="absolute inset-0 cursor-pointer"
+															/>
+														</div>
+													)}
+
+													<Input
+														{...fieldProps}
+														id="sidebar-cover-input"
+														type="file"
+														accept="image/*"
+														className="hidden"
+														onChange={(event) => {
+															const file =
+																event.target.files &&
+																event.target.files[0];
+															if (file) {
+																onChange(file);
+																setImagePreview(
+																	URL.createObjectURL(file),
+																);
+															}
+														}}
+													/>
+												</div>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							</div>
 
-							<div className="border-t pt-4">
-								<div className="flex gap-4 items-end">
-									<div className="space-y-2 w-full">
-										<Label>{t("Source Url")}</Label>
+							<div className="space-y-6">
+								<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+									{t("Taxonomy")}
+								</h3>
+
+								<FormField
+									control={form.control}
+									name="categories"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t("Categories")}</FormLabel>
+											<FormControl>
+												<MultiSelect
+													options={topCategories.map((c) => ({
+														label: c.name,
+														value: c.slug,
+													}))}
+													onValueChange={field.onChange}
+													defaultValue={field.value}
+													placeholder={t("Select categories")}
+													asyncSearch={asyncSearchCategories}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="tags"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>{t("Tags")}</FormLabel>
+											<FormControl>
+												<MultiSelect
+													options={topTags.map((c) => ({
+														label: c.name,
+														value: c.slug,
+													}))}
+													onValueChange={field.onChange}
+													defaultValue={field.value}
+													placeholder={t("Select tags")}
+													asyncSearch={asyncSearchTags}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							<div className="space-y-4">
+								<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+									{t("Sources")}
+								</h3>
+								<div className="space-y-3">
+									{fields.map((field, index) => (
+										<div
+											key={index}
+											className="flex items-center gap-2 p-2 bg-muted/50 rounded-md text-sm group"
+										>
+											<div
+												className="flex-1 truncate font-mono text-xs"
+												title={field.url}
+											>
+												{field.url}
+											</div>
+											<Button
+												variant="ghost"
+												size="icon"
+												onClick={() => remove(index)}
+												className="h-6 w-6 text-muted-foreground hover:text-red-500"
+												type="button"
+											>
+												<X className="h-3 w-3" />
+											</Button>
+										</div>
+									))}
+
+									<div className="flex gap-2">
 										<Input
-											id="account-url"
 											value={newSourceUrl}
 											onChange={(e) => setNewSourceUrl(e.target.value)}
 											onKeyDown={(e) => {
@@ -304,189 +481,34 @@ export default function ArticleForm({
 													handleAddSource();
 												}
 											}}
-											className="w-full"
-											type="url"
+											placeholder="https://..."
+											className="h-8 text-sm"
 										/>
+										<Button
+											size="sm"
+											variant="secondary"
+											onClick={handleAddSource}
+											type="button"
+											disabled={!newSourceUrl}
+											className="h-8"
+										>
+											<Plus className="h-3 w-3" />
+										</Button>
 									</div>
-
-									<Button
-										disabled={!newSourceUrl}
-										type="button"
-										onClick={handleAddSource}
-									>
-										<Plus className="h-4 w-4 mr-2" />
-										{t("Add Source")}
-									</Button>
 								</div>
 							</div>
-						</CardContent>
-					</Card>
+						</div>
 
-					<Card>
-						<CardHeader>
-							<CardTitle>{t("Publishing")}</CardTitle>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<FormField
-								control={form.control}
-								name="published"
-								render={({ field }) => (
-									<FormItem className="flex items-center justify-between space-y-0">
-										<div className="space-y-0.5">
-											<FormLabel>{t("Publish immediately")}</FormLabel>
-											<FormDescription>
-												{t("Make article visible to everyone")}
-											</FormDescription>
-										</div>
-										<FormControl>
-											<Switch
-												checked={field.value}
-												onCheckedChange={field.onChange}
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardTitle>
-								{t("Cover Image")} {form.watch("published") ? "*" : ""}
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<FormField
-								control={form.control}
-								name="image"
-								// eslint-disable-next-line no-unused-vars
-								render={({ field: { value, onChange, ...fieldProps } }) => (
-									<FormItem>
-										<FormControl>
-											<div
-												className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center bg-no-repeat bg-cover bg-center"
-												style={{
-													backgroundImage: `url(${imagePreview})`,
-												}}
-											>
-												{!imagePreview ? (
-													<>
-														<Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-														<p className="text-muted-foreground mb-4">
-															{t(
-																"Drag and drop an image, or click to browse",
-															)}
-														</p>
-													</>
-												) : (
-													<div className="h-32"></div>
-												)}
-												<FormLabel
-													htmlFor="cover-input"
-													className="cursor-pointer"
-												>
-													<div className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
-														<Upload className="h-4 w-4 mr-2" />
-														{t("Change Cover")}
-													</div>
-												</FormLabel>
-												<Input
-													{...fieldProps}
-													id="cover-input"
-													type="file"
-													accept="image/*"
-													className="hidden"
-													onChange={(event) => {
-														const file =
-															event.target.files &&
-															event.target.files[0];
-														if (file) {
-															onChange(file);
-															setImagePreview(
-																URL.createObjectURL(file),
-															);
-														}
-													}}
-												/>
-											</div>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardTitle>
-								{t("Categories")} {form.watch("published") ? "*" : ""}
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<FormField
-								control={form.control}
-								name="categories"
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<MultiSelect
-												options={topCategories.map((c) => ({
-													label: `${c.name}`,
-													value: c.slug,
-												}))}
-												onValueChange={field.onChange}
-												defaultValue={field.value}
-												hideSelectAll
-												placeholder={t("Select Options")}
-												pageSize={5}
-												debounceMs={300}
-												asyncSearch={asyncSearchCategories}
-												paginationType="page"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader>
-							<CardTitle>
-								{t("Tags")} {form.watch("published") ? "*" : ""}
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<FormField
-								control={form.control}
-								name="tags"
-								render={({ field }) => (
-									<FormItem>
-										<FormControl>
-											<MultiSelect
-												options={topTags.map((c) => ({
-													label: `${c.name}`,
-													value: c.slug,
-												}))}
-												onValueChange={field.onChange}
-												defaultValue={field.value}
-												hideSelectAll
-												placeholder={t("Select Options")}
-												pageSize={5}
-												debounceMs={300}
-												asyncSearch={asyncSearchTags}
-												paginationType="page"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</CardContent>
-					</Card>
+						<div className="p-6 border-t bg-muted/10">
+							<Button
+								className="w-full"
+								type="button"
+								onClick={() => setIsSidebarOpen(false)}
+							>
+								{t("Done")}
+							</Button>
+						</div>
+					</div>
 				</div>
 			</div>
 		</Form>

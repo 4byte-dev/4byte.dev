@@ -2,7 +2,6 @@
 
 namespace Modules\Search\Providers;
 
-use App\Http\Middleware\BatchLogsActivity;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
 
@@ -41,7 +40,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes(): void
     {
-        Route::middleware(['web', 'auth', BatchLogsActivity::class])
+        Route::middleware(['web'])
             ->prefix("api/{$this->nameLower}")
             ->name("api.{$this->nameLower}.")
             ->group(module_path($this->name, '/routes/api.php'));

@@ -111,7 +111,7 @@ services:
         security_opt:
             - no-new-privileges:true
         environment:
-            - MEILI_MASTER_KEY='${MEILISEARCH_KEY}'
+            - MEILI_MASTER_KEY=${MEILISEARCH_KEY}
         networks:
             - stack
         healthcheck:

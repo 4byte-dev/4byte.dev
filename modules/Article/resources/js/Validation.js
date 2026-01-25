@@ -49,11 +49,7 @@ export const createArticleSchema = (t) => {
 
 	return z.preprocess(
 		(data) => {
-			if (
-				typeof data === "object" &&
-				data !== null &&
-				data.published === undefined
-			) {
+			if (typeof data === "object" && data !== null && data.published === undefined) {
 				return { ...data, published: false };
 			}
 			return data;

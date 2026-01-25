@@ -67,5 +67,6 @@
     "yearsAgo_plural": "{{count}} years",
     "justNow": "just now",
     "ago": "ago",
-    "Stay updated with the latest articles, events, tutorials, and developer news": "Stay updated with the latest articles, events, tutorials, and developer news"
+    "Stay updated with the latest articles, events, tutorials, and developer news": "Stay updated with the latest articles, events, tutorials, and developer news",
+    "Write your article content here... (Markdown supported)": "Write your article content here... (Markdown supported)"
 }

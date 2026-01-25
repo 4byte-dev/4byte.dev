@@ -134,7 +134,10 @@ class PageResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
                     ->label(__('Image'))
-                    ->grow(false),
+                    ->grow(false)
+                    ->getStateUsing(function ($record) {
+                        return $record->getFirstMediaUrl('cover');
+                    }),
                 Tables\Columns\TextColumn::make('title')
                     ->label(__('Title'))
                     ->searchable()
