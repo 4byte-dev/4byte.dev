@@ -20,9 +20,9 @@ initCoreThemes();
 pluginRegistry.registerPlugin(CoreSettings);
 pluginRegistry.enablePlugin(CoreSettings.id);
 
-export default function Workbench({ children }) {
+export default function Workbench({ children, height = null }) {
 	useKeybindings();
-	const { activeFile, files, theme } = useEditorStore();
+	const { activeFile, files, theme, isEmbed } = useEditorStore();
 
 	useEffect(() => {
 		const themes = pluginRegistry.getThemes();
@@ -49,20 +49,27 @@ export default function Workbench({ children }) {
 		pluginRegistry.updateStatusBarItem("core.lang", { label });
 	}, [activeFile, files]);
 
+	const containerClass = isEmbed
+		? "w-full relative flex flex-col bg-[var(--ce-editor-background)] text-[var(--ce-foreground)] overflow-hidden font-sans border rounded-md min-h-80"
+		: "fixed inset-0 z-50 flex flex-col w-screen h-screen bg-[var(--ce-editor-background)] text-[var(--ce-foreground)] overflow-hidden font-sans";
+
 	return (
-		<div className="fixed inset-0 z-50 flex flex-col w-screen h-screen bg-[var(--ce-editor-background)] text-[var(--ce-foreground)] overflow-hidden font-sans">
-			<TitleBar />
+		<div
+			className={containerClass}
+			style={height ? { height } : isEmbed ? { height: "100%" } : {}}
+		>
+			{!isEmbed && <TitleBar />}
 			<div className="flex-1 flex overflow-hidden relative">
-				<ActivityBar />
-				<Sidebar />
+				{!isEmbed && <ActivityBar />}
+				{!isEmbed && <Sidebar />}
 				<div className="flex-1 flex flex-col min-w-0 bg-[var(--ce-editor-background)]">
 					<div className="flex-1 overflow-hidden relative">{children}</div>
 					<ConsolePanel />
 				</div>
 			</div>
-			<StatusBar />
-			<QuickOpen />
-			<SettingsModal />
+			{!isEmbed && <StatusBar />}
+			{!isEmbed && <QuickOpen />}
+			{!isEmbed && <SettingsModal />}
 		</div>
 	);
 }

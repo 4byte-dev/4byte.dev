@@ -24,6 +24,7 @@ export const useEditorStore = create((set) => ({
 
 	name: null,
 	slug: null,
+	isEmbed: false,
 
 	activeFile: "index.html",
 	openFiles: ["index.html"],
@@ -72,6 +73,7 @@ export const useEditorStore = create((set) => ({
 
 	setName: (name) => set({ name }),
 	setSlug: (slug) => set({ slug }),
+	setEmbed: (isEmbed) => set({ isEmbed }),
 
 	setActiveFile: (filePath) => set({ activeFile: filePath }),
 
@@ -133,6 +135,8 @@ export const useEditorStore = create((set) => ({
 			openFiles: Object.keys(files).slice(0, 1),
 			activeFile: Object.keys(files)[0],
 		}),
+
+	setOpenFiles: (files) => set({ openFiles: files }),
 
 	loadTemplate: (templateKey) => {
 		const template = TEMPLATES[templateKey];

@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/Components/Ui/Avatar";
 import { Button } from "@/Components/Ui/Form/Button";
 import { Separator } from "@/Components/Ui/Separator";
 import { UserProfileHover } from "@/Components/Common/UserProfileHover";
-import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
+import MarkdownRenderer from "@/Components/Markdown/MarkdownRenderer";
 import { useAuthStore } from "@/Stores/AuthStore";
 import { ImageSlider } from "@/Components/Common/ImageSlider";
 import { Comments } from "@React/Components/Comments";

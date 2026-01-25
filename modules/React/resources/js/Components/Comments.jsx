@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/Components/Ui/Card";
 import { Button } from "@/Components/Ui/Form/Button";
 import { UserProfileHover } from "@/Components/Common/UserProfileHover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/Components/Ui/Avatar";
-import MarkdownRenderer from "@/Components/Common/MarkdownRenderer";
+import MarkdownRenderer from "@/Components/Markdown/MarkdownRenderer";
 import { useMutation } from "@tanstack/react-query";
 import ReactApi from "@React/Api";
 import { CommentSubmitForm } from "@React/Components/Parts/CommentSubmitForm";
@@ -175,8 +175,11 @@ export function Comments({ commentsCounts: initialCommentsCounts, type, slug }) 
 				<div className="space-y-6">
 					<Card>
 						<CardContent className="p-6">
-							{comments.map((comment) => (
-								<div key={comment.id} className="flex items-start space-x-4 mb-3">
+							{comments.map((comment, index) => (
+								<div
+									key={`${comment.id}-${index}`}
+									className="flex items-start space-x-4 mb-3"
+								>
 									<UserProfileHover username={comment.user.username}>
 										<Avatar className="h-10 w-10 cursor-pointer">
 											<AvatarImage

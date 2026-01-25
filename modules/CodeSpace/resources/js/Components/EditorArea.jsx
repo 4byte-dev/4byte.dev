@@ -9,9 +9,9 @@ import { useTranslation } from "react-i18next";
 
 function EditorTitle() {
 	const titleItems = usePluginRegistry((reg) => reg.getEditorTitleItems());
-	const { activeFile } = useEditorStore();
+	const { activeFile, isEmbed } = useEditorStore();
 
-	const context = { activeFile, type: "editor" };
+	const context = { activeFile, type: "editor", isEmbed };
 
 	const visibleItems = titleItems.filter((item) => {
 		if (item.when && !item.when(context)) return false;
