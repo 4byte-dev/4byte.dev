@@ -11,6 +11,7 @@ import {
 	Palette,
 	Save,
 	Settings,
+	ExternalLink,
 } from "lucide-react";
 import { router } from "@inertiajs/react";
 
@@ -355,5 +356,24 @@ export function initCoreCommands() {
 		command: "workbench.action.togglePanel",
 		contextMenuGroupId: "navigation",
 		keybindings: [],
+	});
+
+	pluginRegistry.registerCommand(
+		"codespace.openInNewTab",
+		() => {
+			const store = useEditorStore.getState();
+			if (store.slug) {
+				window.open(route("codespace.view", { slug: store.slug }), "_blank");
+			}
+		},
+		{ label: "Open in New Tab" },
+	);
+
+	pluginRegistry.registerEditorTitleItem({
+		id: "codespace.open-new-tab",
+		label: "Open in New Tab",
+		icon: React.createElement(ExternalLink, { size: 16 }),
+		command: "codespace.openInNewTab",
+		when: (ctx) => ctx.isEmbed,
 	});
 }
