@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import { slugify } from "@/Lib/Utils";
 import { markedCodeGroup, initCodeGroups } from "@/Components/Markdown/MarkedCodeGroup";
 import { markedEmoji } from "@/Components/Markdown/MarkedEmoji";
+import { markedCodeSpace } from "./MarkedCodeSpace";
+import CodeSpacePage from "@CodeSpace/Pages/CodeSpace/Detail";
 
 export default function MarkdownRenderer({ content }) {
 	const { t } = useTranslation();
@@ -22,10 +24,12 @@ export default function MarkdownRenderer({ content }) {
 
 	markedCodeGroup(marked);
 	markedEmoji(marked);
+	markedCodeSpace(marked);
 
 	const html = marked(content, {
 		renderer,
 	});
+	const clean = DOMPurify.sanitize(html);
 
 	useEffect(() => {
 		initCodeGroups();
@@ -54,6 +58,25 @@ export default function MarkdownRenderer({ content }) {
 	}, [content]);
 
 	return (
-		<div className="prose dark:prose-invert max-w-none">{parse(DOMPurify.sanitize(html))}</div>
+		<div className="prose dark:prose-invert max-w-none">
+			{parse(clean, {
+				replace(domNode) {
+					if (
+						domNode.type === "tag" &&
+						domNode.name === "div" &&
+						domNode.attribs?.["data-codespace"] !== undefined
+					) {
+						const props = {};
+						Object.entries(domNode.attribs).forEach(([key, value]) => {
+							if (key.startsWith("data-") && key !== "data-codespace") {
+								props[key.replace("data-", "")] = value;
+							}
+						});
+
+						return <CodeSpacePage embed {...props} />;
+					}
+				},
+			})}
+		</div>
 	);
 }
