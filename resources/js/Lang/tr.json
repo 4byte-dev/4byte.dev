@@ -68,5 +68,14 @@
     "justNow": "az önce",
     "ago": "önce",
     "Stay updated with the latest articles, events, tutorials, and developer news": "En son makaleler, etkinlikler, eğitimler ve geliştirici haberlerinden haberdar olun",
-    "Write your article content here... (Markdown supported)": "Makale içeriğinizi buraya yazın... (Markdown destekleniyor)"
+    "Write your article content here... (Markdown supported)": "Makale içeriğinizi buraya yazın... (Markdown destekleniyor)",
+    "Change Project": "Projeyi Değiştir",
+    "Cancel Selection": "Seçimi İptal Et",
+    "to select": "seçmek için",
+    "create_embed_with_slug": "<0>{{slug}}</0> slug'ı ile oluştur",
+    "No projects found": "Proje bulunamadı",
+    "Loading projects...": "Projeler yükleniyor...",
+    "Search projects or enter slug...": "Projeleri ara veya slug gir...",
+    "Select a project to embed in your content": "İçeriğine gömmek için bir proje seç",
+    "Embed CodeSpace": "CodeSpace Göm"
 }
