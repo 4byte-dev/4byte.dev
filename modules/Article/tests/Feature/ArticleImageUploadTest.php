@@ -3,7 +3,6 @@
 namespace Modules\Article\Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +14,6 @@ use Tests\TestCase;
 
 class ArticleImageUploadTest extends TestCase
 {
-    use RefreshDatabase;
     use WithFaker;
 
     public function test_can_upload_content_images_on_create(): void
@@ -50,10 +48,6 @@ class ArticleImageUploadTest extends TestCase
                 $placeholder2 => $image2,
             ],
         ]);
-
-        if ($response->status() !== 200) {
-            dump($response->json());
-        }
 
         $response->assertStatus(200);
 
@@ -104,10 +98,6 @@ class ArticleImageUploadTest extends TestCase
                 $placeholder => $image,
             ],
         ]);
-
-        if ($response->status() !== 200) {
-            dump($response->json());
-        }
 
         $response->assertStatus(200);
 
