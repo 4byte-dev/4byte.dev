@@ -63,7 +63,7 @@ class EditRequest extends FormRequest
             if (
                 ! $isDraft &&
                 ! $this->hasFile('image') &&
-                ! $article?->hasMedia('cover')
+                ! $article->hasMedia('cover')
             ) {
                 $validator->addRules([
                     'image' => ['required'],
