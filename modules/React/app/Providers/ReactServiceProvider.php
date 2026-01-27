@@ -4,6 +4,7 @@ namespace Modules\React\Providers;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Modules\React\Console\Commands\UpdateReactCounts;
 use Modules\React\Models\Comment;
 use Modules\React\Models\Dislike;
 use Modules\React\Models\Follow;
@@ -32,6 +33,7 @@ class ReactServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+        $this->registerCommands();
         $this->registerTranslations();
         $this->registerPublishableResources();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
@@ -124,5 +126,15 @@ class ReactServiceProvider extends ServiceProvider
             isFilter: false,
             callback: fn ($slug) => app(ReactService::class)->getComment($slug)
         );
+    }
+
+    /**
+     * Register commands in the format of Command::class.
+     */
+    protected function registerCommands(): void
+    {
+        $this->commands([
+            UpdateReactCounts::class,
+        ]);
     }
 }
