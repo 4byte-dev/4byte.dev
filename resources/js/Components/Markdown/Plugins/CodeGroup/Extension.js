@@ -1,38 +1,37 @@
-export const CodeGroupExtension = {
+export const codeGroupExtension = {
 	name: "codegroup",
 	level: "block",
 	start(src) {
 		return src.match(/::: code-group/)?.index;
 	},
 	tokenizer(src) {
-		const rule = /^::: code-group(?:\s+labels=\[([^\]]+)\])?\n([\s\S]*?)\n:::/;
+		const rule = /^:::code-group(?:\{[^}]*labels\s*=\s*"([^"]+)"[^}]*\})?\n([\s\S]*?)\n:::/;
+
 		const match = rule.exec(src);
+		if (!match) return;
 
-		if (match) {
-			const labels = match[1]
-				? match[1].split(",").map((l) => l.trim().replace(/^['"]|['"]$/g, ""))
-				: [];
+		const labels = match[1] ? match[1].split(",").map((l) => l.trim()) : [];
 
-			const content = match[2];
-			const blocks = [];
-			const codeRule = /```(\w+)?\n([\s\S]*?)```/g;
-			let codeMatch;
+		const content = match[2];
+		const blocks = [];
 
-			while ((codeMatch = codeRule.exec(content)) !== null) {
-				blocks.push({
-					lang: codeMatch[1] || "",
-					code: codeMatch[2],
-				});
-			}
+		const codeRule = /```(\w+)?\n([\s\S]*?)```/g;
+		let codeMatch;
 
-			return {
-				type: "codegroup",
-				raw: match[0],
-				labels: labels,
-				blocks: blocks,
-				tokens: [],
-			};
+		while ((codeMatch = codeRule.exec(content)) !== null) {
+			blocks.push({
+				lang: codeMatch[1] || "",
+				code: codeMatch[2],
+			});
 		}
+
+		return {
+			type: "codegroup",
+			raw: match[0],
+			labels,
+			blocks,
+			tokens: [],
+		};
 	},
 	renderer(token) {
 		const labels =
@@ -78,7 +77,7 @@ export const CodeGroupExtension = {
               <div role="tablist" class="flex h-10 items-center rounded-md bg-muted p-1 gap-1">
                 ${tabs}
               </div>
-              <div class="code-blocks">${blocks}</div>
+              <div class="code-blocks -mt-5">${blocks}</div>
             </div>
           `;
 	},
