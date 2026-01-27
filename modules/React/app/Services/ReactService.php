@@ -573,6 +573,36 @@ class ReactService
     }
 
     /**
+     * Set the count for a specific filter (DB + Cache).
+     */
+    public function setCount(string $countableType, int $countableId, string $filter, int $count): void
+    {
+        $this->setCountDb($countableType, $countableId, $filter, $count);
+
+        if (Cache::has("react:counts:{$this->cacheKey($countableType, $countableId, $filter)}")) {
+            $this->setCountCache($countableType, $countableId, $filter, $count);
+        }
+    }
+
+    public function setCountDb(string $countableType, int $countableId, string $filter, int $count): void
+    {
+        Count::updateOrCreate([
+            'countable_type' => $countableType,
+            'countable_id'   => $countableId,
+            'filter'         => $filter,
+        ], [
+            'count' => $count,
+        ]);
+    }
+
+    public function setCountCache(string $countableType, int $countableId, string $filter, int $count): void
+    {
+        $cacheKey = "react:counts:{$this->cacheKey($countableType, $countableId, $filter)}";
+
+        Cache::forever($cacheKey, $count);
+    }
+
+    /**
      * Generates a cache key for reactable entities.
      *
      * @param string|int ...$parts
