@@ -19,7 +19,7 @@ class UpdateReactCountsTest extends TestCase
         Cache::flush();
     }
 
-    public function test_it_updates_article_counts_correctly()
+    public function test_it_updates_article_counts_correctly(): void
     {
         $article = Article::factory()->create();
 
