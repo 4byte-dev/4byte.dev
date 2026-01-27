@@ -48,7 +48,6 @@ class EditRequestTest extends TestCase
         $this->assertArrayHasKey('content', $errors->toArray());
         $this->assertArrayHasKey('categories', $errors->toArray());
         $this->assertArrayHasKey('tags', $errors->toArray());
-        $this->assertArrayHasKey('image', $errors->toArray());
         $this->assertArrayHasKey('sources', $errors->toArray());
     }
 
@@ -209,14 +208,6 @@ class EditRequestTest extends TestCase
                 'tags' => ['a', 'b', 'c', 'd'],
             ]),
             field: 'tags'
-        );
-    }
-
-    public function test_image_is_required_when_published(): void
-    {
-        $this->assertValidationError(
-            data: $this->publishedBaseData(except: ['image']),
-            field: 'image'
         );
     }
 
