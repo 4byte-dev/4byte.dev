@@ -4,6 +4,7 @@ namespace Modules\Article\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Validator;
 use Modules\Article\Models\Article;
 
 class EditRequest extends FormRequest
@@ -39,7 +40,7 @@ class EditRequest extends FormRequest
                 'categories.*'     => ['string'],
                 'tags'             => ['required', 'array', 'min:1', 'max:3'],
                 'tags.*'           => ['string'],
-                'image'            => ['required', 'file', 'image'],
+                'image'            => ['file', 'image'],
                 'sources'          => ['required', 'array', 'min:1'],
                 'sources.*.url'    => ['required', 'string', 'url'],
                 'sources.*.date'   => ['required', 'date'],
@@ -49,6 +50,26 @@ class EditRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $isDraft = ! $this->boolean('published', false);
+
+            /** @var Article $article */
+            $article = $this->route('article');
+
+            if (
+                ! $isDraft &&
+                ! $this->hasFile('image') &&
+                ! $article?->hasMedia('cover')
+            ) {
+                $validator->addRules([
+                    'image' => ['required'],
+                ]);
+            }
+        });
     }
 
     public function createSlug(?int $ignoreId = null): string

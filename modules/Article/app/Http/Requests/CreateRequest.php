@@ -4,6 +4,7 @@ namespace Modules\Article\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Validator;
 use Modules\Article\Models\Article;
 
 class CreateRequest extends FormRequest
@@ -49,6 +50,26 @@ class CreateRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $isDraft = ! $this->boolean('published', false);
+
+            /** @var Article $article */
+            $article = $this->route('article');
+
+            if (
+                ! $isDraft &&
+                ! $this->hasFile('image') &&
+                ! $article?->hasMedia('cover')
+            ) {
+                $validator->addRules([
+                    'image' => ['required'],
+                ]);
+            }
+        });
     }
 
     public function createSlug(?int $ignoreId = null): string

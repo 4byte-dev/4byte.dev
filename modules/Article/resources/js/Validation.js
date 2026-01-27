@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-export const createArticleSchema = (t) => {
+export const createArticleSchema = (t, hasExistingImage = false) => {
 	const baseSchema = z.object({
 		title: z
 			.string()
@@ -44,7 +44,6 @@ export const createArticleSchema = (t) => {
 			.array(z.string())
 			.min(1, t("Select at least 1 tag"))
 			.max(3, t("You can select up to 3 tags")),
-		image: z.any().refine((val) => !!val, t("Cover image is required")),
 	});
 
 	return z.preprocess(
@@ -54,6 +53,16 @@ export const createArticleSchema = (t) => {
 			}
 			return data;
 		},
-		z.discriminatedUnion("published", [draftSchema, publishedSchema]),
+		z
+			.discriminatedUnion("published", [draftSchema, publishedSchema])
+			.superRefine((data, ctx) => {
+				if (data.published && !data.image && !hasExistingImage) {
+					ctx.addIssue({
+						path: ["image"],
+						message: t("Cover image is required"),
+						code: z.ZodIssueCode.custom,
+					});
+				}
+			}),
 	);
 };
