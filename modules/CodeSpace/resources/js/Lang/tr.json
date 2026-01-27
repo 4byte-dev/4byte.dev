@@ -55,5 +55,13 @@
     "Delete": "Sil",
     "Console": "Konsol",
     "No logs yet...": "Henüz günlük yok...",
-    "Themes...": "Temalar..."
+    "Themes...": "Temalar...",
+    "initializing_environment...": "ortam_başlatılıyor...",
+    "Error: 404_RESOURCE_NOT_FOUND": "Error: 404_KAYNAK_BULUNAMADI",
+    "CodeSpace Not Found": "CodeSpace Bulunamadı",
+    "Connection Error": "Bağlantı Hatası",
+    "The requested CodeSpace environment could not be located.": "İstenen CodeSpace bulunamadı.",
+    "Unable to establish a connection to the remote environment.": "Uzak ortama bağlantı kurulamadı.",
+    "Compiling resources...": "Kaynaklar derleniyor...",
+    "System Halted": "Sistem Durduruldu"
 }

@@ -68,5 +68,14 @@
     "justNow": "just now",
     "ago": "ago",
     "Stay updated with the latest articles, events, tutorials, and developer news": "Stay updated with the latest articles, events, tutorials, and developer news",
-    "Write your article content here... (Markdown supported)": "Write your article content here... (Markdown supported)"
+    "Write your article content here... (Markdown supported)": "Write your article content here... (Markdown supported)",
+    "Change Project": "Change Project",
+    "Cancel Selection": "Cancel Selection",
+    "to select": "to select",
+    "create_embed_with_slug": "Create embed with slug: <0>{{slug}}</0>",
+    "No projects found": "No projects found",
+    "Loading projects...": "Loading projects...",
+    "Search projects or enter slug...": "Search projects or enter slug...",
+    "Select a project to embed in your content": "Select a project to embed in your content",
+    "Embed CodeSpace": "Embed CodeSpace"
 }

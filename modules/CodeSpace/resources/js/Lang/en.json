@@ -55,5 +55,13 @@
     "Delete": "Delete",
     "Console": "Console",
     "No logs yet...": "No logs yet...",
-    "Themes...": "Themes..."
+    "Themes...": "Themes...",
+    "initializing_environment...": "initializing_environment...",
+    "Error: 404_RESOURCE_NOT_FOUND": "Error: 404_RESOURCE_NOT_FOUND",
+    "CodeSpace Not Found": "CodeSpace Not Found",
+    "Connection Error": "Connection Error",
+    "The requested CodeSpace environment could not be located.": "The requested CodeSpace environment could not be located.",
+    "Unable to establish a connection to the remote environment.": "Unable to establish a connection to the remote environment.",
+    "Compiling resources...": "Compiling resources...",
+    "System Halted": "System Halted"
 }

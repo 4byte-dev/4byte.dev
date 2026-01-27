@@ -1,11 +1,11 @@
-export const CodeSpaceExtension = {
-	name: "codespace",
+export const codeSpaceExtension = {
+	name: "code-space",
 	level: "block",
 	start(src) {
-		return src.match(/\[codespace\s+/)?.index;
+		return src.match(/::code-space\{/i)?.index;
 	},
 	tokenizer(src) {
-		const rule = /^\[codespace\s+([^\]]+)\]/;
+		const rule = /^::code-space\{([^}]+)\}/;
 		const match = rule.exec(src);
 		if (!match) return;
 
@@ -19,7 +19,7 @@ export const CodeSpaceExtension = {
 		}
 
 		return {
-			type: "codespace",
+			type: "code-space",
 			raw: match[0],
 			props,
 		};

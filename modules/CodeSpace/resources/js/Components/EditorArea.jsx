@@ -24,7 +24,7 @@ function EditorTitle() {
 				<button
 					key={item.id || idx}
 					onClick={() => item.command && pluginRegistry.executeCommand(item.command)}
-					className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white ml-1"
+					className="!p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white !ml-1"
 					title={item.title}
 				>
 					{item.icon}
@@ -161,7 +161,7 @@ export default function EditorArea() {
 							key={path}
 							onClick={() => setActiveFile(path)}
 							className={clsx(
-								"flex items-center gap-2 px-3 min-w-[120px] max-w-[200px] text-xs cursor-pointer border-r border-[var(--ce-tab-border)] group relative",
+								"flex items-center gap-2 !px-3 min-w-[120px] max-w-[200px] text-xs cursor-pointer border-r border-[var(--ce-tab-border)] group relative",
 								activeFile === path
 									? "bg-[var(--ce-tab-activeBackground)] text-[var(--ce-tab-activeForeground)]"
 									: "bg-[var(--ce-tab-inactiveBackground)] text-[var(--ce-tab-inactiveForeground)]",
@@ -179,7 +179,7 @@ export default function EditorArea() {
 									closeFile(path);
 								}}
 								className={clsx(
-									"p-0.5 hover:bg-gray-700 rounded flex items-center justify-center w-5 h-5",
+									"!p-0.5 hover:bg-gray-700 rounded flex items-center justify-center w-5 h-5",
 									activeFile === path || buffers[path] !== undefined
 										? "opacity-100"
 										: "opacity-0 group-hover:opacity-100",

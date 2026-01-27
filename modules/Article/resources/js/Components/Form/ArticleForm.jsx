@@ -47,9 +47,10 @@ export default function ArticleForm({
 	const [isExcerptTouched, setIsExcerptTouched] = useState(
 		!!initialValues?.excerpt && initialValues.excerpt.length > 0,
 	);
+	const hasExistingImage = !!initialValues?.image;
 
 	const form = useForm({
-		resolver: zodResolver(createArticleSchema(t)),
+		resolver: zodResolver(createArticleSchema(t, hasExistingImage)),
 		defaultValues: {
 			title: initialValues?.title || "",
 			excerpt: initialValues?.excerpt || "",
@@ -116,6 +117,18 @@ export default function ArticleForm({
 			});
 		}
 	}, [apiErrors, form]);
+
+	useEffect(() => {
+		const sidebarFields = ["categories", "tags", "excerpt", "image", "published", "sources"];
+
+		const hasSidebarErrors = Object.keys(form.formState.errors).some((key) =>
+			sidebarFields.includes(key),
+		);
+
+		if (hasSidebarErrors && !isSidebarOpen) {
+			setIsSidebarOpen(true);
+		}
+	}, [form.formState.errors]);
 
 	const { fields, append, remove } = useFieldArray({
 		control: form.control,
