@@ -3,7 +3,10 @@ name: Generate PHP Docs to GitHub Pages
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
   docs:
@@ -37,11 +40,14 @@ jobs:
           composer install -q --no-ansi \
           --no-interaction --no-scripts --no-progress
 
-      - name: Download phpDocumentor.phar
-        run: |
-          curl -L https://www.phpdoc.org/phpDocumentor.phar -o phpDocumentor.phar
-          chmod +x phpDocumentor.phar
-
       - name: Generate PHPDocs
         run: |
-          php phpDocumentor.phar -d app,modules -t docs
+          ./vendor/bin/phpdoc
+
+      - name: Deploy docs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gp-pages
+          publish_dir: docs/build
+          force_orphan: true
