@@ -1,0 +1,92 @@
+:root {
+    --primary-color: #fafafa;
+    --background-color: #0a0a0a;
+    --text-color: #fafafa;
+    --link-color: #fafafa;
+    --sidebar-background: #0a0a0a;
+    --sidebar-border: #262626;
+    --code-background: #1e1e1e;
+    --border-color: #262626;
+}
+
+body {
+    background-color: var(--background-color) !important;
+    color: var(--text-color) !important;
+    font-family: 'Inter', sans-serif;
+}
+
+.navbar {
+    background-color: var(--background-color) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand {
+    color: var(--primary-color) !important;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar-brand::before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 30px;
+    background-image: url('../images/logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.sidebar {
+    background-color: var(--sidebar-background) !important;
+    border-right: 1px solid var(--sidebar-border);
+}
+
+a {
+    color: var(--link-color) !important;
+}
+
+code,
+pre {
+    background-color: var(--code-background) !important;
+    color: #d4d4d4 !important;
+    border: 1px solid var(--border-color);
+}
+
+.table {
+    color: var(--text-color) !important;
+    --bs-table-color: var(--text-color);
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--border-color);
+}
+
+.card {
+    background-color: var(--background-color) !important;
+    border: 1px solid var(--border-color);
+}
+
+.card-header {
+    background-color: var(--sidebar-background) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Scrollbars for dark theme */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #262626;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #444;
+}

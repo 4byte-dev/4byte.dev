@@ -29,6 +29,7 @@
         "marcogermani87/filament-cookie-consent": "^1.1",
         "meilisearch/meilisearch-php": "^1.16",
         "nwidart/laravel-modules": "^12.0",
+        "phpdocumentor/shim": "^3.9",
         "rmsramos/activitylog": "^2.0",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-medialibrary": "^11.15",
@@ -121,6 +122,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "pestphp/pest-plugin": true,
             "php-http/discovery": true,
+            "phpdocumentor/shim": true,
             "wikimedia/composer-merge-plugin": true
         }
     },

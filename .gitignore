@@ -25,7 +25,7 @@ Thumbs.db
 docker-compose.local.yml
 public/sitemap.xml
 .php-cs-fixer.cache
-docs/
-.phpdoc/
+docs/build
+.phpdoc/cache
 /_ide_helper.php
 /.phpstorm.meta.php

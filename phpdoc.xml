@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor
+        configVersion="3"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="https://www.phpdoc.org"
+        xsi:noNamespaceSchemaLocation="data/xsd/phpdoc.xsd"
+>
+    <title>4Byte</title>
+    <paths>
+        <output>docs/build</output>
+    </paths>
+    <version number="latest">
+        <api ignore-packages="true" format="php">
+            <source dsn=".">
+                <path>app</path>
+                <path>modules</path>
+            </source>
+            <output>api</output>
+            <ignore hidden="true" symlinks="true">
+                <path>tests/**/*</path>
+                <path>build/**/*</path>
+                <path>var/**/*</path>
+                <path>vendor/**/*</path>
+            </ignore>
+            <extensions>
+                <extension>php</extension>
+            </extensions>
+            <default-package-name>phpDocumentor</default-package-name>
+        </api>
+        <guide>
+            <source dsn=".">
+                <path>docs</path>
+            </source>
+            <output>/guide</output>
+        </guide>
+    </version>
+    <setting name="guides.enabled" value="true"/>
+    <setting name="graphs.enabled" value="true"/>
+    <template name=".phpdoc/template" />
+</phpdocumentor>
