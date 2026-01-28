@@ -5,13 +5,8 @@ namespace Modules\Recommend\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Modules\Article\Mappers\ArticleMapper;
-use Modules\Article\Models\Article;
-use Modules\Entry\Mappers\EntryMapper;
-use Modules\Entry\Models\Entry;
 use Modules\Recommend\Http\Requests\FeedRequest;
 use Modules\Recommend\Services\FeedService;
-use Modules\User\Mappers\UserMapper;
 
 class FeedController extends Controller
 {
@@ -47,20 +42,6 @@ class FeedController extends Controller
      */
     public function feed(FeedRequest $request): JsonResponse
     {
-        $entries = Entry::with('user')->get()->map(function ($entry) {
-            $user = UserMapper::toData($entry->user);
-
-            return EntryMapper::toData($entry, $user);
-        });
-
-        $articles = Article::with('user')->get()->map(function ($article) {
-            $user = UserMapper::toData($article->user);
-
-            return ArticleMapper::toData($article, $user);
-        });
-
-        return response()->json([...$articles, ...$entries]);
-
         $userId = Auth::id() ?? null;
         $page   = $request->get('page', 1);
         $limit  = $request->get('limit', 10);

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<template>
+    <title>4Byte</title>
+    <name>4byte</name>
+    <author>4Byte Team</author>
+    <email>info@4byte.dev</email>
+    <version>1.0.0</version>
+    <extends>default</extends>
+    <transformations>
+        <transformation writer="twig" source="templates/default/index.html.twig" artifact="index.html"/>
+    </transformations>
+</template>
