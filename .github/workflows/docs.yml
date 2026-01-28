@@ -51,3 +51,4 @@ jobs:
           publish_branch: gh-pages
           publish_dir: docs/build
           force_orphan: true
+          cname: docs.4byte.dev
