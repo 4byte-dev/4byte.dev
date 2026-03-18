@@ -1,0 +1,95 @@
+---
+interface Props {
+	title: string
+	url: string
+}
+
+const { title, url } = Astro.props
+
+const encodedTitle = encodeURIComponent(title)
+const encodedUrl = encodeURIComponent(url)
+---
+
+<div class="flex items-center gap-3 py-6 border-y border-border/50 dark:border-border-dark/50 my-8">
+	<span class="text-xs font-semibold uppercase tracking-widest text-muted-foreground dark:text-muted-dark-foreground mr-2">
+		Share
+	</span>
+
+	<a
+		href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`}
+		target="_blank"
+		rel="noopener noreferrer"
+		aria-label="Share on X (Twitter)"
+		class="flex items-center justify-center w-9 h-9 rounded-lg bg-muted dark:bg-muted-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10 hover:text-primary dark:hover:text-primary-dark text-muted-foreground dark:text-muted-dark-foreground transition-all duration-200 hover:scale-110"
+	>
+		<span class="i-lucide-twitter w-4 h-4"></span>
+	</a>
+
+	<a
+		href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`}
+		target="_blank"
+		rel="noopener noreferrer"
+		aria-label="Share on LinkedIn"
+		class="flex items-center justify-center w-9 h-9 rounded-lg bg-muted dark:bg-muted-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10 hover:text-primary dark:hover:text-primary-dark text-muted-foreground dark:text-muted-dark-foreground transition-all duration-200 hover:scale-110"
+	>
+		<span class="i-lucide-linkedin w-4 h-4"></span>
+	</a>
+
+	<a
+		href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+		target="_blank"
+		rel="noopener noreferrer"
+		aria-label="Share on Facebook"
+		class="flex items-center justify-center w-9 h-9 rounded-lg bg-muted dark:bg-muted-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10 hover:text-primary dark:hover:text-primary-dark text-muted-foreground dark:text-muted-dark-foreground transition-all duration-200 hover:scale-110"
+	>
+		<span class="i-lucide-facebook w-4 h-4"></span>
+	</a>
+
+	<button
+		id="copy-link-btn"
+		aria-label="Copy link"
+		data-url={url}
+		class="flex items-center justify-center w-9 h-9 rounded-lg bg-muted dark:bg-muted-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10 hover:text-primary dark:hover:text-primary-dark text-muted-foreground dark:text-muted-dark-foreground transition-all duration-200 hover:scale-110"
+	>
+		<span class="i-lucide-link w-4 h-4" id="copy-icon"></span>
+		<span class="i-lucide-check w-4 h-4 hidden" id="copy-check"></span>
+	</button>
+</div>
+
+<script>
+	const btn = document.getElementById('copy-link-btn')
+	const icon = document.getElementById('copy-icon')
+	const check = document.getElementById('copy-check')
+
+	if (btn && icon && check) {
+		btn.addEventListener('click', async () => {
+			const url = btn.getAttribute('data-url') || window.location.href
+			try {
+				await navigator.clipboard.writeText(url)
+				icon.classList.add('hidden')
+				check.classList.remove('hidden')
+				btn.classList.add('text-green-500')
+				setTimeout(() => {
+					icon.classList.remove('hidden')
+					check.classList.add('hidden')
+					btn.classList.remove('text-green-500')
+				}, 2000)
+			} catch {
+				const input = document.createElement('input')
+				input.value = url
+				document.body.appendChild(input)
+				input.select()
+				document.execCommand('copy')
+				document.body.removeChild(input)
+				icon.classList.add('hidden')
+				check.classList.remove('hidden')
+				btn.classList.add('text-green-500')
+				setTimeout(() => {
+					icon.classList.remove('hidden')
+					check.classList.add('hidden')
+					btn.classList.remove('text-green-500')
+				}, 2000)
+			}
+		})
+	}
+</script>

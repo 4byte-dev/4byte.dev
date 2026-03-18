@@ -1,0 +1,145 @@
+---
+import { Image } from 'astro:assets';
+import categories from '../data/categories.json'
+import tags from '../data/tags.json'
+
+const navItems = [
+	{ title: 'Home', url: '/' },
+	{ title: 'Articles', url: '/articles' },
+	{ title: 'Categories', url: '/categories' },
+	{ title: 'Tags', url: '/tags' },
+]
+
+const currentPath = Astro.url.pathname
+
+function isActive(path: string): boolean {
+	if (path === '/') return currentPath === '/'
+	return currentPath.startsWith(path)
+}
+
+const topCategories = [...categories]
+	.sort((a, b) => b.articleCount - a.articleCount)
+	.slice(0, 5)
+
+const topTags = [...tags]
+	.sort((a, b) => b.articleCount - a.articleCount)
+	.slice(0, 8)
+
+import logoDark from '../assets/logo-dark.png';
+import logoLight from '../assets/logo-light.png';
+---
+
+<aside
+	class="w-64 shrink-0 border-r border-border dark:border-border-dark bg-background dark:bg-background-dark hidden lg:flex flex-col h-screen sticky top-0"
+>
+	<div class="p-6 border-b border-border dark:border-border-dark">
+		<a href="/" class="flex items-center gap-2">
+			<Image src={logoLight} height={32} alt="4byte logo" class="block dark:hidden" />
+			<Image src={logoDark} height={32} alt="4byte logo" class="hidden dark:block" />
+		</a>
+	</div>
+
+	<nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+		<div
+			class="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground dark:text-muted-dark-foreground mb-3 ml-3"
+		>
+			Navigation
+		</div>
+		{
+			navItems.map((item) => (
+				<a
+					href={item.url}
+					class={`flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-colors ${
+						isActive(item.url)
+							? 'bg-primary/10 dark:bg-primary-dark/20 text-primary dark:text-primary-dark font-medium'
+							: 'text-muted-foreground dark:text-muted-dark-foreground hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark'
+					}`}
+				>
+					{item.title === 'Home' && <span class="i-lucide-home w-4 h-4" />}
+					{item.title === 'Articles' && <span class="i-lucide-file-text w-4 h-4" />}
+					{item.title === 'Categories' && <span class="i-lucide-folder w-4 h-4" />}
+					{item.title === 'Tags' && <span class="i-lucide-tag w-4 h-4" />}
+					<span>{item.title}</span>
+				</a>
+			))
+		}
+
+		<div
+			class="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground dark:text-muted-dark-foreground mt-6 mb-3 ml-3"
+		>
+			Categories
+		</div>
+		{
+			topCategories.map((cat) => (
+				<a
+					href={`/categories/${cat.slug}`}
+					class={`flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${
+						currentPath === `/categories/${cat.slug}`
+							? 'bg-primary/10 dark:bg-primary-dark/20 text-primary dark:text-primary-dark font-medium'
+							: 'text-muted-foreground dark:text-muted-dark-foreground hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark'
+					}`}
+				>
+					<span>{cat.name}</span>
+					<span class="text-xs tabular-nums">{cat.articleCount}</span>
+				</a>
+			))
+		}
+
+		<div
+			class="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground dark:text-muted-dark-foreground mt-6 mb-3 ml-3"
+		>
+			Tags
+		</div>
+		
+		<div class="flex flex-wrap gap-2 px-3 pb-4 mt-3">
+			{
+				topTags.map((tag) => (
+					<a
+						href={`/tags/${tag.slug}`}
+						class={`inline-flex items-center px-2 py-1 rounded-md text-xs transition-colors ${
+							currentPath === `/tags/${tag.slug}`
+								? 'bg-primary text-primary-foreground dark:bg-primary-dark dark:text-primary-dark-foreground font-medium'
+								: 'bg-muted dark:bg-muted-dark text-muted-foreground dark:text-muted-dark-foreground hover:bg-primary/20 dark:hover:bg-primary-dark/20 hover:text-foreground dark:hover:text-foreground-dark'
+						}`}
+					>
+						#{tag.name}
+					</a>
+				))
+			}
+		</div>
+	</nav>
+
+	<div class="p-4 border-t border-border dark:border-border-dark">
+		<button
+			id="theme-toggle"
+			class="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground dark:text-muted-dark-foreground rounded-md hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark transition-colors w-full"
+		>
+			<span class="theme-icon i-lucide-moon w-4 h-4"></span>
+			<span class="theme-text">Dark Mode</span>
+		</button>
+	</div>
+</aside>
+
+<script>
+	const toggle = document.getElementById('theme-toggle')
+	const icon = toggle?.querySelector('.theme-icon')
+	const text = toggle?.querySelector('.theme-text')
+
+	function updateTheme() {
+		const isDark = document.documentElement.classList.contains('dark')
+		if (icon) {
+			icon.className = `theme-icon w-4 h-4 ${isDark ? 'i-lucide-sun' : 'i-lucide-moon'}`
+		}
+		if (text) {
+			text.textContent = isDark ? 'Light Mode' : 'Dark Mode'
+		}
+	}
+
+	toggle?.addEventListener('click', () => {
+		document.documentElement.classList.toggle('dark')
+		localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')
+		updateTheme()
+	})
+
+	updateTheme()
+</script>

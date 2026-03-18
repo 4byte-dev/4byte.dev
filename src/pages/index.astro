@@ -1,0 +1,107 @@
+---
+import DocsLayout from '../layouts/DocsLayout.astro'
+import { getCollection } from 'astro:content'
+
+const allArticles = await getCollection('articles')
+const published = allArticles.filter((a) => a.data.status === 'Published')
+const featured = published.slice(0, 3)
+const recent = published.slice(0, 6)
+---
+
+<DocsLayout
+	title="Machine Learning Documentation"
+	description="A technical reference for core ML concepts, architectures, and implementation patterns. Built for practitioners."
+	image="/og/index.png"
+>
+	<div class="px-8 py-12 max-w-5xl mx-auto">
+		<div class="mb-12">
+			<h1 class="text-4xl font-extrabold tracking-tight text-foreground dark:text-foreground-dark mb-3">
+				Machine Learning Documentation
+			</h1>
+			<p class="text-lg text-muted-foreground dark:text-muted-dark-foreground max-w-2xl">
+				A technical reference for core ML concepts, architectures, and implementation patterns. Built for
+				practitioners.
+			</p>
+		</div>
+
+		<section class="mb-12">
+			<div class="flex items-center justify-between mb-4">
+				<h2
+					class="text-xs font-bold tracking-[0.15em] uppercase text-muted-foreground dark:text-muted-dark-foreground"
+				>
+					Featured Articles
+				</h2>
+				<a
+					href="/articles"
+					class="text-sm text-primary dark:text-primary-dark font-medium hover:underline flex items-center gap-1"
+				>
+					View all <span class="i-lucide-arrow-right w-3 h-3"></span>
+				</a>
+			</div>
+			<div class="grid gap-4 md:grid-cols-3">
+				{
+					featured.map((article) => (
+						<a
+							href={`/articles/${article.data.slug}`}
+							class="block p-5 bg-background dark:bg-background-dark rounded-lg shadow-flat-sm hover:shadow-flat-md transition-shadow h-full"
+						>
+							<div class="text-xs font-medium text-primary dark:text-primary-dark mb-2">
+								{article.data.category}
+							</div>
+							<h3 class="font-semibold text-foreground dark:text-foreground-dark mb-2 leading-snug">
+								{article.data.title}
+							</h3>
+							<p class="text-sm text-muted-foreground dark:text-muted-dark-foreground line-clamp-2 mb-4">
+								{article.data.excerpt}
+							</p>
+							<div class="flex items-center gap-4 text-xs text-muted-foreground dark:text-muted-dark-foreground">
+								<span class="flex items-center gap-1">
+									<span class="i-lucide-eye w-3 h-3" />
+									{article.data.views.toLocaleString()}
+								</span>
+							</div>
+						</a>
+					))
+				}
+			</div>
+		</section>
+
+		<h2
+			class="text-xs font-bold tracking-[0.15em] uppercase text-muted-foreground dark:text-muted-dark-foreground mb-4"
+		>
+			All Articles
+		</h2>
+		<div class="bg-background dark:bg-background-dark rounded-lg shadow-flat-sm overflow-hidden">
+			{
+				recent.map((article) => (
+					<a
+						href={`/articles/${article.data.slug}`}
+						class="flex items-center justify-between px-5 py-4 hover:bg-muted/30 dark:hover:bg-muted-dark/30 transition-colors border-b border-border/50 dark:border-border-dark/50 last:border-0"
+					>
+						<div class="min-w-0 flex-1">
+							<div class="flex items-center gap-2 mb-1">
+								<span class="text-xs font-medium text-primary dark:text-primary-dark">
+									{article.data.category}
+								</span>
+								<span class="text-muted-foreground dark:text-muted-dark-foreground text-xs">·</span>
+								<span class="text-xs text-muted-foreground dark:text-muted-dark-foreground">
+									{article.data.date}
+								</span>
+							</div>
+							<h3 class="font-medium text-foreground dark:text-foreground-dark text-sm">
+								{article.data.title}
+							</h3>
+						</div>
+						<div class="flex items-center gap-4 ml-4 text-xs text-muted-foreground dark:text-muted-dark-foreground shrink-0">
+							<span class="flex items-center gap-1 tabular-nums">
+								<span class="i-lucide-eye w-3 h-3" />
+								{article.data.views.toLocaleString()}
+							</span>
+							<span class="i-lucide-arrow-right w-3.5 h-3.5" />
+						</div>
+					</a>
+				))
+			}
+		</div>
+	</div>
+</DocsLayout>

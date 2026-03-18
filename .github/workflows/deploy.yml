@@ -1,0 +1,53 @@
+name: Deploy to Cloudflare Pages
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        types: [closed]
+        branches: [main]
+
+jobs:
+    deploy:
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            deployments: write
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build
+              run: pnpm generate:og
+              env:
+                  NODE_VERSION: '20'
+
+            - name: Build
+              run: pnpm build
+              env:
+                  NODE_VERSION: '20'
+
+            - name: Deploy to Cloudflare Pages
+              uses: cloudflare/pages-action@v1
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  projectName: 4byte-dev
+                  directory: dist
+                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+                  wranglerVersion: '3'

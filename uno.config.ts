@@ -1,0 +1,65 @@
+import { defineConfig, presetUno, presetIcons, presetWebFonts } from 'unocss'
+
+export default defineConfig({
+	presets: [
+		presetUno(),
+		presetIcons({
+			scale: 1.2,
+			cdn: 'https://esm.sh/',
+		}),
+		presetWebFonts({
+			fonts: {
+				sans: 'Inter:400,500,600,700,800',
+				mono: 'JetBrains Mono:400,500,600',
+			},
+		}),
+	],
+	theme: {
+		colors: {
+			background: '#ffffff',
+			'background-dark': '#18181b',
+			foreground: '#030712',
+			'foreground-dark': '#e5e7eb',
+			primary: '#3b82f6',
+			'primary-foreground': '#f8fafc',
+			'primary-dark': '#60a5fa',
+			'primary-dark-foreground': '#0f172a',
+			secondary: '#f1f5f9',
+			'secondary-foreground': '#0f172a',
+			'secondary-dark': '#27272a',
+			'secondary-dark-foreground': '#e5e7eb',
+			muted: '#f1f5f9',
+			'muted-foreground': '#64748b',
+			'muted-dark': '#27272a',
+			'muted-dark-foreground': '#94a3b8',
+			accent: '#f1f5f9',
+			'accent-foreground': '#0f172a',
+			'accent-dark': '#27272a',
+			'accent-dark-foreground': '#e5e7eb',
+			destructive: '#ef4444',
+			'destructive-foreground': '#f8fafc',
+			'destructive-dark': '#b91c1c',
+			'destructive-dark-foreground': '#e5e7eb',
+			border: '#e2e8f0',
+			'border-dark': '#3f3f46',
+			input: '#e2e8f0',
+			'input-dark': '#3f3f46',
+			ring: '#3b82f6',
+			'ring-dark': '#60a5fa',
+			card: '#ffffff',
+			'card-foreground': '#030712',
+			'card-dark': '#1c1c1e',
+			'card-dark-foreground': '#e5e7eb',
+			popover: '#ffffff',
+			'popover-foreground': '#030712',
+			'popover-dark': '#1c1c1e',
+			'popover-dark-foreground': '#e5e7eb',
+		},
+	},
+	content: {
+		pipeline: {
+			include: ['src/**/*.{astro,html,js,ts,jsx,tsx}'],
+			exclude: ['node_modules', 'dist', '.git'],
+		},
+	},
+})

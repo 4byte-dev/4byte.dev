@@ -1,0 +1,229 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro'
+import ShareButtons from '../../components/ShareButtons.astro'
+import { getCollection } from 'astro:content'
+import { SITE } from '../../config.mjs'
+
+export async function getStaticPaths() {
+	const articles = await getCollection('articles')
+	return articles.map((article) => ({
+		params: { slug: article.data.slug },
+		props: { article },
+	}))
+}
+
+const { article } = Astro.props
+
+if (!article || article.data.status !== 'Published') {
+	return Astro.redirect('/404')
+}
+
+const categorySlug = article.data.category.toLowerCase().replace(/\s+/g, '-')
+const articleUrl = `${SITE.origin}/articles/${article.data.slug}`
+const ogImageUrl = `/og/${article.data.slug}.png`
+
+const publishedDate = new Date(article.data.date)
+const isoDate = publishedDate.toISOString()
+
+const sections = (article.body ?? '')
+	.split('\n')
+	.filter((line) => line.startsWith('## '))
+	.map((line) => line.replace('## ', ''))
+
+const jsonLdArticle = {
+	'@context': 'https://schema.org',
+	'@type': 'Article',
+	headline: article.data.title,
+	description: article.data.excerpt,
+	image: `${SITE.origin}${ogImageUrl}`,
+	url: articleUrl,
+	datePublished: isoDate,
+	dateModified: isoDate,
+	author: {
+		'@type': 'Person',
+		name: article.data.author,
+		url: SITE.origin,
+	},
+	publisher: {
+		'@type': 'Organization',
+		name: SITE.name,
+		url: SITE.origin,
+	},
+	keywords: article.data.tags.join(', '),
+	mainEntityOfPage: {
+		'@type': 'WebPage',
+		'@id': articleUrl,
+	},
+}
+
+const jsonLdBreadcrumb = {
+	'@context': 'https://schema.org',
+	'@type': 'BreadcrumbList',
+	itemListElement: [
+		{
+			'@type': 'ListItem',
+			position: 1,
+			name: 'Home',
+			item: SITE.origin,
+		},
+		{
+			'@type': 'ListItem',
+			position: 2,
+			name: 'Articles',
+			item: `${SITE.origin}/articles`,
+		},
+		{
+			'@type': 'ListItem',
+			position: 3,
+			name: article.data.category,
+			item: `${SITE.origin}/categories/${categorySlug}`,
+		},
+		{
+			'@type': 'ListItem',
+			position: 4,
+			name: article.data.title,
+			item: articleUrl,
+		},
+	],
+}
+---
+
+<DocsLayout
+	title={article.data.title}
+	description={article.data.excerpt}
+	image={ogImageUrl}
+	type="article"
+	article={{
+		publishedTime: isoDate,
+		author: article.data.author,
+		tags: article.data.tags,
+	}}
+>
+	<script type="application/ld+json" set:html={JSON.stringify(jsonLdArticle)} slot="head" />
+	<script type="application/ld+json" set:html={JSON.stringify(jsonLdBreadcrumb)} slot="head" />
+
+	<div class="flex">
+		<div class="flex-1 px-8 py-12 max-w-4xl mx-auto min-w-0">
+			<nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-muted-foreground dark:text-muted-dark-foreground mb-6">
+				<a href="/" class="hover:text-foreground dark:hover:text-foreground-dark transition-colors">Home</a>
+				<span>/</span>
+				<a href="/articles" class="hover:text-foreground dark:hover:text-foreground-dark transition-colors">Articles</a>
+				<span>/</span>
+				<a href={`/categories/${categorySlug}`} class="hover:text-foreground dark:hover:text-foreground-dark transition-colors">
+					{article.data.category}
+				</a>
+				<span>/</span>
+				<span class="text-foreground dark:text-foreground-dark truncate max-w-[200px]">{article.data.title}</span>
+			</nav>
+
+			<header class="mb-8">
+				<div class="flex items-center gap-2 text-sm text-primary dark:text-primary-dark font-medium mb-2">
+					<a href={`/categories/${categorySlug}`} class="hover:underline">
+						{article.data.category}
+					</a>
+				</div>
+				<h1 class="text-3xl font-bold tracking-tight text-foreground dark:text-foreground-dark mb-4">
+					{article.data.title}
+				</h1>
+				<div class="flex items-center gap-4 text-sm text-muted-foreground dark:text-muted-dark-foreground mb-4">
+					<span>By {article.data.author}</span>
+					<span>{article.data.date}</span>
+					<span class="flex items-center gap-1"
+						><span class="i-lucide-eye w-3.5 h-3.5"></span>{article.data.views.toLocaleString()}</span
+					>
+				</div>
+				<div class="flex gap-2 flex-wrap">
+					{
+						article.data.tags.map((tag) => (
+							<a
+								href={`/tags/${tag}`}
+								class="px-2 py-1 bg-muted dark:bg-muted-dark text-muted-foreground dark:text-muted-dark-foreground text-xs rounded-sm hover:text-foreground dark:hover:text-foreground-dark transition-colors font-mono"
+							>
+								#{tag}
+							</a>
+						))
+					}
+				</div>
+			</header>
+
+			<ShareButtons title={article.data.title} url={articleUrl} />
+
+			<article class="mb-12 prose">
+				{
+					(article.body ?? '').split('\n\n').map((block) => {
+						const trimmed = block.trim()
+						if (!trimmed) return null
+
+						if (trimmed.startsWith('## ')) {
+							const heading = trimmed.replace('## ', '')
+							return (
+								<h2
+									id={heading.toLowerCase().replace(/\s+/g, '-')}
+									class="text-xl font-bold text-foreground dark:text-foreground-dark mt-10 mb-4"
+								>
+									{heading}
+								</h2>
+							)
+						}
+						if (trimmed.startsWith('- ')) {
+							const items = trimmed.split('\n').filter((l) => l.startsWith('- '))
+							return (
+								<ul class="list-disc pl-6 space-y-1 text-muted-foreground dark:text-muted-dark-foreground text-sm mb-4">
+									{items.map((item) => (
+										<li>{item.replace('- ', '')}</li>
+									))}
+								</ul>
+							)
+						}
+						if (
+							trimmed.includes('=') ||
+							trimmed.includes('←') ||
+							trimmed.includes('→') ||
+							trimmed.includes('Σ') ||
+							trimmed.includes('π')
+						) {
+							return (
+								<div class="p-4 bg-muted/50 dark:bg-muted-dark/50 rounded-md border-l-4 border-primary dark:border-primary-dark my-4">
+									<code class="text-sm font-mono text-foreground dark:text-foreground-dark whitespace-pre-wrap">
+										{trimmed}
+									</code>
+								</div>
+							)
+						}
+						return (
+							<p class="text-muted-foreground dark:text-muted-dark-foreground leading-relaxed mb-4 text-[15px]">
+								{trimmed}
+							</p>
+						)
+					})
+				}
+			</article>
+
+			<ShareButtons title={article.data.title} url={articleUrl} />
+		</div>
+
+		<aside class="w-56 shrink-0 py-12 pr-8 hidden xl:block">
+			<div class="sticky top-20">
+				<h4
+					class="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground dark:text-muted-dark-foreground mb-4"
+				>
+					On this page
+				</h4>
+				<ul class="space-y-2.5 text-sm text-muted-foreground dark:text-muted-dark-foreground">
+					{
+						sections.map((s) => (
+							<li>
+								<a
+									href={`#${s.toLowerCase().replace(/\s+/g, '-')}`}
+									class="hover:text-foreground dark:hover:text-foreground-dark transition-colors"
+								>
+									{s}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</aside>
+	</div>
+</DocsLayout>

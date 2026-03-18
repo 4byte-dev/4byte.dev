@@ -1,0 +1,161 @@
+---
+import '@unocss/reset/tailwind.css'
+import 'virtual:uno.css'
+import '../styles/global.css'
+import { ClientRouter } from 'astro:transitions'
+import { SITE } from '../config.mjs'
+
+interface Props {
+	title?: string
+	description?: string
+	image?: string
+	type?: 'website' | 'article'
+	article?: {
+		publishedTime?: string
+		modifiedTime?: string
+		author?: string
+		tags?: string[]
+	}
+	noindex?: boolean
+}
+
+const {
+	title,
+	description = SITE.description,
+	image = SITE.defaultImage,
+	type = 'website',
+	article,
+	noindex = false,
+} = Astro.props
+
+const canonicalURL = new URL(Astro.url.pathname, SITE.origin)
+const resolvedImage = new URL(image, SITE.origin)
+const siteName = SITE.name
+const fullTitle = title ? `${title} | ${siteName}` : siteName
+
+const jsonLdWebSite = {
+	'@context': 'https://schema.org',
+	'@type': 'WebSite',
+	name: siteName,
+	url: SITE.origin,
+	description: SITE.description,
+	publisher: {
+		'@type': 'Organization',
+		name: SITE.author.name,
+		url: SITE.origin,
+	},
+	potentialAction: {
+		'@type': 'SearchAction',
+		target: {
+			'@type': 'EntryPoint',
+			urlTemplate: `${SITE.origin}/articles?q={search_term_string}`,
+		},
+		'query-input': 'required name=search_term_string',
+	},
+}
+---
+
+<!doctype html>
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="generator" content={Astro.generator} />
+
+		<title>{fullTitle}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+
+		{SITE.googleSiteVerificationId && (
+			<meta name="google-site-verification" content={SITE.googleSiteVerificationId} />
+		)}
+
+		{noindex && <meta name="robots" content="noindex, follow" />}
+
+		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="alternate" type="application/rss+xml" title={siteName} href="/rss.xml" />
+
+		<meta property="og:type" content={type} />
+		<meta property="og:site_name" content={siteName} />
+		<meta property="og:title" content={fullTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:image" content={resolvedImage} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:locale" content="en_US" />
+
+		{type === 'article' && article && (
+			<>
+				{article.publishedTime && <meta property="article:published_time" content={article.publishedTime} />}
+				{article.modifiedTime && <meta property="article:modified_time" content={article.modifiedTime} />}
+				{article.author && <meta property="article:author" content={article.author} />}
+				{article.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+			</>
+		)}
+
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:site" content={SITE.social.twitter} />
+		<meta name="twitter:title" content={fullTitle} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={resolvedImage} />
+		<meta name="twitter:image:alt" content={fullTitle} />
+
+		<meta name="format-detection" content="telephone=no" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<meta name="apple-mobile-web-app-title" content={siteName} />
+
+		<script type="application/ld+json" set:html={JSON.stringify(jsonLdWebSite)} />
+
+		<ClientRouter />
+		<slot name="head" />
+
+		<script is:inline>
+			;(function () {
+				const saved = localStorage.getItem('theme')
+				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+				if (saved === 'dark' || (!saved && prefersDark)) {
+					document.documentElement.classList.add('dark')
+				}
+			})()
+		</script>
+
+		{SITE.googleAnalyticsId && (
+			<>
+				<script type="text/partytown" src={`https://www.googletagmanager.com/gtag/js?id=${SITE.googleAnalyticsId}`} async></script>
+				<script type="text/partytown">
+					window.dataLayer = window.dataLayer || [];
+					function gtag(){dataLayer.push(arguments);}
+					gtag('js', new Date());
+					gtag('config', window.__GA_ID__);
+				</script>
+				<script is:inline define:vars={{ gaId: SITE.googleAnalyticsId }}>
+					window.__GA_ID__ = gaId;
+				</script>
+			</>
+		)}
+	</head>
+	<body>
+		<slot />
+		<script is:inline>
+			function applyTheme() {
+				const saved = localStorage.getItem('theme')
+				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+				if (saved === 'dark' || (!saved && prefersDark)) {
+					document.documentElement.classList.add('dark')
+				} else {
+					document.documentElement.classList.remove('dark')
+				}
+			}
+			applyTheme()
+			document.addEventListener('astro:after-swap', applyTheme)
+		</script>
+	</body>
+</html>

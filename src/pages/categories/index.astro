@@ -1,0 +1,38 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro'
+import categories from '../../data/categories.json'
+---
+
+<DocsLayout
+	title="Categories"
+	description="Browse machine learning articles by category: Fundamentals, Deep Learning, NLP, Computer Vision, and Reinforcement Learning."
+	image="/og/index.png"
+>
+	<div class="px-8 py-12 max-w-5xl mx-auto">
+		<h1 class="text-3xl font-bold tracking-tight text-foreground dark:text-foreground-dark mb-2">Categories</h1>
+		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-8">Browse articles by topic area.</p>
+		<div class="grid gap-4 md:grid-cols-2">
+			{
+				categories.map((cat) => (
+					<a
+						href={`/categories/${cat.slug}`}
+						class="block p-5 bg-background dark:bg-background-dark rounded-lg shadow-flat-sm hover:shadow-flat-md transition-shadow"
+					>
+						<div class="flex items-center justify-between mb-2">
+							<h3 class="font-semibold text-foreground dark:text-foreground-dark">{cat.name}</h3>
+							<span class="text-xs tabular-nums text-muted-foreground dark:text-muted-dark-foreground bg-muted dark:bg-muted-dark px-2 py-0.5 rounded-sm">
+								{cat.articleCount} articles
+							</span>
+						</div>
+						<p class="text-sm text-muted-foreground dark:text-muted-dark-foreground mb-3">
+							{cat.description}
+						</p>
+						<span class="text-sm text-primary dark:text-primary-dark font-medium flex items-center gap-1">
+							Browse <span class="i-lucide-arrow-right w-3 h-3" />
+						</span>
+					</a>
+				))
+			}
+		</div>
+	</div>
+</DocsLayout>

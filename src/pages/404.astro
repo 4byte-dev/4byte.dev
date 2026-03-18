@@ -1,0 +1,56 @@
+---
+import DocsLayout from '../layouts/DocsLayout.astro'
+import { SITE } from '../config.mjs'
+---
+
+<DocsLayout title="404 — Page Not Found" description="The page you're looking for doesn't exist." noindex={true}>
+	<div class="px-8 py-12 max-w-4xl mx-auto text-center">
+		<div class="mb-6">
+			<span class="text-7xl font-bold text-primary/20 dark:text-primary-dark/20 font-mono">404</span>
+		</div>
+		<h1 class="text-2xl font-bold text-foreground dark:text-foreground-dark mb-2">Page not found</h1>
+		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-6">
+			The page you're looking for doesn't exist or has been moved.
+		</p>
+		<div class="flex items-center justify-center gap-4 mb-8">
+			<a
+				href="/"
+				class="px-4 py-2 bg-primary dark:bg-primary-dark text-background dark:text-background-dark text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+			>
+				← Back to home
+			</a>
+			<a
+				href="/articles"
+				class="px-4 py-2 border border-border dark:border-border-dark text-foreground dark:text-foreground-dark text-sm font-medium rounded-lg hover:bg-muted dark:hover:bg-muted-dark transition-colors"
+			>
+				Browse articles
+			</a>
+		</div>
+		<p class="text-xs text-muted-foreground dark:text-muted-dark-foreground">
+			If you believe this is an error, please contact the site administrator.
+		</p>
+	</div>
+</DocsLayout>
+
+<script>
+	declare global {
+		interface Window {
+			gtag?: (...args: unknown[]) => void
+			_paq?: unknown[][]
+		}
+	}
+
+	if (typeof window.gtag === 'function') {
+		window.gtag('event', 'page_view', {
+			page_title: '404: Page Not Found',
+			page_location: window.location.href,
+			page_path: window.location.pathname,
+		})
+	}
+
+	if (typeof window._paq === 'object') {
+		window._paq.push(['setCustomUrl', window.location.href])
+		window._paq.push(['setDocumentTitle', '404 — Page Not Found'])
+		window._paq.push(['trackPageView'])
+	}
+</script>

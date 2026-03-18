@@ -1,0 +1,67 @@
+* {
+	border-color: hsl(var(--border));
+}
+
+body {
+	background-color: hsl(var(--background));
+	color: hsl(var(--foreground));
+	font-family:
+		'Inter',
+		system-ui,
+		-apple-system,
+		sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+code,
+pre,
+.font-mono {
+	font-family: 'JetBrains Mono', monospace;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family:
+		'Inter',
+		system-ui,
+		-apple-system,
+		sans-serif;
+	letter-spacing: -0.025em;
+}
+
+.shadow-flat-sm {
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.05),
+		0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-flat-md {
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.05),
+		0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-flat-lg {
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.05),
+		0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.line-clamp-1 {
+	display: -webkit-box;
+	-webkit-line-clamp: 1;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.line-clamp-2 {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}

@@ -1,0 +1,9 @@
+{
+	"useTabs": true,
+	"tabWidth": 4,
+	"printWidth": 120,
+	"endOfLine": "lf",
+	"singleQuote": true,
+	"semi": false,
+	"plugins": ["prettier-plugin-astro"]
+}

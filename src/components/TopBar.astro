@@ -1,0 +1,112 @@
+---
+import rawArticles from '../data/articles.json';
+const mappedArticles = rawArticles.map(a => ({
+  id: a.slug,
+  title: a.title,
+  category: ''
+}));
+---
+
+
+<header
+	class="h-14 border-b border-border/50 dark:border-border-dark/50 flex items-center justify-between px-6 bg-background dark:bg-background-dark sticky top-0 z-10"
+>
+	<div class="flex items-center gap-4 lg:hidden">
+		<button
+			id="mobile-menu-btn"
+			class="text-muted-foreground dark:text-muted-dark-foreground hover:text-foreground dark:hover:text-foreground-dark"
+		>
+			<span class="i-lucide-menu w-5 h-5"></span>
+		</button>
+		<a href="/" class="flex items-center gap-2">
+			<div
+				class="w-6 h-6 bg-primary dark:bg-primary-dark rounded flex items-center justify-center text-primary-foreground dark:text-primary-dark-foreground font-bold text-[10px]"
+			>
+				L
+			</div>
+			<span class="font-bold text-sm text-foreground dark:text-foreground-dark">4Byte.dev</span>
+		</a>
+	</div>
+
+	<div class="relative flex-1 max-w-md hidden sm:block">
+		<span
+			class="absolute left-3 top-1/2 -translate-y-1/2 i-lucide-search w-4 h-4 text-muted-foreground dark:text-muted-dark-foreground"
+		></span>
+		<input
+			type="text"
+			id="search-input"
+			placeholder="Search documentation..."
+			class="w-full pl-9 pr-4 py-2 text-sm rounded-md ring-1 ring-border dark:ring-border-dark bg-muted/30 dark:bg-muted-dark/30 focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark outline-none transition-all text-foreground dark:text-foreground-dark placeholder:text-muted-foreground dark:placeholder:text-muted-dark-foreground"
+		/>
+		<div
+			id="search-results"
+			class="absolute top-full left-0 right-0 mt-1 bg-background dark:bg-background-dark shadow-flat-lg rounded-md overflow-hidden z-50 border border-border/50 dark:border-border-dark/50 hidden"
+		>
+		</div>
+	</div>
+
+	<div class="flex items-center gap-3">
+		<button
+			id="mobile-theme-toggle"
+			class="text-muted-foreground dark:text-muted-dark-foreground hover:text-foreground dark:hover:text-foreground-dark lg:hidden"
+			title="Toggle theme"
+		>
+			<span class="mobile-theme-icon i-lucide-moon w-4 h-4"></span>
+		</button>
+	</div>
+</header>
+
+<script define:vars={{ mappedArticles }}>
+	const mobileToggle = document.getElementById('mobile-theme-toggle')
+	const mobileIcon = mobileToggle?.querySelector('.mobile-theme-icon')
+
+	function updateMobileTheme() {
+		const isDark = document.documentElement.classList.contains('dark')
+		if (mobileIcon) {
+			mobileIcon.className = `mobile-theme-icon w-4 h-4 ${isDark ? 'i-lucide-sun' : 'i-lucide-moon'}`
+		}
+	}
+
+	mobileToggle?.addEventListener('click', () => {
+		document.documentElement.classList.toggle('dark')
+		localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')
+		updateMobileTheme()
+	})
+
+	const searchInput = document.getElementById('search-input')
+	const searchResults = document.getElementById('search-results')
+
+	const articles = mappedArticles;
+
+	searchInput?.addEventListener('input', (e) => {
+		const query = e.target.value
+		if (query.length < 2) {
+			searchResults?.classList.add('hidden')
+			return
+		}
+
+		const filtered = articles.filter((a) => a.title.toLowerCase().includes(query.toLowerCase())).slice(0, 5)
+
+		if (filtered.length > 0 && searchResults) {
+			searchResults.innerHTML = filtered
+				.map(
+					(a) => `
+        <a href="/articles/${a.id}" class="block w-full text-left px-4 py-3 text-sm hover:bg-muted dark:hover:bg-muted-dark transition-colors border-b border-border/50 dark:border-border-dark/50 last:border-0 text-foreground dark:text-foreground-dark">
+          <div class="font-medium">${a.title}</div>
+          <div class="text-xs text-muted-foreground dark:text-muted-dark-foreground mt-0.5">${a.category}</div>
+        </a>
+      `,
+				)
+				.join('')
+			searchResults.classList.remove('hidden')
+		} else {
+			searchResults?.classList.add('hidden')
+		}
+	})
+
+	searchInput?.addEventListener('blur', () => {
+		setTimeout(() => searchResults?.classList.add('hidden'), 200)
+	})
+
+	updateMobileTheme()
+</script>

@@ -1,0 +1,31 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro'
+import tags from '../../data/tags.json'
+---
+
+<DocsLayout
+	title="Tags"
+	description="Browse machine learning articles by tags. Topics include neural networks, transformers, CNN, RNN, optimization, and more."
+	image="/og/index.png"
+>
+	<div class="px-8 py-12 max-w-5xl mx-auto">
+		<h1 class="text-3xl font-bold tracking-tight text-foreground dark:text-foreground-dark mb-2">Tags</h1>
+		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-8">Browse articles by topic tags.</p>
+		<div class="flex flex-wrap gap-3">
+			{
+				tags.map((tag) => (
+					<a
+						href={`/tags/${tag.slug}`}
+						class="inline-flex items-center gap-2 px-4 py-2.5 bg-background dark:bg-background-dark rounded-md shadow-flat-sm hover:shadow-flat-md transition-shadow font-mono text-sm"
+					>
+						<span class="text-primary dark:text-primary-dark">#</span>
+						<span class="text-foreground dark:text-foreground-dark">{tag.name}</span>
+						<span class="text-xs tabular-nums text-muted-foreground dark:text-muted-dark-foreground bg-muted dark:bg-muted-dark px-1.5 py-0.5 rounded-sm">
+							{tag.articleCount}
+						</span>
+					</a>
+				))
+			}
+		</div>
+	</div>
+</DocsLayout>
