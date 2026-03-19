@@ -46,7 +46,7 @@ jobs:
               with:
                   commit_options: '--no-verify'
                   commit_message: 'chore: auto-generate data and og images'
-                  
+
             - name: Comment on PR
               if: steps.auto-commit.outputs.changes_detected == 'true'
               uses: thollander/actions-comment-pull-request@v3
