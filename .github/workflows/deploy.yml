@@ -1,15 +1,13 @@
 name: Deploy to Cloudflare Pages
 
 on:
-    push:
-        branches: [main]
     pull_request:
         types: [closed]
         branches: [main]
 
 jobs:
     deploy:
-        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+        if: github.event.pull_request.merged == true
         runs-on: ubuntu-latest
         environment: production
         permissions:
@@ -32,11 +30,6 @@ jobs:
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
-
-            - name: Build
-              run: pnpm generate:og
-              env:
-                  NODE_VERSION: '22'
 
             - name: Build
               run: pnpm build

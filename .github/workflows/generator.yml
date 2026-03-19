@@ -1,0 +1,45 @@
+name: Generate Data and OG Images
+
+on:
+    pull_request:
+        branches: [main]
+
+jobs:
+    generate-and-commit:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.head_ref }}
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Generate Data
+              run: pnpm generate:data
+              env:
+                  NODE_VERSION: '22'
+
+            - name: Generate OG Images
+              run: pnpm generate:og
+              env:
+                  NODE_VERSION: '22'
+
+            - name: Commit and Push changes
+              uses: stefanzweifel/git-auto-commit-action@v5
+              with:
+                  commit_message: "chore: auto-generate data and og images"
