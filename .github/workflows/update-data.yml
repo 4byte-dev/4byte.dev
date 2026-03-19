@@ -4,7 +4,7 @@ on:
     push:
         branches: [main]
         paths:
-            - 'content/**/*.md'
+            - 'src/content/articles/**/*.md'
     workflow_dispatch:
 
 jobs:
@@ -60,4 +60,5 @@ jobs:
                   body: |
                       This PR contains updates to `tags.json`, `categories.json` and `articles.json`
                       generated from the latest markdown content.
-                      New tags/categories have empty descriptions – please fill them in.
+                      New tags have empty descriptions – please fill them in.
+                      New categories have empty descriptions and colors – please fill them in (colors are used for OG images).

@@ -63,13 +63,14 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 					name: catName,
 					slug: slugify(catName, { lower: true }),
 					description: '',
+					color: '',
 					articleCount: 1,
 				})
 				addedCategories.add(catName)
 			}
 		}
 
-		articles.push({ title, slug })
+		articles.push({ title, slug, category: data.category?.trim() ?? '' })
 	}
 
 	const filteredTags = tags.filter((t) => (t.articleCount ?? 0) > 0)

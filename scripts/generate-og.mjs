@@ -11,16 +11,10 @@ const fontBold = await fetch(
 	'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf',
 ).then((res) => res.arrayBuffer())
 
-const CATEGORY_COLORS = {
-	fundamentals: { bg: '#1a1a2e', text: '#e2e8f0' },
-	'deep-learning': { bg: '#0f3460', text: '#e94560' },
-	nlp: { bg: '#1b1b2f', text: '#a855f7' },
-	'computer-vision': { bg: '#0d1b2a', text: '#22d3ee' },
-	'reinforcement-learning': { bg: '#1a0a2e', text: '#4ade80' },
-}
+const DEFAULT_COLORS = { bg: '#1a1a2e', text: '#e2e8f0' }
 
-async function makeSvg(title, catSlug, isArticle) {
-	const colors = CATEGORY_COLORS[catSlug] || CATEGORY_COLORS['fundamentals']
+async function makeSvg(title, color, isArticle) {
+	const bg = color || DEFAULT_COLORS.bg
 	const svg = await satori(
 		{
 			type: 'div',
@@ -32,7 +26,7 @@ async function makeSvg(title, catSlug, isArticle) {
 					flexDirection: 'column',
 					justifyContent: 'space-between',
 					padding: '60px 80px',
-					background: `linear-gradient(135deg, ${colors.bg} 0%, #0a0a1a 100%)`,
+					background: `linear-gradient(135deg, ${bg} 0%, #0a0a1a 100%)`,
 					fontFamily: 'Inter',
 				},
 				children: [
@@ -198,28 +192,30 @@ async function makeSvg(title, catSlug, isArticle) {
 const outDir = path.join(process.cwd(), 'public', 'og')
 fs.mkdirSync(outDir, { recursive: true })
 
-const svgIndex = await makeSvg('4byte.dev', 'fundamentals', false)
+const dataDir = path.join(process.cwd(), 'src', 'data')
+const categories = JSON.parse(fs.readFileSync(path.join(dataDir, 'categories.json'), 'utf8'))
+const articles = JSON.parse(fs.readFileSync(path.join(dataDir, 'articles.json'), 'utf8'))
+
+const categoryColorMap = {}
+for (const cat of categories) {
+	categoryColorMap[cat.name] = cat.color || null
+}
+
+const svgIndex = await makeSvg('4byte.dev', null, false)
 const resvgIndex = new Resvg(svgIndex, { fitTo: { mode: 'width', value: 1200 } })
 fs.writeFileSync(path.join(outDir, 'index.png'), Buffer.from(resvgIndex.render().asPng()))
-console.log('Generated dist/og/index.png')
+console.log('Generated public/og/index.png')
 
-const articles = [
-	{ slug: 'backpropagation', title: 'Backpropagation', cat: 'deep-learning' },
-	{ slug: 'cnn-image-classification', title: 'CNN for Image Classification', cat: 'computer-vision' },
-	{ slug: 'diffusion-models', title: 'Diffusion Models', cat: 'deep-learning' },
-	{ slug: 'linear-regression', title: 'Linear Regression', cat: 'fundamentals' },
-	{ slug: 'loss-functions', title: 'Loss Functions', cat: 'fundamentals' },
-	{ slug: 'q-learning', title: 'Q-Learning', cat: 'reinforcement-learning' },
-	{ slug: 'rnn-sequence-modeling', title: 'RNN for Sequence Modeling', cat: 'nlp' },
-	{ slug: 'transformer-architectures', title: 'Transformer Architectures', cat: 'nlp' },
-	{ slug: 'word-embeddings', title: 'Word Embeddings', cat: 'nlp' },
-]
-
-for (const { slug, title, cat } of articles) {
-	const svgArticle = await makeSvg(title, cat, true)
-	const resvgArticle = new Resvg(svgArticle, { fitTo: { mode: 'width', value: 1200 } })
-	fs.writeFileSync(path.join(outDir, `${slug}.png`), Buffer.from(resvgArticle.render().asPng()))
-	console.log(`Generated dist/og/${slug}.png`)
+if (articles.length === 0) {
+	console.log('No articles found – skipping article OG images.')
+} else {
+	for (const { slug, title, category } of articles) {
+		const color = categoryColorMap[category] || null
+		const svgArticle = await makeSvg(title, color, true)
+		const resvgArticle = new Resvg(svgArticle, { fitTo: { mode: 'width', value: 1200 } })
+		fs.writeFileSync(path.join(outDir, `${slug}.png`), Buffer.from(resvgArticle.render().asPng()))
+		console.log(`Generated public/og/${slug}.png`)
+	}
 }
 
 console.log('All OG images generated.')
