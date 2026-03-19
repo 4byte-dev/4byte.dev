@@ -55,9 +55,9 @@ jobs:
               with:
                   header: preview-url
                   message: |
-                      🚀 **Preview Deployment is Ready!**
+                      **Preview Deployment is Ready!**
 
                       You can test the updates in this PR in a live environment by clicking the link below:
-                      🔗 [View Preview](${{ steps.preview.outputs.deployment-url }})
+                      [View Preview](${{ steps.preview.outputs.deployment-url }})
 
                       *(This environment is specific to this PR and does not affect the `main` branch. The content at this link will update automatically when you push new commits to the PR.)*

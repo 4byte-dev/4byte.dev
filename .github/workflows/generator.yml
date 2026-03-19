@@ -52,7 +52,7 @@ jobs:
               uses: thollander/actions-comment-pull-request@v3
               with:
                   message: |
-                      ### 🤖 Data Generation Update
+                      ### Data Generation Update
                       New data and OG images have been automatically generated. 
                       Please **review the changes** and ensure that any missing **descriptions** or **colors** are filled in manually.
                   github-token: ${{ secrets.GITHUB_TOKEN }}
