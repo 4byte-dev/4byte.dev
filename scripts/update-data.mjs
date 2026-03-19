@@ -18,8 +18,8 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 	const tags = (await readJSON(tagsPath)) ?? []
 	const categories = (await readJSON(categoriesPath)) ?? []
 
-	tags.forEach(t => t.articleCount = 0)
-    categories.forEach(c => c.articleCount = 0)
+	tags.forEach((t) => (t.articleCount = 0))
+	categories.forEach((c) => (c.articleCount = 0))
 
 	const addedTags = new Set()
 	const addedCategories = new Set()
@@ -72,11 +72,9 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 		articles.push({ title, slug })
 	}
 
-	// Remove tags/categories with zero articles
 	const filteredTags = tags.filter((t) => (t.articleCount ?? 0) > 0)
 	const filteredCategories = categories.filter((c) => (c.articleCount ?? 0) > 0)
 
-	// Write back JSON files (using filtered arrays)
 	await writeJSON(tagsPath, filteredTags)
 	await writeJSON(categoriesPath, filteredCategories)
 	await writeJSON(articlesPath, articles)

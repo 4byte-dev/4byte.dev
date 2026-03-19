@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image } from 'astro:assets'
 import categories from '../data/categories.json'
 import tags from '../data/tags.json'
 
@@ -17,16 +17,12 @@ function isActive(path: string): boolean {
 	return currentPath.startsWith(path)
 }
 
-const topCategories = [...categories]
-	.sort((a, b) => b.articleCount - a.articleCount)
-	.slice(0, 5)
+const topCategories = [...categories].sort((a, b) => b.articleCount - a.articleCount).slice(0, 5)
 
-const topTags = [...tags]
-	.sort((a, b) => b.articleCount - a.articleCount)
-	.slice(0, 8)
+const topTags = [...tags].sort((a, b) => b.articleCount - a.articleCount).slice(0, 8)
 
-import logoDark from '../assets/logo-dark.png';
-import logoLight from '../assets/logo-light.png';
+import logoDark from '../assets/logo-dark.png'
+import logoLight from '../assets/logo-light.png'
 ---
 
 <aside
@@ -90,7 +86,7 @@ import logoLight from '../assets/logo-light.png';
 		>
 			Tags
 		</div>
-		
+
 		<div class="flex flex-wrap gap-2 px-3 pb-4 mt-3">
 			{
 				topTags.map((tag) => (

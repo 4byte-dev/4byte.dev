@@ -1,12 +1,11 @@
 ---
-import rawArticles from '../data/articles.json';
-const mappedArticles = rawArticles.map(a => ({
-  id: a.slug,
-  title: a.title,
-  category: ''
-}));
+import rawArticles from '../data/articles.json'
+const mappedArticles = rawArticles.map((a) => ({
+	id: a.slug,
+	title: a.title,
+	category: '',
+}))
 ---
-
 
 <header
 	class="h-14 border-b border-border/50 dark:border-border-dark/50 flex items-center justify-between px-6 bg-background dark:bg-background-dark sticky top-0 z-10"
@@ -76,7 +75,7 @@ const mappedArticles = rawArticles.map(a => ({
 	const searchInput = document.getElementById('search-input')
 	const searchResults = document.getElementById('search-results')
 
-	const articles = mappedArticles;
+	const articles = mappedArticles
 
 	searchInput?.addEventListener('input', (e) => {
 		const query = e.target.value

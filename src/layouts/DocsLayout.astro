@@ -18,7 +18,7 @@ interface Props {
 }
 
 const { title, description, image, type, article, noindex } = Astro.props
-const year = new Date().getFullYear();
+const year = new Date().getFullYear()
 ---
 
 <BaseLayout title={title} description={description} image={image} type={type} article={article} noindex={noindex}>
