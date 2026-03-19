@@ -8,6 +8,7 @@ on:
 jobs:
     deploy-preview:
         runs-on: ubuntu-latest
+        environment: production
         permissions:
             contents: read
             deployments: write
@@ -46,6 +47,8 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   command: pages deploy dist --project-name=4byte-dev --branch=${{ github.head_ref }}
+                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+                  wranglerVersion: '3'
 
             - name: Add or Update PR Comment
               uses: marocchino/sticky-pull-request-comment@v2
