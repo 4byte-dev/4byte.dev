@@ -67,9 +67,9 @@ async function makeSvg(title, color, isArticle, lang = 'en', logo) {
 												type: 'img',
 												props: {
 													src: `data:image/png;base64,${logo}`,
-													height: 48
+													height: 48,
 												},
-											}
+											},
 										],
 									},
 								},
@@ -146,7 +146,7 @@ async function makeSvg(title, color, isArticle, lang = 'en', logo) {
 									type: 'img',
 									props: {
 										src: `data:image/png;base64,${logo}`,
-										height: 48
+										height: 48,
 									},
 								},
 								{

@@ -42,7 +42,7 @@ export function getOtherLang(currentLang: string): string {
 	return SUPPORTED_LANGS.find((l) => l !== currentLang) || DEFAULT_LANG
 }
 
-export function getHreflangLinks(currentPath: string, currentLang: string): Array<{ lang: string; href: string }> {
+export function getHreflangLinks(currentPath: string): Array<{ lang: string; href: string }> {
 	const links: Array<{ lang: string; href: string }> = []
 	for (const lang of SUPPORTED_LANGS) {
 		const href = getAlternatePath(lang, currentPath)

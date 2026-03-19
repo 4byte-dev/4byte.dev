@@ -39,7 +39,7 @@ const siteName = SITE.name
 const fullTitle = title ? `${title} | ${siteName}` : siteName
 const langConfig = LANGUAGES[currentLang as keyof typeof LANGUAGES]
 
-const hreflangLinks = getHreflangLinks(currentPath, currentLang)
+const hreflangLinks = getHreflangLinks(currentPath)
 
 const jsonLdWebSite = {
 	'@context': 'https://schema.org',

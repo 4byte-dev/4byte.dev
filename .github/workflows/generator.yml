@@ -9,6 +9,7 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: write
+            pull-requests: write
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -40,6 +41,18 @@ jobs:
                   NODE_VERSION: '22'
 
             - name: Commit and Push changes
+              id: auto-commit
               uses: stefanzweifel/git-auto-commit-action@v5
               with:
-                  commit_message: "chore: auto-generate data and og images"
+                  commit_options: '--no-verify'
+                  commit_message: 'chore: auto-generate data and og images'
+
+            - name: Comment on PR
+              if: steps.auto-commit.outputs.changes_detected == 'true'
+              uses: thollander/actions-comment-pull-request@v3
+              with:
+                  message: |
+                      ### Data Generation Update
+                      New data and OG images have been automatically generated. 
+                      Please **review the changes** and ensure that any missing **descriptions** or **colors** are filled in manually.
+                  github-token: ${{ secrets.GITHUB_TOKEN }}

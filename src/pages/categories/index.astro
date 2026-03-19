@@ -4,8 +4,15 @@ import categoriesTr from '../../data/tr/categories.json'
 import categoriesEn from '../../data/en/categories.json'
 import { getLangFromUrl, t } from '../../i18n/index.ts'
 
+interface Category {
+	slug: string
+	name: string
+	description: string
+	articleCount: number
+}
+
 const lang = getLangFromUrl(Astro.url)
-const categories = lang === 'en' ? categoriesEn : categoriesTr
+const categories: Category[] = lang === 'en' ? categoriesEn : categoriesTr
 const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.default)
 ---
 

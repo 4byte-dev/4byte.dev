@@ -15,8 +15,21 @@ interface Props {
 
 const { lang, currentPath, labels } = Astro.props
 
-const categories = lang === 'en' ? categoriesEn : categoriesTr
-const tags = lang === 'en' ? tagsEn : tagsTr
+interface Category {
+	slug: string
+	name: string
+	description: string
+	articleCount: number
+}
+
+interface Tag {
+	slug: string
+	name: string
+	articleCount: number
+}
+
+const categories: Category[] = lang === 'en' ? categoriesEn : categoriesTr
+const tags: Tag[] = lang === 'en' ? tagsEn : tagsTr
 
 const navLabels = labels.nav as Record<string, string> | undefined
 const themeLabels = labels.theme as Record<string, string> | undefined
