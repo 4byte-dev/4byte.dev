@@ -12,7 +12,12 @@ interface Props {
 
 const { lang, currentPath, labels } = Astro.props
 
-const rawArticles = lang === 'en' ? rawArticlesEn : rawArticlesTr
+interface Article {
+	slug: string
+	title: string
+}
+
+const rawArticles: Article[] = lang === 'en' ? rawArticlesEn : rawArticlesTr
 const mappedArticles = rawArticles.map((a) => ({
 	id: a.slug,
 	title: a.title,

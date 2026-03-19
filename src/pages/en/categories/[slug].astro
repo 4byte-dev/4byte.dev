@@ -4,23 +4,21 @@ import { getCollection } from 'astro:content'
 import categoriesEn from '../../../data/en/categories.json'
 import { t } from '../../../i18n/index.ts'
 
+interface Category {
+	slug: string
+	name: string
+	description: string
+	articleCount: number
+}
+
 const lang = 'en'
 const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.default)
 
 export async function getStaticPaths() {
-	const allArticles = await getCollection('articles')
-	return categoriesEn.map((cat) => {
-		const catArticles = allArticles.filter(
-			(a) =>
-				a.data.lang === 'en' &&
-				a.data.category.toLowerCase().replace(/\s+/g, '-') === cat.slug &&
-				a.data.status === 'Published',
-		)
-		return {
-			params: { slug: cat.slug },
-			props: { category: cat },
-		}
-	})
+	return categoriesEn.map((cat: Category) => ({
+		params: { slug: cat.slug },
+		props: { category: cat },
+	}))
 }
 
 const { category } = Astro.props

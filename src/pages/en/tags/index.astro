@@ -3,6 +3,12 @@ import DocsLayout from '../../../layouts/DocsLayout.astro'
 import tagsEn from '../../../data/en/tags.json'
 import { t } from '../../../i18n/index.ts'
 
+interface Tag {
+	slug: string
+	name: string
+	articleCount: number
+}
+
 const lang = 'en'
 const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.default)
 ---
@@ -20,7 +26,7 @@ const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.d
 		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-8">{t(labels, 'tags.description')}</p>
 		<div class="flex flex-wrap gap-3">
 			{
-				tagsEn.map((tag) => (
+				tagsEn.map((tag: Tag) => (
 					<a
 						href={`/en/tags/${tag.slug}`}
 						class="inline-flex items-center gap-2 px-4 py-2.5 bg-background dark:bg-background-dark rounded-md shadow-flat-sm hover:shadow-flat-md transition-shadow font-mono text-sm"

@@ -5,26 +5,26 @@ import categoriesTr from '../../data/tr/categories.json'
 import categoriesEn from '../../data/en/categories.json'
 import { getLangFromUrl, t } from '../../i18n/index.ts'
 
+interface Category {
+	slug: string
+	name: string
+	description: string
+	articleCount: number
+}
+
 const lang = getLangFromUrl(Astro.url)
-const categories = lang === 'en' ? categoriesEn : categoriesTr
 const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.default)
 
 export async function getStaticPaths() {
 	const allArticles = await getCollection('articles')
 	const paths = []
 
-	for (const lang of ['tr', 'en']) {
-		const langCategories = lang === 'en' ? categoriesEn : categoriesTr
+	for (const currentLang of ['tr', 'en']) {
+		const langCategories: Category[] = currentLang === 'en' ? categoriesEn : categoriesTr
 		for (const cat of langCategories) {
-			const catArticles = allArticles.filter(
-				(a) =>
-					a.data.lang === lang &&
-					a.data.category.toLowerCase().replace(/\s+/g, '-') === cat.slug &&
-					a.data.status === 'Published',
-			)
 			paths.push({
 				params: { slug: cat.slug },
-				props: { category: cat, lang },
+				props: { category: cat, lang: currentLang },
 			})
 		}
 	}

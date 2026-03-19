@@ -4,20 +4,20 @@ import { getCollection } from 'astro:content'
 import tagsEn from '../../../data/en/tags.json'
 import { t } from '../../../i18n/index.ts'
 
+interface Tag {
+	slug: string
+	name: string
+	articleCount: number
+}
+
 const lang = 'en'
 const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.default)
 
 export async function getStaticPaths() {
-	const allArticles = await getCollection('articles')
-	return tagsEn.map((tag) => {
-		const tagArticles = allArticles.filter(
-			(a) => a.data.lang === 'en' && a.data.tags.includes(tag.slug) && a.data.status === 'Published',
-		)
-		return {
-			params: { slug: tag.slug },
-			props: { tag },
-		}
-	})
+	return tagsEn.map((tag: Tag) => ({
+		params: { slug: tag.slug },
+		props: { tag },
+	}))
 }
 
 const { tag } = Astro.props
