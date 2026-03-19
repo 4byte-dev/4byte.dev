@@ -44,11 +44,10 @@ jobs:
                   NODE_VERSION: '22'
 
             - name: Deploy to Cloudflare Pages
-              uses: cloudflare/pages-action@v1
+              uses: cloudflare/wrangler-action@v3
               with:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  projectName: 4byte-dev
-                  directory: dist
+                  command: pages deploy dist --project-name=4byte-dev
                   gitHubToken: ${{ secrets.GITHUB_TOKEN }}
                   wranglerVersion: '3'
