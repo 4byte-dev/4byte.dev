@@ -7,7 +7,7 @@ const CONFIG = {
 		'Clear, concise explanations of machine learning and AI concepts. From neural networks to reinforcement learning — learn the fundamentals that power modern AI.',
 	defaultImage: '/og-default.png',
 
-	googleAnalyticsId: false,
+	googleAnalyticsId: 'G-LCW5GXVKS6',
 	googleSiteVerificationId: 'orcPxI47GSa-cRvY11tUe6iGg2IO_RPvnA1q95iEM3M',
 
 	author: {
