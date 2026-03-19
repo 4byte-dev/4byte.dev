@@ -1,30 +1,31 @@
 ---
-import DocsLayout from '../../layouts/DocsLayout.astro'
-import ShareButtons from '../../components/ShareButtons.astro'
+import DocsLayout from '../../../layouts/DocsLayout.astro'
+import ShareButtons from '../../../components/ShareButtons.astro'
 import { getCollection } from 'astro:content'
-import { SITE } from '../../config.mjs'
-import { getLangFromUrl, t } from '../../i18n/index.ts'
+import { SITE } from '../../../config.mjs'
+import { t } from '../../../i18n/index.ts'
 
-const lang = getLangFromUrl(Astro.url)
-const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.default)
+const lang = 'en'
+const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.default)
 
 export async function getStaticPaths() {
 	const allArticles = await getCollection('articles')
-	return allArticles.map((article) => ({
-		params: { slug: article.data.slug },
-		props: { article },
-	}))
+	return allArticles
+		.filter((a) => a.data.lang === 'en')
+		.map((article) => ({
+			params: { slug: article.data.slug },
+			props: { article },
+		}))
 }
 
 const { article } = Astro.props
 
 if (!article || article.data.status !== 'Published') {
-	return Astro.redirect('/404')
+	return Astro.redirect('/en/404')
 }
 
 const categorySlug = article.data.category.toLowerCase().replace(/\s+/g, '-')
-const langPrefix = article.data.lang === 'en' ? '/en' : ''
-const articleUrl = `${SITE.origin}${langPrefix}/articles/${article.data.slug}`
+const articleUrl = `${SITE.origin}/en/articles/${article.data.slug}`
 const ogImageUrl = `/og/${article.data.slug}.png`
 
 const publishedDate = new Date(article.data.date)
@@ -54,7 +55,7 @@ const jsonLdArticle = {
 		name: SITE.name,
 		url: SITE.origin,
 	},
-	inLanguage: article.data.lang,
+	inLanguage: 'en',
 	keywords: article.data.tags.join(', '),
 	mainEntityOfPage: {
 		'@type': 'WebPage',
@@ -78,7 +79,7 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 		author: article.data.author,
 		tags: article.data.tags,
 	}}
-	lang={article.data.lang}
+	lang="en"
 >
 	<script type="application/ld+json" set:html={JSON.stringify(jsonLdArticle)} slot="head" />
 
@@ -88,18 +89,16 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 				aria-label="Breadcrumb"
 				class="flex items-center gap-2 text-xs text-muted-foreground dark:text-muted-dark-foreground mb-6"
 			>
-				<a
-					href={langPrefix ? `${langPrefix}/` : '/'}
-					class="hover:text-foreground dark:hover:text-foreground-dark transition-colors">{homeLabel}</a
+				<a href="/en/" class="hover:text-foreground dark:hover:text-foreground-dark transition-colors"
+					>{homeLabel}</a
+				>
+				<span>/</span>
+				<a href="/en/articles" class="hover:text-foreground dark:hover:text-foreground-dark transition-colors"
+					>{articlesLabel}</a
 				>
 				<span>/</span>
 				<a
-					href={`${langPrefix}/articles`}
-					class="hover:text-foreground dark:hover:text-foreground-dark transition-colors">{articlesLabel}</a
-				>
-				<span>/</span>
-				<a
-					href={`${langPrefix}/categories/${categorySlug}`}
+					href={`/en/categories/${categorySlug}`}
 					class="hover:text-foreground dark:hover:text-foreground-dark transition-colors"
 				>
 					{article.data.category}
@@ -112,7 +111,7 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 
 			<header class="mb-8">
 				<div class="flex items-center gap-2 text-sm text-primary dark:text-primary-dark font-medium mb-2">
-					<a href={`${langPrefix}/categories/${categorySlug}`} class="hover:underline">
+					<a href={`/en/categories/${categorySlug}`} class="hover:underline">
 						{article.data.category}
 					</a>
 				</div>
@@ -130,7 +129,7 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 					{
 						article.data.tags.map((tag) => (
 							<a
-								href={`${langPrefix}/tags/${tag}`}
+								href={`/en/tags/${tag}`}
 								class="px-2 py-1 bg-muted dark:bg-muted-dark text-muted-foreground dark:text-muted-dark-foreground text-xs rounded-sm hover:text-foreground dark:hover:text-foreground-dark transition-colors font-mono"
 							>
 								#{tag}

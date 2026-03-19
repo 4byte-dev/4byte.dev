@@ -1,21 +1,21 @@
 ---
-import DocsLayout from '../layouts/DocsLayout.astro'
+import DocsLayout from '../../layouts/DocsLayout.astro'
 import { getCollection } from 'astro:content'
-import { getLangFromUrl, t } from '../i18n/index.ts'
+import { t } from '../../i18n/index.ts'
 
-const lang = getLangFromUrl(Astro.url)
+const lang = 'en'
 const allArticles = await getCollection('articles')
 const published = allArticles.filter((a) => a.data.lang === lang && a.data.status === 'Published')
 const featured = published.slice(0, 3)
 const recent = published.slice(0, 6)
 
-const labels = await import(`../data/${lang}/labels.json`).then((m) => m.default)
+const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.default)
 
 const title = t(labels, 'home.title')
 const description = t(labels, 'home.description')
 ---
 
-<DocsLayout title={title} description={description} image="/og/index.png" lang={lang}>
+<DocsLayout title={title} description={description} image="/og/en/index.png" lang={lang}>
 	<div class="px-8 py-12 max-w-5xl mx-auto">
 		<div class="mb-12">
 			<h1 class="text-4xl font-extrabold tracking-tight text-foreground dark:text-foreground-dark mb-3">
@@ -34,7 +34,7 @@ const description = t(labels, 'home.description')
 					{t(labels, 'home.featuredArticles')}
 				</h2>
 				<a
-					href={lang === 'en' ? '/en/articles' : '/articles'}
+					href="/en/articles"
 					class="text-sm text-primary dark:text-primary-dark font-medium hover:underline flex items-center gap-1"
 				>
 					{t(labels, 'home.viewAll')}
@@ -50,7 +50,7 @@ const description = t(labels, 'home.description')
 					) : (
 						featured.map((article) => (
 							<a
-								href={`${lang === 'en' ? '/en' : ''}/articles/${article.data.slug}`}
+								href={`/en/articles/${article.data.slug}`}
 								class="block p-5 bg-background dark:bg-background-dark rounded-lg shadow-flat-sm hover:shadow-flat-md transition-shadow h-full"
 							>
 								<div class="text-xs font-medium text-primary dark:text-primary-dark mb-2">
@@ -89,7 +89,7 @@ const description = t(labels, 'home.description')
 				) : (
 					recent.map((article) => (
 						<a
-							href={`${lang === 'en' ? '/en' : ''}/articles/${article.data.slug}`}
+							href={`/en/articles/${article.data.slug}`}
 							class="flex items-center justify-between px-5 py-4 hover:bg-muted/30 dark:hover:bg-muted-dark/30 transition-colors border-b border-border/50 dark:border-border-dark/50 last:border-0"
 						>
 							<div class="min-w-0 flex-1">

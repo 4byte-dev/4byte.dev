@@ -13,7 +13,27 @@ const fontBold = await fetch(
 
 const DEFAULT_COLORS = { bg: '#1a1a2e', text: '#e2e8f0' }
 
-async function makeSvg(title, color, isArticle) {
+const LANG_TEXTS = {
+	tr: {
+		explore: 'Makaleleri Keşfet',
+		category: 'KATEGORİ',
+		article: 'MAKALE',
+		tagline: 'Sinir ağları, transformerlar, pekiştirmeli öğrenme ve daha fazlası',
+		description: 'Makine öğrenimi kavramlarının net açıklamaları',
+		suffix: '4byte.dev — ML Kavramları Açıklandı',
+	},
+	en: {
+		explore: 'Explore Articles',
+		category: 'CATEGORY',
+		article: 'ARTICLE',
+		tagline: 'Neural networks, transformers, reinforcement learning & more',
+		description: 'Clear explanations of machine learning concepts',
+		suffix: '4byte.dev — ML Concepts Explained',
+	},
+}
+
+async function makeSvg(title, color, isArticle, lang = 'en') {
+	const texts = LANG_TEXTS[lang] || LANG_TEXTS.en
 	const bg = color || DEFAULT_COLORS.bg
 	const svg = await satori(
 		{
@@ -83,7 +103,7 @@ async function makeSvg(title, color, isArticle) {
 											fontWeight: '500',
 											fontFamily: 'Inter',
 										},
-										children: isArticle ? 'Machine Learning & AI' : 'Explore Articles',
+										children: isArticle ? 'Machine Learning & AI' : texts.explore,
 									},
 								},
 							],
@@ -105,7 +125,7 @@ async function makeSvg(title, color, isArticle) {
 											letterSpacing: '2px',
 											fontFamily: 'Inter',
 										},
-										children: isArticle ? 'ARTICLE' : 'LEARN MACHINE LEARNING',
+										children: isArticle ? texts.article : texts.category,
 									},
 								},
 								{
@@ -132,9 +152,7 @@ async function makeSvg(title, color, isArticle) {
 											fontFamily: 'Inter',
 											maxWidth: '800px',
 										},
-										children: isArticle
-											? 'Clear explanations of machine learning concepts'
-											: 'Neural networks, transformers, reinforcement learning & more',
+										children: isArticle ? texts.description : texts.tagline,
 									},
 								},
 							],
@@ -168,7 +186,7 @@ async function makeSvg(title, color, isArticle) {
 									type: 'span',
 									props: {
 										style: { fontSize: '18px', color: '#94a3b8', fontFamily: 'Inter' },
-										children: '4byte.dev — ML Concepts Explained',
+										children: texts.suffix,
 									},
 								},
 							],
@@ -189,32 +207,47 @@ async function makeSvg(title, color, isArticle) {
 	return svg
 }
 
-const outDir = path.join(process.cwd(), 'public', 'og')
+const repoRoot = path.join(process.cwd())
+const outDir = path.join(repoRoot, 'public', 'og')
 fs.mkdirSync(outDir, { recursive: true })
 
-const dataDir = path.join(process.cwd(), 'src', 'data')
-const categories = JSON.parse(fs.readFileSync(path.join(dataDir, 'categories.json'), 'utf8'))
-const articles = JSON.parse(fs.readFileSync(path.join(dataDir, 'articles.json'), 'utf8'))
+const SUPPORTED_LANGS = ['tr', 'en']
 
-const categoryColorMap = {}
-for (const cat of categories) {
-	categoryColorMap[cat.name] = cat.color || null
-}
+for (const lang of SUPPORTED_LANGS) {
+	const langOutDir = path.join(outDir, lang)
+	fs.mkdirSync(langOutDir, { recursive: true })
 
-const svgIndex = await makeSvg('4byte.dev', null, false)
-const resvgIndex = new Resvg(svgIndex, { fitTo: { mode: 'width', value: 1200 } })
-fs.writeFileSync(path.join(outDir, 'index.png'), Buffer.from(resvgIndex.render().asPng()))
-console.log('Generated public/og/index.png')
+	const dataDir = path.join(repoRoot, 'src', 'data', lang)
+	let categories = []
+	let articles = []
 
-if (articles.length === 0) {
-	console.log('No articles found – skipping article OG images.')
-} else {
-	for (const { slug, title, category } of articles) {
-		const color = categoryColorMap[category] || null
-		const svgArticle = await makeSvg(title, color, true)
-		const resvgArticle = new Resvg(svgArticle, { fitTo: { mode: 'width', value: 1200 } })
-		fs.writeFileSync(path.join(outDir, `${slug}.png`), Buffer.from(resvgArticle.render().asPng()))
-		console.log(`Generated public/og/${slug}.png`)
+	try {
+		categories = JSON.parse(fs.readFileSync(path.join(dataDir, 'categories.json'), 'utf8'))
+		articles = JSON.parse(fs.readFileSync(path.join(dataDir, 'articles.json'), 'utf8'))
+	} catch {
+		console.log(`No data found for language: ${lang}`)
+	}
+
+	const categoryColorMap = {}
+	for (const cat of categories) {
+		categoryColorMap[cat.name] = cat.color || null
+	}
+
+	const svgIndex = await makeSvg('4byte.dev', null, false, lang)
+	const resvgIndex = new Resvg(svgIndex, { fitTo: { mode: 'width', value: 1200 } })
+	fs.writeFileSync(path.join(langOutDir, 'index.png'), Buffer.from(resvgIndex.render().asPng()))
+	console.log(`Generated public/og/${lang}/index.png`)
+
+	if (articles.length === 0) {
+		console.log(`No articles for ${lang} – skipping article OG images.`)
+	} else {
+		for (const { slug, title, category } of articles) {
+			const color = categoryColorMap[category] || null
+			const svgArticle = await makeSvg(title, color, true, lang)
+			const resvgArticle = new Resvg(svgArticle, { fitTo: { mode: 'width', value: 1200 } })
+			fs.writeFileSync(path.join(langOutDir, `${slug}.png`), Buffer.from(resvgArticle.render().asPng()))
+			console.log(`Generated public/og/${lang}/${slug}.png`)
+		}
 	}
 }
 

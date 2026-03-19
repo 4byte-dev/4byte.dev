@@ -21,3 +21,23 @@ const CONFIG = {
 }
 
 export const SITE = CONFIG
+
+export const LANGUAGES = {
+	tr: {
+		code: 'tr',
+		name: 'Türkçe',
+		dir: 'ltr',
+		prefix: '',
+		ogLocale: 'tr_TR',
+	},
+	en: {
+		code: 'en',
+		name: 'English',
+		dir: 'ltr',
+		prefix: '/en',
+		ogLocale: 'en_US',
+	},
+}
+
+export const DEFAULT_LANG = 'tr'
+export const SUPPORTED_LANGS = Object.keys(LANGUAGES)

@@ -3,6 +3,8 @@ import '@unocss/reset/tailwind.css'
 import '../styles/global.css'
 import { ClientRouter } from 'astro:transitions'
 import { SITE } from '../config.mjs'
+import { LANGUAGES, DEFAULT_LANG } from '../helper.mjs'
+import { getHreflangLinks } from '../i18n/index.ts'
 
 interface Props {
 	title?: string
@@ -16,6 +18,7 @@ interface Props {
 		tags?: string[]
 	}
 	noindex?: boolean
+	lang?: string
 }
 
 const {
@@ -25,12 +28,18 @@ const {
 	type = 'website',
 	article,
 	noindex = false,
+	lang = DEFAULT_LANG,
 } = Astro.props
 
+const currentLang = lang
+const currentPath = Astro.url.pathname
 const canonicalURL = new URL(Astro.url.pathname, SITE.origin)
 const resolvedImage = new URL(image, SITE.origin)
 const siteName = SITE.name
 const fullTitle = title ? `${title} | ${siteName}` : siteName
+const langConfig = LANGUAGES[currentLang as keyof typeof LANGUAGES]
+
+const hreflangLinks = getHreflangLinks(currentPath, currentLang)
 
 const jsonLdWebSite = {
 	'@context': 'https://schema.org',
@@ -47,7 +56,7 @@ const jsonLdWebSite = {
 		'@type': 'SearchAction',
 		target: {
 			'@type': 'EntryPoint',
-			urlTemplate: `${SITE.origin}/articles?q={search_term_string}`,
+			urlTemplate: `${SITE.origin}${currentLang === 'en' ? '/en' : ''}/articles?q={search_term_string}`,
 		},
 		'query-input': 'required name=search_term_string',
 	},
@@ -55,7 +64,7 @@ const jsonLdWebSite = {
 ---
 
 <!doctype html>
-<html lang="en" itemscope itemtype="https://schema.org/WebPage">
+<html lang={langConfig.code} itemscope itemtype="https://schema.org/WebPage">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -64,6 +73,9 @@ const jsonLdWebSite = {
 		<title>{fullTitle}</title>
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonicalURL} />
+
+		{hreflangLinks.map((link) => <link rel="alternate" hreflang={link.lang} href={link.href} />)}
+		<link rel="alternate" hreflang="x-default" href={SITE.origin} />
 
 		{
 			SITE.googleSiteVerificationId && (
@@ -89,7 +101,7 @@ const jsonLdWebSite = {
 		<meta property="og:image" content={resolvedImage} />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
-		<meta property="og:locale" content="en_US" />
+		<meta property="og:locale" content={langConfig.ogLocale} />
 
 		{
 			type === 'article' && article && (

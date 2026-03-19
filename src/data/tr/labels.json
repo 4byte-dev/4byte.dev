@@ -1,0 +1,68 @@
+{
+	"nav": {
+		"home": "Ana Sayfa",
+		"articles": "Makaleler",
+		"categories": "Kategoriler",
+		"tags": "Etiketler"
+	},
+	"home": {
+		"title": "Makine Öğrenimi Dokümantasyonu",
+		"description": "Temel ML kavramları, mimarileri ve uygulama kalıpları için teknik bir referans. Uygulamacılar için hazırlandı.",
+		"featuredArticles": "Öne Çıkan Makaleler",
+		"allArticles": "Tüm Makaleler",
+		"viewAll": "Tümünü gör",
+		"noArticles": "Henüz makale yok."
+	},
+	"articles": {
+		"title": "Makaleler",
+		"description": "Sinir ağlarından pekiştirmeli öğrenmeye kadar tüm makine öğrenimi ve yapay zeka makaleleri.",
+		"count": "{count} makale mevcut.",
+		"noArticles": "Henüz yayınlanmış makale yok.",
+		"views": "görüntülenme"
+	},
+	"categories": {
+		"title": "Kategoriler",
+		"description": "Makaleleri konu alanına göre inceleyin.",
+		"articlesCount": "makale",
+		"browse": "İncele",
+		"allCategories": "Tüm kategoriler",
+		"noArticles": "Bu kategoride yayınlanmış makale yok."
+	},
+	"tags": {
+		"title": "Etiketler",
+		"description": "Makaleleri etiketlere göre inceleyin.",
+		"allTags": "Tüm etiketler",
+		"articlesTagged": "adet makale etiketlendi",
+		"noArticles": "Bu etiketle makale yok."
+	},
+	"article": {
+		"home": "Ana Sayfa",
+		"by": "Yazar",
+		"onThisPage": "Sayfada",
+		"share": "Paylaş"
+	},
+	"share": {
+		"label": "Paylaş"
+	},
+	"theme": {
+		"darkMode": "Koyu Mod",
+		"lightMode": "Açık Mod"
+	},
+	"search": {
+		"placeholder": "Dokümantasyonda ara..."
+	},
+	"footer": {
+		"copyright": "Bir makine öğrenimi dokümantasyon projesi."
+	},
+	"404": {
+		"title": "Sayfa Bulunamadı",
+		"description": "Aradığınız sayfa mevcut değil veya taşınmış olabilir.",
+		"backHome": "← Ana sayfaya dön",
+		"browseArticles": "Makalelere göz at",
+		"contact": "Bu bir hata olduğunu düşünüyorsanız, site yöneticisiyle iletişime geçin."
+	},
+	"lang": {
+		"tr": "TR",
+		"en": "EN"
+	}
+}

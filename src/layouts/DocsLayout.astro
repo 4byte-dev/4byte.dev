@@ -2,6 +2,8 @@
 import BaseLayout from './BaseLayout.astro'
 import Sidebar from '../components/Sidebar.astro'
 import TopBar from '../components/TopBar.astro'
+import { DEFAULT_LANG, LANGUAGES } from '../helper.mjs'
+import { getLangFromUrl, loadLabels, t } from '../i18n/index.ts'
 
 interface Props {
 	title?: string
@@ -15,25 +17,38 @@ interface Props {
 		tags?: string[]
 	}
 	noindex?: boolean
+	lang?: string
 }
+
+const lang = getLangFromUrl(Astro.url)
+const labels = await loadLabels(lang)
 
 const { title, description, image, type, article, noindex } = Astro.props
 const year = new Date().getFullYear()
+const footerLabel = t(labels, 'footer.copyright')
 ---
 
-<BaseLayout title={title} description={description} image={image} type={type} article={article} noindex={noindex}>
+<BaseLayout
+	title={title}
+	description={description}
+	image={image}
+	type={type}
+	article={article}
+	noindex={noindex}
+	lang={lang}
+>
 	<slot name="head" slot="head" />
 
 	<div class="flex min-h-screen bg-background dark:bg-background-dark w-full">
-		<Sidebar />
+		<Sidebar lang={lang} currentPath={Astro.url.pathname} labels={labels} />
 		<div class="flex-1 flex flex-col min-w-0">
-			<TopBar />
+			<TopBar lang={lang} currentPath={Astro.url.pathname} labels={labels} />
 			<main class="flex-1">
 				<slot />
 			</main>
 			<footer class="border-t border-border/50 dark:border-border-dark/50 py-6 px-8">
 				<p class="text-xs text-muted-foreground dark:text-muted-dark-foreground text-center">
-					© {year} 4Byte.dev. A machine learning documentation project.
+					© {year} 4Byte.dev. {footerLabel}
 				</p>
 			</footer>
 		</div>

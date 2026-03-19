@@ -1,0 +1,99 @@
+---
+import { LANGUAGES } from '../helper.mjs'
+
+interface Props {
+	currentLang: string
+	currentPath: string
+	labels: Record<string, unknown>
+	direction?: 'up' | 'down'
+}
+
+const { currentLang, currentPath, labels, direction = 'down' } = Astro.props
+
+const langLabels = labels.lang as Record<string, string> | undefined
+
+function getOtherLangPath(lang: string, path: string): string {
+	if (lang === 'en') {
+		return path.replace(/^\/en/, '') || '/'
+	}
+	return '/en' + path
+}
+
+const otherLangPath = getOtherLangPath(currentLang, currentPath)
+
+const isUp = direction === 'up'
+const dropdownClass = isUp
+	? 'hidden absolute bottom-full left-0 mb-1 w-32'
+	: 'hidden absolute top-full left-0 mt-1 w-32'
+---
+
+<div class="lang-selector-wrapper relative" data-lang-wrapper data-lang-direction={direction}>
+	<button
+		data-lang-btn
+		class="flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground dark:text-muted-dark-foreground rounded-md hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark transition-colors"
+		aria-label="Change language"
+	>
+		<span class="i-lucide-globe w-4 h-4"></span>
+		<span data-lang-code>{langLabels?.[currentLang] || currentLang.toUpperCase()}</span>
+		{!isUp && <span data-lang-chevron class="i-lucide-chevron-down w-3 h-3 transition-transform"></span>}
+	</button>
+
+	<div
+		data-lang-dropdown
+		class={`${dropdownClass} bg-background dark:bg-background-dark border border-border dark:border-border-dark rounded-md shadow-flat-sm overflow-hidden z-50`}
+	>
+		{
+			Object.entries(LANGUAGES).map(([code, config]) => (
+				<a
+					href={code === 'en' ? getOtherLangPath(currentLang, currentPath) : otherLangPath}
+					class={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+						code === currentLang
+							? 'bg-primary/10 dark:bg-primary-dark/20 text-primary dark:text-primary-dark font-medium'
+							: 'text-muted-foreground dark:text-muted-dark-foreground hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark'
+					}`}
+				>
+					<span class="w-5 text-center font-mono text-xs">{langLabels?.[code] || code.toUpperCase()}</span>
+					<span class="text-xs">{config.name}</span>
+				</a>
+			))
+		}
+	</div>
+</div>
+
+<script>
+	document.querySelectorAll('[data-lang-wrapper]').forEach((wrapper) => {
+		const btn = wrapper.querySelector('[data-lang-btn]')
+		const dropdown = wrapper.querySelector('[data-lang-dropdown]')
+		const chevron = wrapper.querySelector('[data-lang-chevron]')
+		const isUp = wrapper.getAttribute('data-lang-direction') === 'up'
+
+		btn?.addEventListener('click', (e) => {
+			e.stopPropagation()
+			const isOpen = !dropdown?.classList.contains('hidden')
+			dropdown?.classList.toggle('hidden')
+			if (chevron && !isUp) {
+				chevron.classList.toggle('rotate-180', isOpen)
+			}
+		})
+	})
+
+	document.addEventListener('click', () => {
+		document.querySelectorAll('[data-lang-dropdown]').forEach((dropdown) => {
+			dropdown.classList.add('hidden')
+		})
+		document.querySelectorAll('[data-lang-chevron]').forEach((chevron) => {
+			chevron.classList.remove('rotate-180')
+		})
+	})
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape') {
+			document.querySelectorAll('[data-lang-dropdown]').forEach((dropdown) => {
+				dropdown.classList.add('hidden')
+			})
+			document.querySelectorAll('[data-lang-chevron]').forEach((chevron) => {
+				chevron.classList.remove('rotate-180')
+			})
+		}
+	})
+</script>

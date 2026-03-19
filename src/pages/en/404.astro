@@ -1,9 +1,9 @@
 ---
-import DocsLayout from '../layouts/DocsLayout.astro'
-import { getLangFromUrl, t } from '../i18n/index.ts'
+import DocsLayout from '../../layouts/DocsLayout.astro'
+import { t } from '../../i18n/index.ts'
 
-const lang = getLangFromUrl(Astro.url)
-const labels = await import(`../data/${lang}/labels.json`).then((m) => m.default)
+const lang = 'en'
+const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.default)
 ---
 
 <DocsLayout title={t(labels, '404.title')} description={t(labels, '404.description')} noindex={true} lang={lang}>
@@ -17,13 +17,13 @@ const labels = await import(`../data/${lang}/labels.json`).then((m) => m.default
 		</p>
 		<div class="flex items-center justify-center gap-4 mb-8">
 			<a
-				href={lang === 'en' ? '/en/' : '/'}
+				href="/en/"
 				class="px-4 py-2 bg-primary dark:bg-primary-dark text-background dark:text-background-dark text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
 			>
 				{t(labels, '404.backHome')}
 			</a>
 			<a
-				href={lang === 'en' ? '/en/articles' : '/articles'}
+				href="/en/articles"
 				class="px-4 py-2 border border-border dark:border-border-dark text-foreground dark:text-foreground-dark text-sm font-medium rounded-lg hover:bg-muted dark:hover:bg-muted-dark transition-colors"
 			>
 				{t(labels, '404.browseArticles')}

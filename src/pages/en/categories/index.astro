@@ -1,18 +1,16 @@
 ---
-import DocsLayout from '../../layouts/DocsLayout.astro'
-import categoriesTr from '../../data/tr/categories.json'
-import categoriesEn from '../../data/en/categories.json'
-import { getLangFromUrl, t } from '../../i18n/index.ts'
+import DocsLayout from '../../../layouts/DocsLayout.astro'
+import categoriesEn from '../../../data/en/categories.json'
+import { t } from '../../../i18n/index.ts'
 
-const lang = getLangFromUrl(Astro.url)
-const categories = lang === 'en' ? categoriesEn : categoriesTr
-const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.default)
+const lang = 'en'
+const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.default)
 ---
 
 <DocsLayout
 	title={t(labels, 'categories.title')}
 	description={t(labels, 'categories.description')}
-	image="/og/index.png"
+	image="/og/en/index.png"
 	lang={lang}
 >
 	<div class="px-8 py-12 max-w-5xl mx-auto">
@@ -22,9 +20,9 @@ const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.defa
 		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-8">{t(labels, 'categories.description')}</p>
 		<div class="grid gap-4 md:grid-cols-2">
 			{
-				categories.map((cat) => (
+				categoriesEn.map((cat) => (
 					<a
-						href={`${lang === 'en' ? '/en' : ''}/categories/${cat.slug}`}
+						href={`/en/categories/${cat.slug}`}
 						class="block p-5 bg-background dark:bg-background-dark rounded-lg shadow-flat-sm hover:shadow-flat-md transition-shadow"
 					>
 						<div class="flex items-center justify-between mb-2">
