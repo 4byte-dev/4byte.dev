@@ -1,52 +1,42 @@
 ---
-import DocsLayout from '../../layouts/DocsLayout.astro'
+import DocsLayout from '../../../layouts/DocsLayout.astro'
 import { getCollection } from 'astro:content'
-import tagsTr from '../../data/tr/tags.json'
-import tagsEn from '../../data/en/tags.json'
-import { getLangFromUrl, t } from '../../i18n/index.ts'
+import tagsEn from '../../../data/en/tags.json'
+import { t } from '../../../i18n/index.ts'
 
-const lang = getLangFromUrl(Astro.url)
-const tags = lang === 'en' ? tagsEn : tagsTr
-const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.default)
+const lang = 'en'
+const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.default)
 
 export async function getStaticPaths() {
 	const allArticles = await getCollection('articles')
-	const paths = []
-
-	for (const tagLang of ['tr', 'en']) {
-		const langTags = tagLang === 'en' ? tagsEn : tagsTr
-		for (const tag of langTags) {
-			const tagArticles = allArticles.filter(
-				(a) => a.data.lang === tagLang && a.data.tags.includes(tag.slug) && a.data.status === 'Published',
-			)
-			paths.push({
-				params: { slug: tag.slug },
-				props: { tag, lang: tagLang },
-			})
+	return tagsEn.map((tag) => {
+		const tagArticles = allArticles.filter(
+			(a) => a.data.lang === 'en' && a.data.tags.includes(tag.slug) && a.data.status === 'Published',
+		)
+		return {
+			params: { slug: tag.slug },
+			props: { tag },
 		}
-	}
-
-	return paths
+	})
 }
 
-const { tag, lang: tagLang } = Astro.props
-const langPrefix = tagLang === 'en' ? '/en' : ''
+const { tag } = Astro.props
 
 const allArticles = await getCollection('articles')
 const tagArticles = allArticles.filter(
-	(a) => a.data.lang === tagLang && a.data.tags.includes(tag.slug) && a.data.status === 'Published',
+	(a) => a.data.lang === 'en' && a.data.tags.includes(tag.slug) && a.data.status === 'Published',
 )
 ---
 
 <DocsLayout
 	title={`#${tag.name}`}
 	description={`Articles tagged with ${tag.name} on 4byte.dev`}
-	image="/og/index.png"
-	lang={tagLang}
+	image="/og/en/index.png"
+	lang="en"
 >
 	<div class="px-8 py-12 max-w-5xl mx-auto">
 		<a
-			href={`${langPrefix}/tags`}
+			href="/en/tags"
 			class="text-sm text-primary dark:text-primary-dark hover:underline flex items-center gap-1 mb-6"
 		>
 			<span class="i-lucide-arrow-left w-3 h-3"></span>
@@ -70,7 +60,7 @@ const tagArticles = allArticles.filter(
 				) : (
 					tagArticles.map((article) => (
 						<a
-							href={`${langPrefix}/articles/${article.data.slug}`}
+							href={`/en/articles/${article.data.slug}`}
 							class="flex items-center justify-between px-5 py-4 hover:bg-muted/30 dark:hover:bg-muted-dark/30 transition-colors border-b border-border/50 dark:border-border-dark/50 last:border-0"
 						>
 							<div class="min-w-0 flex-1">

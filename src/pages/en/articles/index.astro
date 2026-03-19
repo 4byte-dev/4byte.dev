@@ -1,19 +1,19 @@
 ---
-import DocsLayout from '../../layouts/DocsLayout.astro'
+import DocsLayout from '../../../layouts/DocsLayout.astro'
 import { getCollection } from 'astro:content'
-import { getLangFromUrl, t } from '../../i18n/index.ts'
+import { t } from '../../../i18n/index.ts'
 
-const lang = getLangFromUrl(Astro.url)
+const lang = 'en'
 const allArticles = await getCollection('articles')
 const published = allArticles.filter((a) => a.data.lang === lang && a.data.status === 'Published')
 
-const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.default)
+const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.default)
 ---
 
 <DocsLayout
 	title={t(labels, 'articles.title')}
 	description={t(labels, 'articles.description')}
-	image="/og/index.png"
+	image="/og/en/index.png"
 	lang={lang}
 >
 	<div class="px-8 py-12 max-w-5xl mx-auto">
@@ -33,7 +33,7 @@ const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.defa
 				) : (
 					published.map((article) => (
 						<a
-							href={`${lang === 'en' ? '/en' : ''}/articles/${article.data.slug}`}
+							href={`/en/articles/${article.data.slug}`}
 							class="flex items-center justify-between px-5 py-4 hover:bg-muted/30 dark:hover:bg-muted-dark/30 transition-colors border-b border-border/50 dark:border-border-dark/50 last:border-0"
 						>
 							<div class="min-w-0 flex-1">

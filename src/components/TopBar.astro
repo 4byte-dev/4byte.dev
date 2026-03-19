@@ -1,5 +1,18 @@
 ---
-import rawArticles from '../data/articles.json'
+import rawArticlesTr from '../data/tr/articles.json'
+import rawArticlesEn from '../data/en/articles.json'
+import LanguageSelector from './LanguageSelector.astro'
+import { t } from '../i18n/index.ts'
+
+interface Props {
+	lang: string
+	currentPath: string
+	labels: Record<string, unknown>
+}
+
+const { lang, currentPath, labels } = Astro.props
+
+const rawArticles = lang === 'en' ? rawArticlesEn : rawArticlesTr
 const mappedArticles = rawArticles.map((a) => ({
 	id: a.slug,
 	title: a.title,
@@ -17,11 +30,11 @@ const mappedArticles = rawArticles.map((a) => ({
 		>
 			<span class="i-lucide-menu w-5 h-5"></span>
 		</button>
-		<a href="/" class="flex items-center gap-2">
+		<a href={lang === 'en' ? '/en/' : '/'} class="flex items-center gap-2">
 			<div
 				class="w-6 h-6 bg-primary dark:bg-primary-dark rounded flex items-center justify-center text-primary-foreground dark:text-primary-dark-foreground font-bold text-[10px]"
 			>
-				L
+				4
 			</div>
 			<span class="font-bold text-sm text-foreground dark:text-foreground-dark">4Byte.dev</span>
 		</a>
@@ -34,7 +47,7 @@ const mappedArticles = rawArticles.map((a) => ({
 		<input
 			type="text"
 			id="search-input"
-			placeholder="Search documentation..."
+			placeholder={t(labels, 'search.placeholder')}
 			class="w-full pl-9 pr-4 py-2 text-sm rounded-md ring-1 ring-border dark:ring-border-dark bg-muted/30 dark:bg-muted-dark/30 focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark outline-none transition-all text-foreground dark:text-foreground-dark placeholder:text-muted-foreground dark:placeholder:text-muted-dark-foreground"
 		/>
 		<div
@@ -44,7 +57,10 @@ const mappedArticles = rawArticles.map((a) => ({
 		</div>
 	</div>
 
-	<div class="flex items-center gap-3">
+	<div class="flex items-center gap-2 lg:gap-3">
+		<div class="hidden lg:block">
+			<LanguageSelector currentLang={lang} currentPath={currentPath} labels={labels} />
+		</div>
 		<button
 			id="mobile-theme-toggle"
 			class="text-muted-foreground dark:text-muted-dark-foreground hover:text-foreground dark:hover:text-foreground-dark lg:hidden"
@@ -52,25 +68,40 @@ const mappedArticles = rawArticles.map((a) => ({
 		>
 			<span class="mobile-theme-icon i-lucide-moon w-4 h-4"></span>
 		</button>
+		<button
+			id="desktop-theme-toggle"
+			class="hidden lg:flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground dark:text-muted-dark-foreground rounded-md hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark transition-colors"
+			title="Toggle theme"
+		>
+			<span class="desktop-theme-icon i-lucide-moon w-4 h-4"></span>
+		</button>
 	</div>
 </header>
 
 <script define:vars={{ mappedArticles }}>
 	const mobileToggle = document.getElementById('mobile-theme-toggle')
+	const desktopToggle = document.getElementById('desktop-theme-toggle')
 	const mobileIcon = mobileToggle?.querySelector('.mobile-theme-icon')
+	const desktopIcon = desktopToggle?.querySelector('.desktop-theme-icon')
 
 	function updateMobileTheme() {
 		const isDark = document.documentElement.classList.contains('dark')
 		if (mobileIcon) {
 			mobileIcon.className = `mobile-theme-icon w-4 h-4 ${isDark ? 'i-lucide-sun' : 'i-lucide-moon'}`
 		}
+		if (desktopIcon) {
+			desktopIcon.className = `desktop-theme-icon w-4 h-4 ${isDark ? 'i-lucide-sun' : 'i-lucide-moon'}`
+		}
 	}
 
-	mobileToggle?.addEventListener('click', () => {
+	function toggleTheme() {
 		document.documentElement.classList.toggle('dark')
 		localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')
 		updateMobileTheme()
-	})
+	}
+
+	mobileToggle?.addEventListener('click', toggleTheme)
+	desktopToggle?.addEventListener('click', toggleTheme)
 
 	const searchInput = document.getElementById('search-input')
 	const searchResults = document.getElementById('search-results')

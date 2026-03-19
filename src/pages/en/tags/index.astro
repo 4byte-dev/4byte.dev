@@ -1,18 +1,16 @@
 ---
-import DocsLayout from '../../layouts/DocsLayout.astro'
-import tagsTr from '../../data/tr/tags.json'
-import tagsEn from '../../data/en/tags.json'
-import { getLangFromUrl, t } from '../../i18n/index.ts'
+import DocsLayout from '../../../layouts/DocsLayout.astro'
+import tagsEn from '../../../data/en/tags.json'
+import { t } from '../../../i18n/index.ts'
 
-const lang = getLangFromUrl(Astro.url)
-const tags = lang === 'en' ? tagsEn : tagsTr
-const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.default)
+const lang = 'en'
+const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.default)
 ---
 
 <DocsLayout
 	title={t(labels, 'tags.title')}
 	description={t(labels, 'tags.description')}
-	image="/og/index.png"
+	image="/og/en/index.png"
 	lang={lang}
 >
 	<div class="px-8 py-12 max-w-5xl mx-auto">
@@ -22,9 +20,9 @@ const labels = await import(`../../data/${lang}/labels.json`).then((m) => m.defa
 		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-8">{t(labels, 'tags.description')}</p>
 		<div class="flex flex-wrap gap-3">
 			{
-				tags.map((tag) => (
+				tagsEn.map((tag) => (
 					<a
-						href={`${lang === 'en' ? '/en' : ''}/tags/${tag.slug}`}
+						href={`/en/tags/${tag.slug}`}
 						class="inline-flex items-center gap-2 px-4 py-2.5 bg-background dark:bg-background-dark rounded-md shadow-flat-sm hover:shadow-flat-md transition-shadow font-mono text-sm"
 					>
 						<span class="text-primary dark:text-primary-dark">#</span>

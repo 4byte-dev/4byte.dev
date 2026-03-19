@@ -1,10 +1,13 @@
 ---
+import { t } from '../i18n/index.ts'
+
 interface Props {
 	title: string
 	url: string
+	labels?: Record<string, unknown>
 }
 
-const { title, url } = Astro.props
+const { title, url, labels = {} } = Astro.props
 
 const encodedTitle = encodeURIComponent(title)
 const encodedUrl = encodeURIComponent(url)
@@ -14,7 +17,7 @@ const encodedUrl = encodeURIComponent(url)
 	<span
 		class="text-xs font-semibold uppercase tracking-widest text-muted-foreground dark:text-muted-dark-foreground mr-2"
 	>
-		Share
+		{t(labels, 'share.label')}
 	</span>
 
 	<a

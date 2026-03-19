@@ -1,24 +1,39 @@
 ---
 import { Image } from 'astro:assets'
-import categories from '../data/categories.json'
-import tags from '../data/tags.json'
+import categoriesTr from '../data/tr/categories.json'
+import tagsTr from '../data/tr/tags.json'
+import categoriesEn from '../data/en/categories.json'
+import tagsEn from '../data/en/tags.json'
+import LanguageSelector from './LanguageSelector.astro'
+import { t } from '../i18n/index.ts'
+
+interface Props {
+	lang: string
+	currentPath: string
+	labels: Record<string, unknown>
+}
+
+const { lang, currentPath, labels } = Astro.props
+
+const categories = lang === 'en' ? categoriesEn : categoriesTr
+const tags = lang === 'en' ? tagsEn : tagsTr
+
+const navLabels = labels.nav as Record<string, string> | undefined
+const themeLabels = labels.theme as Record<string, string> | undefined
 
 const navItems = [
-	{ title: 'Home', url: '/' },
-	{ title: 'Articles', url: '/articles' },
-	{ title: 'Categories', url: '/categories' },
-	{ title: 'Tags', url: '/tags' },
+	{ title: navLabels?.home || 'Home', url: lang === 'en' ? '/en/' : '/' },
+	{ title: navLabels?.articles || 'Articles', url: lang === 'en' ? '/en/articles' : '/articles' },
+	{ title: navLabels?.categories || 'Categories', url: lang === 'en' ? '/en/categories' : '/categories' },
+	{ title: navLabels?.tags || 'Tags', url: lang === 'en' ? '/en/tags' : '/tags' },
 ]
 
-const currentPath = Astro.url.pathname
-
 function isActive(path: string): boolean {
-	if (path === '/') return currentPath === '/'
+	if (path === '/' || path === '/en/') return currentPath === path
 	return currentPath.startsWith(path)
 }
 
 const topCategories = [...categories].sort((a, b) => b.articleCount - a.articleCount).slice(0, 5)
-
 const topTags = [...tags].sort((a, b) => b.articleCount - a.articleCount).slice(0, 8)
 
 import logoDark from '../assets/logo-dark.png'
@@ -29,7 +44,7 @@ import logoLight from '../assets/logo-light.png'
 	class="w-64 shrink-0 border-r border-border dark:border-border-dark bg-background dark:bg-background-dark hidden lg:flex flex-col h-screen sticky top-0"
 >
 	<div class="p-6 border-b border-border dark:border-border-dark">
-		<a href="/" class="flex items-center gap-2">
+		<a href={lang === 'en' ? '/en/' : '/'} class="flex items-center gap-2">
 			<Image src={logoLight} height={32} alt="4byte logo" class="block dark:hidden" />
 			<Image src={logoDark} height={32} alt="4byte logo" class="hidden dark:block" />
 		</a>
@@ -39,7 +54,7 @@ import logoLight from '../assets/logo-light.png'
 		<div
 			class="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground dark:text-muted-dark-foreground mb-3 ml-3"
 		>
-			Navigation
+			{t(labels, 'nav.home')}
 		</div>
 		{
 			navItems.map((item) => (
@@ -51,10 +66,10 @@ import logoLight from '../assets/logo-light.png'
 							: 'text-muted-foreground dark:text-muted-dark-foreground hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark'
 					}`}
 				>
-					{item.title === 'Home' && <span class="i-lucide-home w-4 h-4" />}
-					{item.title === 'Articles' && <span class="i-lucide-file-text w-4 h-4" />}
-					{item.title === 'Categories' && <span class="i-lucide-folder w-4 h-4" />}
-					{item.title === 'Tags' && <span class="i-lucide-tag w-4 h-4" />}
+					{item.title === (navLabels?.home || 'Home') && <span class="i-lucide-home w-4 h-4" />}
+					{item.title === (navLabels?.articles || 'Articles') && <span class="i-lucide-file-text w-4 h-4" />}
+					{item.title === (navLabels?.categories || 'Categories') && <span class="i-lucide-folder w-4 h-4" />}
+					{item.title === (navLabels?.tags || 'Tags') && <span class="i-lucide-tag w-4 h-4" />}
 					<span>{item.title}</span>
 				</a>
 			))
@@ -63,14 +78,14 @@ import logoLight from '../assets/logo-light.png'
 		<div
 			class="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground dark:text-muted-dark-foreground mt-6 mb-3 ml-3"
 		>
-			Categories
+			{t(labels, 'nav.categories') || 'Categories'}
 		</div>
 		{
 			topCategories.map((cat) => (
 				<a
-					href={`/categories/${cat.slug}`}
+					href={`${lang === 'en' ? '/en' : ''}/categories/${cat.slug}`}
 					class={`flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${
-						currentPath === `/categories/${cat.slug}`
+						currentPath === `${lang === 'en' ? '/en' : ''}/categories/${cat.slug}`
 							? 'bg-primary/10 dark:bg-primary-dark/20 text-primary dark:text-primary-dark font-medium'
 							: 'text-muted-foreground dark:text-muted-dark-foreground hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark'
 					}`}
@@ -84,16 +99,16 @@ import logoLight from '../assets/logo-light.png'
 		<div
 			class="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground dark:text-muted-dark-foreground mt-6 mb-3 ml-3"
 		>
-			Tags
+			{t(labels, 'nav.tags') || 'Tags'}
 		</div>
 
 		<div class="flex flex-wrap gap-2 px-3 pb-4 mt-3">
 			{
 				topTags.map((tag) => (
 					<a
-						href={`/tags/${tag.slug}`}
+						href={`${lang === 'en' ? '/en' : ''}/tags/${tag.slug}`}
 						class={`inline-flex items-center px-2 py-1 rounded-md text-xs transition-colors ${
-							currentPath === `/tags/${tag.slug}`
+							currentPath === `${lang === 'en' ? '/en' : ''}/tags/${tag.slug}`
 								? 'bg-primary text-primary-foreground dark:bg-primary-dark dark:text-primary-dark-foreground font-medium'
 								: 'bg-muted dark:bg-muted-dark text-muted-foreground dark:text-muted-dark-foreground hover:bg-primary/20 dark:hover:bg-primary-dark/20 hover:text-foreground dark:hover:text-foreground-dark'
 						}`}
@@ -105,13 +120,16 @@ import logoLight from '../assets/logo-light.png'
 		</div>
 	</nav>
 
-	<div class="p-4 border-t border-border dark:border-border-dark">
+	<div class="p-4 border-t border-border dark:border-border-dark space-y-1">
+		<LanguageSelector currentLang={lang} currentPath={currentPath} labels={labels} direction="up" />
 		<button
 			id="theme-toggle"
+			data-dark-label={themeLabels?.lightMode || 'Light Mode'}
+			data-light-label={themeLabels?.darkMode || 'Dark Mode'}
 			class="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground dark:text-muted-dark-foreground rounded-md hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark transition-colors w-full"
 		>
 			<span class="theme-icon i-lucide-moon w-4 h-4"></span>
-			<span class="theme-text">Dark Mode</span>
+			<span class="theme-text">{themeLabels?.darkMode || 'Dark Mode'}</span>
 		</button>
 	</div>
 </aside>
@@ -126,8 +144,10 @@ import logoLight from '../assets/logo-light.png'
 		if (icon) {
 			icon.className = `theme-icon w-4 h-4 ${isDark ? 'i-lucide-sun' : 'i-lucide-moon'}`
 		}
-		if (text) {
-			text.textContent = isDark ? 'Light Mode' : 'Dark Mode'
+		if (text && toggle) {
+			text.textContent = isDark
+				? toggle.dataset.darkLabel || 'Light Mode'
+				: toggle.dataset.lightLabel || 'Dark Mode'
 		}
 	}
 

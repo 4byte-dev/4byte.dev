@@ -1,0 +1,68 @@
+{
+	"nav": {
+		"home": "Home",
+		"articles": "Articles",
+		"categories": "Categories",
+		"tags": "Tags"
+	},
+	"home": {
+		"title": "Machine Learning Documentation",
+		"description": "A technical reference for core ML concepts, architectures, and implementation patterns. Built for practitioners.",
+		"featuredArticles": "Featured Articles",
+		"allArticles": "All Articles",
+		"viewAll": "View all",
+		"noArticles": "No articles yet."
+	},
+	"articles": {
+		"title": "Articles",
+		"description": "All machine learning and AI articles. From neural networks to reinforcement learning.",
+		"count": "{count} articles available.",
+		"noArticles": "No published articles yet.",
+		"views": "views"
+	},
+	"categories": {
+		"title": "Categories",
+		"description": "Browse articles by topic area.",
+		"articlesCount": "articles",
+		"browse": "Browse",
+		"allCategories": "All categories",
+		"noArticles": "No published articles in this category."
+	},
+	"tags": {
+		"title": "Tags",
+		"description": "Browse articles by topic tags.",
+		"allTags": "All tags",
+		"articlesTagged": "articles tagged with",
+		"noArticles": "No articles with this tag."
+	},
+	"article": {
+		"home": "Home",
+		"by": "By",
+		"onThisPage": "On this page",
+		"share": "Share"
+	},
+	"share": {
+		"label": "Share"
+	},
+	"theme": {
+		"darkMode": "Dark Mode",
+		"lightMode": "Light Mode"
+	},
+	"search": {
+		"placeholder": "Search documentation..."
+	},
+	"footer": {
+		"copyright": "A machine learning documentation project."
+	},
+	"404": {
+		"title": "Page Not Found",
+		"description": "The page you're looking for doesn't exist or has been moved.",
+		"backHome": "← Back to home",
+		"browseArticles": "Browse articles",
+		"contact": "If you believe this is an error, please contact the site administrator."
+	},
+	"lang": {
+		"tr": "TR",
+		"en": "EN"
+	}
+}
