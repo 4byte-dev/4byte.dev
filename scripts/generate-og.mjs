@@ -11,7 +11,10 @@ const fontBold = await fetch(
 	'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf',
 ).then((res) => res.arrayBuffer())
 
-const DEFAULT_COLORS = { bg: '#1a1a2e', text: '#e2e8f0' }
+const repoRoot = path.join(process.cwd())
+const logoDark = fs.readFileSync(path.join(repoRoot, 'src/assets/logo-dark.png')).toString('base64')
+
+const DEFAULT_COLORS = { bg: '#18181b', text: '#e5e7eb' }
 
 const LANG_TEXTS = {
 	tr: {
@@ -20,7 +23,7 @@ const LANG_TEXTS = {
 		article: 'MAKALE',
 		tagline: 'Sinir ağları, transformerlar, pekiştirmeli öğrenme ve daha fazlası',
 		description: 'Makine öğrenimi kavramlarının net açıklamaları',
-		suffix: '4byte.dev — ML Kavramları Açıklandı',
+		suffix: 'ML Kavramları Açıklandı',
 	},
 	en: {
 		explore: 'Explore Articles',
@@ -28,11 +31,11 @@ const LANG_TEXTS = {
 		article: 'ARTICLE',
 		tagline: 'Neural networks, transformers, reinforcement learning & more',
 		description: 'Clear explanations of machine learning concepts',
-		suffix: '4byte.dev — ML Concepts Explained',
+		suffix: 'ML Concepts Explained',
 	},
 }
 
-async function makeSvg(title, color, isArticle, lang = 'en') {
+async function makeSvg(title, color, isArticle, lang = 'en', logo) {
 	const texts = LANG_TEXTS[lang] || LANG_TEXTS.en
 	const bg = color || DEFAULT_COLORS.bg
 	const svg = await satori(
@@ -46,7 +49,7 @@ async function makeSvg(title, color, isArticle, lang = 'en') {
 					flexDirection: 'column',
 					justifyContent: 'space-between',
 					padding: '60px 80px',
-					background: `linear-gradient(135deg, ${bg} 0%, #0a0a1a 100%)`,
+					background: `linear-gradient(180deg, ${bg} 0%, #0d0d0d 100%)`,
 					fontFamily: 'Inter',
 				},
 				children: [
@@ -61,36 +64,12 @@ async function makeSvg(title, color, isArticle, lang = 'en') {
 										style: { display: 'flex', alignItems: 'center', gap: '16px' },
 										children: [
 											{
-												type: 'div',
+												type: 'img',
 												props: {
-													style: {
-														width: '48px',
-														height: '48px',
-														borderRadius: '12px',
-														background: '#22d3ee',
-														display: 'flex',
-														alignItems: 'center',
-														justifyContent: 'center',
-														color: '#0a0a1a',
-														fontSize: '24px',
-														fontWeight: '700',
-														fontFamily: 'Inter',
-													},
-													children: '4',
+													src: `data:image/png;base64,${logo}`,
+													height: 48
 												},
-											},
-											{
-												type: 'span',
-												props: {
-													style: {
-														fontSize: '28px',
-														fontWeight: '700',
-														color: '#f8fafc',
-														fontFamily: 'Inter',
-													},
-													children: '4byte.dev',
-												},
-											},
+											}
 										],
 									},
 								},
@@ -99,7 +78,7 @@ async function makeSvg(title, color, isArticle, lang = 'en') {
 									props: {
 										style: {
 											fontSize: '16px',
-											color: '#94a3b8',
+											color: '#8b949e',
 											fontWeight: '500',
 											fontFamily: 'Inter',
 										},
@@ -119,7 +98,7 @@ async function makeSvg(title, color, isArticle, lang = 'en') {
 									props: {
 										style: {
 											fontSize: '14px',
-											color: '#e94560',
+											color: '#388bfd',
 											fontWeight: '600',
 											textTransform: 'uppercase',
 											letterSpacing: '2px',
@@ -134,7 +113,7 @@ async function makeSvg(title, color, isArticle, lang = 'en') {
 										style: {
 											fontSize: title.length > 60 ? '42px' : '56px',
 											fontWeight: '700',
-											color: '#f8fafc',
+											color: '#e5e7eb',
 											lineHeight: 1.2,
 											fontFamily: 'Inter',
 											maxWidth: '900px',
@@ -147,7 +126,7 @@ async function makeSvg(title, color, isArticle, lang = 'en') {
 									props: {
 										style: {
 											fontSize: '20px',
-											color: '#94a3b8',
+											color: '#8b949e',
 											lineHeight: 1.6,
 											fontFamily: 'Inter',
 											maxWidth: '800px',
@@ -164,28 +143,16 @@ async function makeSvg(title, color, isArticle, lang = 'en') {
 							style: { display: 'flex', alignItems: 'center', gap: '12px' },
 							children: [
 								{
-									type: 'div',
+									type: 'img',
 									props: {
-										style: {
-											width: '40px',
-											height: '40px',
-											borderRadius: '50%',
-											background: '#22d3ee',
-											display: 'flex',
-											alignItems: 'center',
-											justifyContent: 'center',
-											fontSize: '18px',
-											fontWeight: '700',
-											color: '#0a0a1a',
-											fontFamily: 'Inter',
-										},
-										children: '4',
+										src: `data:image/png;base64,${logo}`,
+										height: 48
 									},
 								},
 								{
 									type: 'span',
 									props: {
-										style: { fontSize: '18px', color: '#94a3b8', fontFamily: 'Inter' },
+										style: { fontSize: '18px', color: '#8b949e', fontFamily: 'Inter' },
 										children: texts.suffix,
 									},
 								},
@@ -207,7 +174,6 @@ async function makeSvg(title, color, isArticle, lang = 'en') {
 	return svg
 }
 
-const repoRoot = path.join(process.cwd())
 const outDir = path.join(repoRoot, 'public', 'og')
 fs.mkdirSync(outDir, { recursive: true })
 
@@ -233,7 +199,7 @@ for (const lang of SUPPORTED_LANGS) {
 		categoryColorMap[cat.name] = cat.color || null
 	}
 
-	const svgIndex = await makeSvg('4byte.dev', null, false, lang)
+	const svgIndex = await makeSvg('4byte.dev', null, false, lang, logoDark)
 	const resvgIndex = new Resvg(svgIndex, { fitTo: { mode: 'width', value: 1200 } })
 	fs.writeFileSync(path.join(langOutDir, 'index.png'), Buffer.from(resvgIndex.render().asPng()))
 	console.log(`Generated public/og/${lang}/index.png`)
@@ -243,7 +209,7 @@ for (const lang of SUPPORTED_LANGS) {
 	} else {
 		for (const { slug, title, category } of articles) {
 			const color = categoryColorMap[category] || null
-			const svgArticle = await makeSvg(title, color, true, lang)
+			const svgArticle = await makeSvg(title, color, true, lang, logoDark)
 			const resvgArticle = new Resvg(svgArticle, { fitTo: { mode: 'width', value: 1200 } })
 			fs.writeFileSync(path.join(langOutDir, `${slug}.png`), Buffer.from(resvgArticle.render().asPng()))
 			console.log(`Generated public/og/${lang}/${slug}.png`)
