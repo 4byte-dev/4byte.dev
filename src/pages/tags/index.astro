@@ -3,12 +3,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro'
 import tagsTr from '../../data/tr/tags.json'
 import tagsEn from '../../data/en/tags.json'
 import { getLangFromUrl, t } from '../../i18n/index.ts'
-
-interface Tag {
-	slug: string
-	name: string
-	articleCount: number
-}
+import type { Tag } from '../../content.config'
 
 const lang = getLangFromUrl(Astro.url)
 const tags: Tag[] = lang === 'en' ? tagsEn : tagsTr

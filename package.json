@@ -17,7 +17,7 @@
 		"prepare": "husky",
 		"check": "astro check",
 		"generate:og": "node scripts/generate-og.mjs",
-		"generate:data": "node scripts/update-data.mjs --lang=tr && node scripts/update-data.mjs --lang=en"
+		"generate:data": "node scripts/update-data.mjs"
 	},
 	"dependencies": {
 		"@astrojs/partytown": "^2.1.5",

@@ -3,12 +3,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro'
 import { getCollection } from 'astro:content'
 import tagsEn from '../../../data/en/tags.json'
 import { t } from '../../../i18n/index.ts'
-
-interface Tag {
-	slug: string
-	name: string
-	articleCount: number
-}
+import type { Tag } from '../../../content.config'
 
 const lang = 'en'
 const labels = await import(`../../../data/${lang}/labels.json`).then((m) => m.default)
