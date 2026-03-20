@@ -2,6 +2,7 @@ import { Resvg } from '@resvg/resvg-js'
 import satori from 'satori'
 import fs from 'fs'
 import path from 'path'
+import { SUPPORTED_LANGS } from '../src/config.mjs'
 
 const fontRegular = await fetch(
 	'https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf',
@@ -16,27 +17,7 @@ const logoDark = fs.readFileSync(path.join(repoRoot, 'src/assets/logo-dark.png')
 
 const DEFAULT_COLORS = { bg: '#18181b', text: '#e5e7eb' }
 
-const LANG_TEXTS = {
-	tr: {
-		explore: 'Makaleleri Keşfet',
-		category: 'KATEGORİ',
-		article: 'MAKALE',
-		tagline: 'Sinir ağları, transformerlar, pekiştirmeli öğrenme ve daha fazlası',
-		description: 'Makine öğrenimi kavramlarının net açıklamaları',
-		suffix: 'ML Kavramları Açıklandı',
-	},
-	en: {
-		explore: 'Explore Articles',
-		category: 'CATEGORY',
-		article: 'ARTICLE',
-		tagline: 'Neural networks, transformers, reinforcement learning & more',
-		description: 'Clear explanations of machine learning concepts',
-		suffix: 'ML Concepts Explained',
-	},
-}
-
-async function makeSvg(title, color, isArticle, lang = 'en', logo) {
-	const texts = LANG_TEXTS[lang] || LANG_TEXTS.en
+async function makeSvg(title, color, isArticle, texts, logo) {
 	const bg = color || DEFAULT_COLORS.bg
 	const svg = await satori(
 		{
@@ -177,21 +158,22 @@ async function makeSvg(title, color, isArticle, lang = 'en', logo) {
 const outDir = path.join(repoRoot, 'public', 'og')
 fs.mkdirSync(outDir, { recursive: true })
 
-const SUPPORTED_LANGS = ['tr', 'en']
-
 for (const lang of SUPPORTED_LANGS) {
 	const langOutDir = path.join(outDir, lang)
 	fs.mkdirSync(langOutDir, { recursive: true })
 
 	const dataDir = path.join(repoRoot, 'src', 'data', lang)
-	let categories = []
-	let articles = []
+	let categories
+	let articles
+	let langTexts
 
 	try {
 		categories = JSON.parse(fs.readFileSync(path.join(dataDir, 'categories.json'), 'utf8'))
 		articles = JSON.parse(fs.readFileSync(path.join(dataDir, 'articles.json'), 'utf8'))
+		langTexts = JSON.parse(fs.readFileSync(path.join(dataDir, 'og-labels.json'), 'utf8'))
 	} catch {
 		console.log(`No data found for language: ${lang}`)
+		continue
 	}
 
 	const categoryColorMap = {}
@@ -199,7 +181,7 @@ for (const lang of SUPPORTED_LANGS) {
 		categoryColorMap[cat.name] = cat.color || null
 	}
 
-	const svgIndex = await makeSvg('4byte.dev', null, false, lang, logoDark)
+	const svgIndex = await makeSvg('4byte.dev', null, false, langTexts, logoDark)
 	const resvgIndex = new Resvg(svgIndex, { fitTo: { mode: 'width', value: 1200 } })
 	fs.writeFileSync(path.join(langOutDir, 'index.png'), Buffer.from(resvgIndex.render().asPng()))
 	console.log(`Generated public/og/${lang}/index.png`)
@@ -209,7 +191,7 @@ for (const lang of SUPPORTED_LANGS) {
 	} else {
 		for (const { slug, title, category } of articles) {
 			const color = categoryColorMap[category] || null
-			const svgArticle = await makeSvg(title, color, true, lang, logoDark)
+			const svgArticle = await makeSvg(title, color, true, langTexts, logoDark)
 			const resvgArticle = new Resvg(svgArticle, { fitTo: { mode: 'width', value: 1200 } })
 			fs.writeFileSync(path.join(langOutDir, `${slug}.png`), Buffer.from(resvgArticle.render().asPng()))
 			console.log(`Generated public/og/${lang}/${slug}.png`)
