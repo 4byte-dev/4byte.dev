@@ -1,6 +1,19 @@
 import { defineCollection, z } from 'astro:content'
 import { glob } from 'astro/loaders'
 
+export interface Tag {
+	slug: string
+	name: string
+	articleCount: number
+}
+
+export interface Category {
+	slug: string
+	name: string
+	description: string
+	articleCount: number
+}
+
 const articles = defineCollection({
 	loader: glob({ pattern: '**/*{.md,.mdx}', base: './src/content/articles' }),
 	schema: z.object({

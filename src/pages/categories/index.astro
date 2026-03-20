@@ -3,13 +3,7 @@ import DocsLayout from '../../layouts/DocsLayout.astro'
 import categoriesTr from '../../data/tr/categories.json'
 import categoriesEn from '../../data/en/categories.json'
 import { getLangFromUrl, t } from '../../i18n/index.ts'
-
-interface Category {
-	slug: string
-	name: string
-	description: string
-	articleCount: number
-}
+import type { Category } from '../../content.config'
 
 const lang = getLangFromUrl(Astro.url)
 const categories: Category[] = lang === 'en' ? categoriesEn : categoriesTr
