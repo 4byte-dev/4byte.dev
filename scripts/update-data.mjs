@@ -112,8 +112,8 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 				}
 				if (lines.length) {
 					const comment = lines.join('\n')
-					const { execSync } = await import('child_process')
-					execSync(`gh pr comment ${prNumber} --body "${comment.replace(/"/g, '\\"')}"`)
+					const { execFileSync } = await import('child_process')
+					execFileSync('gh', ['pr', 'comment', String(prNumber), '--body', comment])
 				}
 			}
 		}
