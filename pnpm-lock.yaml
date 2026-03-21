@@ -25,6 +25,15 @@ importers:
             gray-matter:
                 specifier: ^4.0.3
                 version: 4.0.3
+            katex:
+                specifier: ^0.16.40
+                version: 0.16.40
+            rehype-katex:
+                specifier: ^7.0.1
+                version: 7.0.1
+            remark-math:
+                specifier: ^6.0.0
+                version: 6.0.0
             satori:
                 specifier: ^0.25.0
                 version: 0.25.0
@@ -41,6 +50,9 @@ importers:
             '@unocss/astro':
                 specifier: ^66.6.6
                 version: 66.6.6(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(yaml@2.8.2))
+            '@unocss/preset-typography':
+                specifier: ^66.6.7
+                version: 66.6.7
             '@unocss/reset':
                 specifier: ^66.6.6
                 version: 66.6.6
@@ -1593,6 +1605,12 @@ packages:
                 integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==,
             }
 
+    '@types/katex@0.16.8':
+        resolution:
+            {
+                integrity: sha512-trgaNyfU+Xh2Tc+ABIb44a5AYUpicB3uwirOioeOkNPPbmgRNtcWyDeeFRzjPZENO9Vq8gvVqfhaaXWLlevVwg==,
+            }
+
     '@types/mdast@4.0.4':
         resolution:
             {
@@ -1700,6 +1718,12 @@ packages:
                 integrity: sha512-Sbbx0ZQqmV8K2lg8E+z9MJzWb1MgRtJnvqzxDIrNuBjXasKhbcFt5wEMBtEZJOr63Z4ck0xThhZK53HmYT2jmg==,
             }
 
+    '@unocss/core@66.6.7':
+        resolution:
+            {
+                integrity: sha512-Q8456iWFtdwrUNYKVOQY8ygRggjZOVtLc6Jc8KIkxig7OiNlUWOgXJTfCh4I8g6jBYzC5eHaHFDLgJOmOrxBsg==,
+            }
+
     '@unocss/extractor-arbitrary-variants@66.6.6':
         resolution:
             {
@@ -1742,6 +1766,12 @@ packages:
                 integrity: sha512-SM1km5nqt15z4sTabfOobSC633I5Ol5nnme6JFTra4wiyCUNs+Cg31nJ6jnopWDUT4SEAXqfUH7jKSSoCnI6ZA==,
             }
 
+    '@unocss/preset-typography@66.6.7':
+        resolution:
+            {
+                integrity: sha512-RA7MwPDD5N9xGrbWnguVm5tP+F4/n/9X1rJsq2nBjvvK2dbtIRJZjRFM1vBDsR0GIhtvbHMoTchZaSZed5I+Hw==,
+            }
+
     '@unocss/preset-uno@66.6.6':
         resolution:
             {
@@ -1782,6 +1812,13 @@ packages:
         resolution:
             {
                 integrity: sha512-krWtQKGshOaqQMuxeGq1NOA8NL35VdpYlmQEWOe39BY6TACT51bgQFu40MRfsAIMZZtoGS2YYTrnHojgR92omw==,
+            }
+        engines: { node: '>=14' }
+
+    '@unocss/rule-utils@66.6.7':
+        resolution:
+            {
+                integrity: sha512-4PT/s8yKIShSqP9XPSw4EjbZopcu3wlIB9i3kbGbzQwF91H+0Yy10guK3kHDGtkmWVN6Np6VvaGIj2UcbmaivA==,
             }
         engines: { node: '>=14' }
 
@@ -2225,6 +2262,13 @@ packages:
                 integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==,
             }
         engines: { node: '>= 10' }
+
+    commander@8.3.0:
+        resolution:
+            {
+                integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==,
+            }
+        engines: { node: '>= 12' }
 
     common-ancestor-path@2.0.0:
         resolution:
@@ -2951,6 +2995,18 @@ packages:
                 integrity: sha512-iOH6Vl8mGd9nNfu9C0IZ+GuOAfJHcyf3VriQxWaSWIB76Fg4BnFuk4cxBxjmQSSxJS664+pgjP6e7VBnUzFfcg==,
             }
 
+    hast-util-from-dom@5.0.1:
+        resolution:
+            {
+                integrity: sha512-N+LqofjR2zuzTjCPzyDUdSshy4Ma6li7p/c3pA78uTwzFgENbgbUrm2ugwsOdcjI1muO+o6Dgzp9p8WHtn/39Q==,
+            }
+
+    hast-util-from-html-isomorphic@2.0.0:
+        resolution:
+            {
+                integrity: sha512-zJfpXq44yff2hmE0XmwEOzdWin5xwH+QIhMLOScpX91e/NSGPsAzNCvLQDIEPyO2TXi+lBmU6hjLIhV8MwP2kw==,
+            }
+
     hast-util-from-html@2.0.3:
         resolution:
             {
@@ -3211,6 +3267,13 @@ packages:
             {
                 integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==,
             }
+
+    katex@0.16.40:
+        resolution:
+            {
+                integrity: sha512-1DJcK/L05k1Y9Gf7wMcyuqFOL6BiY3vY0CFcAM/LPRN04NALxcl6u7lOWNsp3f/bCHWxigzQl6FbR95XJ4R84Q==,
+            }
+        hasBin: true
 
     keyv@4.5.4:
         resolution:
@@ -3488,6 +3551,12 @@ packages:
                 integrity: sha512-0ulfdQOM3ysHhCJ1p06l0b0VKlhU0wuQs3thxZQagjcjPrlFRqY215uZGHHJan9GEAXd9MbfPjFJz+qMkVR6zQ==,
             }
 
+    mdast-util-math@3.0.0:
+        resolution:
+            {
+                integrity: sha512-Tl9GBNeG/AhJnQM221bJR2HPvLOSnLE/T9cJI9tlc6zwQk2nPk/4f0cHkOdEixQPC/j8UtKDdITswvLAy1OZ1w==,
+            }
+
     mdast-util-phrasing@4.1.0:
         resolution:
             {
@@ -3583,6 +3652,12 @@ packages:
         resolution:
             {
                 integrity: sha512-vsKArQsicm7t0z2GugkCKtZehqUm31oeGBV/KVSorWSy8ZlNAv7ytjFhvaryUiCUJYqs+NoE6AFhpQvBTM6Q4w==,
+            }
+
+    micromark-extension-math@3.1.0:
+        resolution:
+            {
+                integrity: sha512-lvEqd+fHjATVs+2v/8kg9i5Q0AP2k85H0WUOwpIVvUML8BapsMvh1XAogmQjOCsLpoKRCVQqEkQBB3NhVBcsOg==,
             }
 
     micromark-factory-destination@2.0.1:
@@ -4166,6 +4241,12 @@ packages:
             }
         hasBin: true
 
+    rehype-katex@7.0.1:
+        resolution:
+            {
+                integrity: sha512-OiM2wrZ/wuhKkigASodFoo8wimG3H12LWQaH8qSPVJn9apWKFSH3YOCtbKpBorTVw/eI7cuT21XBbvwEswbIOA==,
+            }
+
     rehype-parse@9.0.1:
         resolution:
             {
@@ -4194,6 +4275,12 @@ packages:
         resolution:
             {
                 integrity: sha512-1quofZ2RQ9EWdeN34S79+KExV1764+wCUGop5CPL1WGdD0ocPpu91lzPGbwWMECpEpd42kJGQwzRfyov9j4yNg==,
+            }
+
+    remark-math@6.0.0:
+        resolution:
+            {
+                integrity: sha512-MMqgnP74Igy+S3WwnhQ7kqGlEerTETXMvJhrUzDikVZ2/uogJCb+WHUg97hK9/jcfc0dkD73s3LN8zU49cTEtA==,
             }
 
     remark-parse@11.0.0:
@@ -6052,6 +6139,8 @@ snapshots:
 
     '@types/json-schema@7.0.15': {}
 
+    '@types/katex@0.16.8': {}
+
     '@types/mdast@4.0.4':
         dependencies:
             '@types/unist': 3.0.3
@@ -6130,6 +6219,8 @@ snapshots:
 
     '@unocss/core@66.6.6': {}
 
+    '@unocss/core@66.6.7': {}
+
     '@unocss/extractor-arbitrary-variants@66.6.6':
         dependencies:
             '@unocss/core': 66.6.6
@@ -6167,6 +6258,11 @@ snapshots:
             '@unocss/core': 66.6.6
             '@unocss/rule-utils': 66.6.6
 
+    '@unocss/preset-typography@66.6.7':
+        dependencies:
+            '@unocss/core': 66.6.7
+            '@unocss/rule-utils': 66.6.7
+
     '@unocss/preset-uno@66.6.6':
         dependencies:
             '@unocss/core': 66.6.6
@@ -6199,6 +6295,11 @@ snapshots:
     '@unocss/rule-utils@66.6.6':
         dependencies:
             '@unocss/core': 66.6.6
+            magic-string: 0.30.21
+
+    '@unocss/rule-utils@66.6.7':
+        dependencies:
+            '@unocss/core': 66.6.7
             magic-string: 0.30.21
 
     '@unocss/transformer-attributify-jsx@66.6.6':
@@ -6568,6 +6669,8 @@ snapshots:
         optional: true
 
     commander@7.2.0: {}
+
+    commander@8.3.0: {}
 
     common-ancestor-path@2.0.0: {}
 
@@ -6991,6 +7094,19 @@ snapshots:
             ufo: 1.6.3
             uncrypto: 0.1.3
 
+    hast-util-from-dom@5.0.1:
+        dependencies:
+            '@types/hast': 3.0.4
+            hastscript: 9.0.1
+            web-namespaces: 2.0.1
+
+    hast-util-from-html-isomorphic@2.0.0:
+        dependencies:
+            '@types/hast': 3.0.4
+            hast-util-from-dom: 5.0.1
+            hast-util-from-html: 2.0.3
+            unist-util-remove-position: 5.0.0
+
     hast-util-from-html@2.0.3:
         dependencies:
             '@types/hast': 3.0.4
@@ -7157,6 +7273,10 @@ snapshots:
     jsonc-parser@2.3.1: {}
 
     jsonc-parser@3.3.1: {}
+
+    katex@0.16.40:
+        dependencies:
+            commander: 8.3.0
 
     keyv@4.5.4:
         dependencies:
@@ -7377,6 +7497,18 @@ snapshots:
         transitivePeerDependencies:
             - supports-color
 
+    mdast-util-math@3.0.0:
+        dependencies:
+            '@types/hast': 3.0.4
+            '@types/mdast': 4.0.4
+            devlop: 1.1.0
+            longest-streak: 3.1.0
+            mdast-util-from-markdown: 2.0.3
+            mdast-util-to-markdown: 2.1.2
+            unist-util-remove-position: 5.0.0
+        transitivePeerDependencies:
+            - supports-color
+
     mdast-util-phrasing@4.1.0:
         dependencies:
             '@types/mdast': 4.0.4
@@ -7493,6 +7625,16 @@ snapshots:
             micromark-extension-gfm-tagfilter: 2.0.0
             micromark-extension-gfm-task-list-item: 2.1.0
             micromark-util-combine-extensions: 2.0.1
+            micromark-util-types: 2.0.2
+
+    micromark-extension-math@3.1.0:
+        dependencies:
+            '@types/katex': 0.16.8
+            devlop: 1.1.0
+            katex: 0.16.40
+            micromark-factory-space: 2.0.1
+            micromark-util-character: 2.1.1
+            micromark-util-symbol: 2.0.1
             micromark-util-types: 2.0.2
 
     micromark-factory-destination@2.0.1:
@@ -7864,6 +8006,16 @@ snapshots:
 
     regexp-tree@0.1.27: {}
 
+    rehype-katex@7.0.1:
+        dependencies:
+            '@types/hast': 3.0.4
+            '@types/katex': 0.16.8
+            hast-util-from-html-isomorphic: 2.0.0
+            hast-util-to-text: 4.0.2
+            katex: 0.16.40
+            unist-util-visit-parents: 6.0.2
+            vfile: 6.0.3
+
     rehype-parse@9.0.1:
         dependencies:
             '@types/hast': 3.0.4
@@ -7896,6 +8048,15 @@ snapshots:
             micromark-extension-gfm: 3.0.0
             remark-parse: 11.0.0
             remark-stringify: 11.0.0
+            unified: 11.0.5
+        transitivePeerDependencies:
+            - supports-color
+
+    remark-math@6.0.0:
+        dependencies:
+            '@types/mdast': 4.0.4
+            mdast-util-math: 3.0.0
+            micromark-extension-math: 3.1.0
             unified: 11.0.5
         transitivePeerDependencies:
             - supports-color

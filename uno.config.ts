@@ -1,8 +1,9 @@
-import { defineConfig, presetUno, presetIcons, presetWebFonts } from 'unocss'
+import { defineConfig, presetWind4, presetTypography, presetIcons, presetWebFonts } from 'unocss'
 
 export default defineConfig({
 	presets: [
-		presetUno(),
+		presetWind4(),
+		presetTypography(),
 		presetIcons({
 			scale: 1.2,
 			cdn: 'https://esm.sh/',

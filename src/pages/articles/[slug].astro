@@ -1,7 +1,7 @@
 ---
 import DocsLayout from '../../layouts/DocsLayout.astro'
 import ShareButtons from '../../components/ShareButtons.astro'
-import { getCollection } from 'astro:content'
+import { getCollection, render } from 'astro:content'
 import { SITE } from '../../config.mjs'
 import { getLangFromUrl, t } from '../../i18n/index.ts'
 
@@ -22,6 +22,8 @@ if (!article || article.data.status !== 'Published') {
 	return Astro.redirect('/404')
 }
 
+const { Content, headings } = await render(article)
+
 const categorySlug = article.data.category.toLowerCase().replace(/\s+/g, '-')
 const langPrefix = article.data.lang === 'en' ? '/en' : ''
 const articleUrl = `${SITE.origin}${langPrefix}/articles/${article.data.slug}`
@@ -30,10 +32,7 @@ const ogImageUrl = `/og/${article.data.slug}.png`
 const publishedDate = new Date(article.data.date)
 const isoDate = publishedDate.toISOString()
 
-const sections = (article.body ?? '')
-	.split('\n')
-	.filter((line) => line.startsWith('## '))
-	.map((line) => line.replace('## ', ''))
+const sections = headings.filter((h) => h.depth === 2).map((h) => h.text)
 
 const jsonLdArticle = {
 	'@context': 'https://schema.org',
@@ -140,57 +139,8 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 				</div>
 			</header>
 
-			<ShareButtons title={article.data.title} url={articleUrl} labels={labels} />
-
-			<article class="mb-12 prose">
-				{
-					(article.body ?? '').split('\n\n').map((block) => {
-						const trimmed = block.trim()
-						if (!trimmed) return null
-
-						if (trimmed.startsWith('## ')) {
-							const heading = trimmed.replace('## ', '')
-							return (
-								<h2
-									id={heading.toLowerCase().replace(/\s+/g, '-')}
-									class="text-xl font-bold text-foreground dark:text-foreground-dark mt-10 mb-4"
-								>
-									{heading}
-								</h2>
-							)
-						}
-						if (trimmed.startsWith('- ')) {
-							const items = trimmed.split('\n').filter((l) => l.startsWith('- '))
-							return (
-								<ul class="list-disc pl-6 space-y-1 text-muted-foreground dark:text-muted-dark-foreground text-sm mb-4">
-									{items.map((item) => (
-										<li>{item.replace('- ', '')}</li>
-									))}
-								</ul>
-							)
-						}
-						if (
-							trimmed.includes('=') ||
-							trimmed.includes('←') ||
-							trimmed.includes('→') ||
-							trimmed.includes('Σ') ||
-							trimmed.includes('π')
-						) {
-							return (
-								<div class="p-4 bg-muted/50 dark:bg-muted-dark/50 rounded-md border-l-4 border-primary dark:border-primary-dark my-4">
-									<code class="text-sm font-mono text-foreground dark:text-foreground-dark whitespace-pre-wrap">
-										{trimmed}
-									</code>
-								</div>
-							)
-						}
-						return (
-							<p class="text-muted-foreground dark:text-muted-dark-foreground leading-relaxed mb-4 text-[15px]">
-								{trimmed}
-							</p>
-						)
-					})
-				}
+			<article class="mb-12 prose dark:prose-invert max-w-none">
+				<Content />
 			</article>
 
 			<ShareButtons title={article.data.title} url={articleUrl} labels={labels} />
