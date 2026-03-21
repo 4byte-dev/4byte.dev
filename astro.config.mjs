@@ -5,12 +5,14 @@ import sitemap from '@astrojs/sitemap'
 import partytown from '@astrojs/partytown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import mdx from '@astrojs/mdx'
 
 export default defineConfig({
 	site: 'https://4byte.dev',
 	output: 'static',
 	integrations: [
 		UnoCSS(),
+		mdx(),
 		icon(),
 		sitemap(),
 		partytown({

@@ -59,7 +59,7 @@ export default defineConfig({
 	},
 	content: {
 		pipeline: {
-			include: ['src/**/*.{astro,html,js,ts,jsx,tsx}'],
+			include: ['src/**/*.{astro,html,js,ts,jsx,tsx,mdx}'],
 			exclude: ['node_modules', 'dist', '.git'],
 		},
 	},
