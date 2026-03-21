@@ -1,46 +1,66 @@
-# Astro Starter Kit: Basics
+# 4Byte.dev
 
-```sh
-npm create astro@latest -- --template basics
+> Uygulayıcılar için makine öğrenimi ve yapay zeka kavramlarının net, kısa ve öz açıklamaları.
+
+## Hakkında
+
+4Byte.dev, makine öğrenimi ve yapay zeka kavramlarına odaklanan teknik bir dokümantasyon web sitesidir. ML mimarileri, algoritmaları ve uygulama kalıpları hakkında iyi yapılandırılmış, anlaşılması kolay açıklamalar sunmayı hedefler.
+
+## Kullanılan Teknolojiler (Tech Stack)
+
+- **Çerçeve (Framework)**: [Astro](https://astro.build) v6
+- **Stillendirme**: [UnoCSS](https://unocss.dev) (Tailwind uyumlu)
+- **İkonlar**: [Lucide](https://lucide.dev)
+- **Diller**: TypeScript + Astro bileşenleri
+
+## Hızlı Başlangıç
+
+```bash
+# Bağımlılıkları yükle
+pnpm install
+
+# Geliştirme sunucusunu başlat
+pnpm dev
+
+# Üretim (production) için derle
+pnpm build
+
+# Üretim derlemesini önizle
+pnpm preview
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Komutlar (Scripts)
 
-## 🚀 Project Structure
+| Komut                | Açıklama                                       |
+| -------------------- | ---------------------------------------------- |
+| `pnpm dev`           | Yerel geliştirme sunucusunu başlatır           |
+| `pnpm build`         | Üretim için derler                             |
+| `pnpm preview`       | Üretim derlemesini önizler                     |
+| `pnpm generate:og`   | OG (Open Graph) görselleri oluşturur           |
+| `pnpm generate:data` | Veri dosyalarını günceller                     |
+| `pnpm lint`          | ESLint'i çalıştırır                            |
+| `pnpm lint:fix`      | ESLint hatalarını düzeltir                     |
+| `pnpm format`        | Prettier ile kodu formatlar                    |
+| `pnpm format:check`  | Kod formatını (biçimlendirmesini) kontrol eder |
 
-Inside of your Astro project, you'll see the following folders and files:
+## Özellikler
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+- **Çoklu Dil Desteği**: Türkçe (varsayılan) ve İngilizce
+- **Karanlık/Aydınlık Mod**: Sistem tercihi algılama
+- **Arama**: İstemci tarafı (client-side) arama işlevselliği
+- **SEO Optimizasyonlu**: Site haritası (Sitemap), RSS, Open Graph, Schema.org
+- **Duyarlı (Responsive) Tasarım**: Mobil uyumlu sayfa düzeni
+- **Statik Üretim (Static Generation)**: Hızlı performans
+
+## Proje Yapısı
+
 ```
-
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+src/
+├── components/     # Astro bileşenleri
+├── content/        # Markdown makaleleri (en/, tr/)
+├── data/           # JSON veri dosyaları
+├── i18n/           # Uluslararasılaştırma (i18n) araçları
+├── layouts/        # Sayfa düzenleri (layouts)
+├── pages/          # Rota sayfaları (sayfa yönlendirmeleri)
+└── styles/         # Global CSS
+```
