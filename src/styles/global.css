@@ -65,3 +65,15 @@ h6 {
 	-webkit-box-orient: vertical;
 	overflow: hidden;
 }
+
+html.dark .astro-code,
+html.dark .astro-code span {
+	color: var(--shiki-dark) !important;
+	background-color: var(--shiki-dark-bg) !important;
+}
+
+html .astro-code,
+html .astro-code span {
+	color: var(--shiki-light) !important;
+	background-color: var(--shiki-light-bg) !important;
+}

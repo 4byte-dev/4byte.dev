@@ -3,6 +3,8 @@ import UnoCSS from 'unocss/astro'
 import icon from 'astro-icon'
 import sitemap from '@astrojs/sitemap'
 import partytown from '@astrojs/partytown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
 
 export default defineConfig({
 	site: 'https://4byte.dev',
@@ -17,4 +19,18 @@ export default defineConfig({
 			},
 		}),
 	],
+	markdown: {
+		remarkPlugins: [remarkMath],
+		rehypePlugins: [rehypeKatex],
+		shikiConfig: {
+			themes: {
+				dark: 'github-dark-dimmed',
+				light: 'github-light',
+			},
+		},
+		syntaxHighlight: {
+			type: 'shiki',
+			excludeLangs: ['mermaid'],
+		},
+	},
 })
