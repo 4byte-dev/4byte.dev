@@ -20,11 +20,13 @@
 		"generate:data": "node scripts/update-data.mjs"
 	},
 	"dependencies": {
+		"@astrojs/mdx": "^5.0.2",
 		"@astrojs/partytown": "^2.1.5",
 		"@astrojs/sitemap": "^3.7.1",
 		"@resvg/resvg-js": "^2.6.2",
 		"astro": "^6.0.5",
 		"astro-icon": "^1.1.5",
+		"d3": "^7.9.0",
 		"gray-matter": "^4.0.3",
 		"katex": "^0.16.40",
 		"rehype-katex": "^7.0.1",

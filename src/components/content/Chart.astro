@@ -1,0 +1,400 @@
+---
+interface DataPoint {
+	label: string
+	value: number
+	color?: string
+}
+
+interface Props {
+	type?: 'line' | 'area' | 'bar' | 'pie' | 'scatter'
+	data?: DataPoint[]
+	id?: string
+	height?: number
+	colors?: string[]
+	showTrendline?: boolean
+	trendlineColor?: string
+}
+
+const {
+	type = 'bar',
+	data = [],
+	id = '',
+	height = 300,
+	showTrendline = false,
+	trendlineColor = '#ef4444',
+	colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'],
+} = Astro.props
+
+const uniqueId = `chart-${id || Math.random().toString(36).slice(2, 9)}`
+const chartData = JSON.stringify(data)
+const chartColors = JSON.stringify(colors)
+const chartHeight = height
+const chartShowTrendline = showTrendline
+const chartTrendlineColor = trendlineColor
+const chartType = type
+---
+
+<div
+	class="chart-wrapper"
+	data-chart-id={uniqueId}
+	data-chart-type={chartType}
+	data-chart-data={chartData}
+	data-chart-height={chartHeight}
+	data-chart-colors={chartColors}
+	data-show-trendline={chartShowTrendline}
+	data-trendline-color={chartTrendlineColor}
+>
+	<div id={uniqueId} class="chart-container" style={`min-height: ${chartHeight}px`}></div>
+</div>
+
+<script>
+	import * as d3 from 'd3'
+
+	const wrappers = document.querySelectorAll('.chart-wrapper')
+
+	wrappers.forEach((wrapper) => {
+		const container = wrapper.querySelector('.chart-container')
+		if (!container) return
+
+		const chartType = wrapper.dataset.chartType || 'bar'
+		const chartData = JSON.parse(wrapper.dataset.chartData || '[]')
+		const colors = JSON.parse(wrapper.dataset.chartColors || '[]')
+		const chartHeight = parseInt(wrapper.dataset.chartHeight || '300')
+		const showTrendline = wrapper.dataset.showTrendline === 'true'
+		const trendlineColor = wrapper.dataset.trendlineColor || '#ef4444'
+
+		if (!chartData.length) return
+
+		const margin = { top: 20, right: 20, bottom: 40, left: 50 }
+
+		function getColor(index) {
+			return colors[index % colors.length]
+		}
+
+		function getThemeColors() {
+			const isDark = document.documentElement.classList.contains('dark')
+
+			return {
+				// Dark: light gray text | Light: near-black for strong contrast
+				textColor: isDark ? '#e5e7eb' : '#1e293b',
+				// Dark: subtle zinc | Light: soft slate
+				gridColor: isDark ? '#3f3f46' : '#cbd5e1',
+				// Dark: zinc-700 | Light: slate-300 — visible axis border
+				axisColor: isDark ? '#52525b' : '#94a3b8',
+			}
+		}
+
+		function initChart() {
+			container.innerHTML = ''
+
+			const width = container.clientWidth
+			const height = chartHeight
+			const innerWidth = width - margin.left - margin.right
+			const innerHeight = height - margin.top - margin.bottom
+
+			const svg = d3
+				.select(container)
+				.append('svg')
+				.attr('width', width)
+				.attr('height', height)
+				.attr('viewBox', `0 0 ${width} ${height}`)
+				.attr('preserveAspectRatio', 'xMidYMid meet')
+				.style('overflow', 'visible') // prevent edge labels from being clipped
+
+			const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+
+			const { textColor, gridColor } = getThemeColors()
+
+			switch (chartType) {
+				case 'line':
+					renderLine(g, innerWidth, innerHeight, textColor, gridColor)
+					break
+				case 'area':
+					renderArea(g, innerWidth, innerHeight, textColor, gridColor)
+					break
+				case 'bar':
+					renderBar(g, innerWidth, innerHeight, textColor, gridColor)
+					break
+				case 'pie':
+					renderPie(svg, width, height, margin)
+					return
+				case 'scatter':
+					renderScatter(g, innerWidth, innerHeight, textColor, gridColor, showTrendline, trendlineColor)
+					break
+			}
+		}
+
+		function applyAxisStyles(axisG, textColor) {
+			const { axisColor } = getThemeColors()
+
+			// Domain line (the outer border of the axis)
+			axisG.select('.domain').style('stroke', axisColor).style('stroke-width', 1.5)
+
+			// Tick marks
+			axisG.selectAll('.tick line').style('stroke', axisColor).style('stroke-width', 1)
+
+			// Tick labels — use attr() not style() so SVG-level CSS rules
+			// (e.g. Tailwind preflight setting fill:currentColor or fill:white)
+			// don't win the specificity battle
+			axisG
+				.selectAll('.tick text')
+				.attr('fill', textColor) // SVG presentation attribute
+				.style('fill', textColor) // inline style as backup
+				.attr('font-size', '12px')
+				.attr('font-family', 'inherit')
+				.style('font-weight', '500')
+		}
+
+		function renderGrid(g, y, w, gridColor) {
+			const gridG = g.append('g').attr('class', 'grid')
+			gridG.call(d3.axisLeft(y).tickSize(-w).tickFormat(''))
+			gridG.selectAll('line').style('stroke', gridColor).style('stroke-dasharray', '3,3').style('stroke-width', 1)
+			gridG.select('.domain').remove()
+			return gridG
+		}
+
+		function renderLine(g, w, h, textColor, gridColor) {
+			const x = d3
+				.scalePoint()
+				.domain(chartData.map((d) => d.label))
+				.range([0, w])
+			const y = d3
+				.scaleLinear()
+				.domain([0, d3.max(chartData, (d) => d.value)])
+				.nice()
+				.range([h, 0])
+
+			renderGrid(g, y, w, gridColor)
+
+			const xAxisG = g.append('g').attr('transform', `translate(0,${h})`)
+			xAxisG.call(d3.axisBottom(x))
+			applyAxisStyles(xAxisG, textColor)
+
+			const yAxisG = g.append('g')
+			yAxisG.call(d3.axisLeft(y))
+			applyAxisStyles(yAxisG, textColor)
+
+			const line = d3
+				.line()
+				.x((d) => x(d.label))
+				.y((d) => y(d.value))
+
+			g.append('path')
+				.datum(chartData)
+				.attr('fill', 'none')
+				.attr('stroke', getColor(0))
+				.attr('stroke-width', 2.5)
+				.attr('d', line)
+
+			g.selectAll('.dot')
+				.data(chartData)
+				.enter()
+				.append('circle')
+				.attr('cx', (d) => x(d.label))
+				.attr('cy', (d) => y(d.value))
+				.attr('r', 4)
+				.attr('fill', getColor(0))
+				.attr('stroke', '#fff')
+				.attr('stroke-width', 2)
+		}
+
+		function renderArea(g, w, h, textColor, gridColor) {
+			const x = d3
+				.scalePoint()
+				.domain(chartData.map((d) => d.label))
+				.range([0, w])
+			const y = d3
+				.scaleLinear()
+				.domain([0, d3.max(chartData, (d) => d.value)])
+				.nice()
+				.range([h, 0])
+
+			renderGrid(g, y, w, gridColor)
+
+			const xAxisG = g.append('g').attr('transform', `translate(0,${h})`)
+			xAxisG.call(d3.axisBottom(x))
+			applyAxisStyles(xAxisG, textColor)
+
+			const yAxisG = g.append('g')
+			yAxisG.call(d3.axisLeft(y))
+			applyAxisStyles(yAxisG, textColor)
+
+			const area = d3
+				.area()
+				.x((d) => x(d.label))
+				.y0(h)
+				.y1((d) => y(d.value))
+				.curve(d3.curveMonotoneX)
+
+			g.append('path').datum(chartData).attr('fill', getColor(0)).attr('fill-opacity', 0.15).attr('d', area)
+
+			const line = d3
+				.line()
+				.x((d) => x(d.label))
+				.y((d) => y(d.value))
+				.curve(d3.curveMonotoneX)
+
+			g.append('path')
+				.datum(chartData)
+				.attr('fill', 'none')
+				.attr('stroke', getColor(0))
+				.attr('stroke-width', 2.5)
+				.attr('d', line)
+		}
+
+		function renderBar(g, w, h, textColor, gridColor) {
+			const x = d3
+				.scaleBand()
+				.domain(chartData.map((d) => d.label))
+				.range([0, w])
+				.padding(0.2)
+			const y = d3
+				.scaleLinear()
+				.domain([0, d3.max(chartData, (d) => d.value)])
+				.nice()
+				.range([h, 0])
+
+			renderGrid(g, y, w, gridColor)
+
+			const xAxisG = g.append('g').attr('transform', `translate(0,${h})`)
+			xAxisG.call(d3.axisBottom(x))
+			applyAxisStyles(xAxisG, textColor)
+
+			const yAxisG = g.append('g')
+			yAxisG.call(d3.axisLeft(y))
+			applyAxisStyles(yAxisG, textColor)
+
+			g.selectAll('.bar')
+				.data(chartData)
+				.enter()
+				.append('rect')
+				.attr('x', (d) => x(d.label))
+				.attr('y', (d) => y(d.value))
+				.attr('width', x.bandwidth())
+				.attr('height', (d) => h - y(d.value))
+				.attr('fill', (d, i) => d.color || getColor(i))
+				.attr('rx', 4)
+		}
+
+		function renderPie(svg, width, height, margin) {
+			const radius = Math.min(width, height) / 2 - Math.max(margin.top, margin.right)
+			const g = svg.append('g').attr('transform', `translate(${width / 2},${height / 2})`)
+
+			const pie = d3
+				.pie()
+				.value((d) => d.value)
+				.sort(null)
+			const arc = d3.arc().innerRadius(0).outerRadius(radius)
+			const labelArc = d3
+				.arc()
+				.innerRadius(radius * 0.6)
+				.outerRadius(radius * 0.6)
+
+			const { textColor } = getThemeColors()
+
+			const arcs = g.selectAll('.arc').data(pie(chartData)).enter().append('g').attr('class', 'arc')
+
+			arcs.append('path')
+				.attr('d', arc)
+				.attr('fill', (d, i) => d.data.color || getColor(i))
+				.attr('stroke', '#fff')
+				.attr('stroke-width', 2)
+
+			arcs.append('text')
+				.attr('transform', (d) => `translate(${labelArc.centroid(d)})`)
+				.attr('text-anchor', 'middle')
+				.attr('fill', textColor)
+				.style('fill', textColor)
+				.attr('font-size', '12px')
+				.attr('font-family', 'inherit')
+				.attr('font-weight', '600')
+				.text((d) => d.data.label)
+		}
+
+		function renderScatter(g, w, h, textColor, gridColor, showTrendline, trendlineColor) {
+			const x = d3
+				.scaleLinear()
+				.domain([0, d3.max(chartData, (d) => d.value) * 1.1])
+				.range([0, w])
+			const y = d3
+				.scaleLinear()
+				.domain([0, chartData.length + 1])
+				.range([h, 0])
+
+			renderGrid(g, y, w, gridColor)
+
+			const xAxisG = g.append('g').attr('transform', `translate(0,${h})`)
+			xAxisG.call(d3.axisBottom(x))
+			applyAxisStyles(xAxisG, textColor)
+
+			const yAxisG = g.append('g')
+			yAxisG.call(d3.axisLeft(y))
+			applyAxisStyles(yAxisG, textColor)
+
+			g.selectAll('.dot')
+				.data(chartData)
+				.enter()
+				.append('circle')
+				.attr('cx', (d) => x(d.value))
+				.attr('cy', (d, i) => y(i + 1))
+				.attr('r', 6)
+				.attr('fill', (d, i) => d.color || getColor(i))
+				.attr('stroke', '#fff')
+				.attr('stroke-width', 2)
+
+			g.selectAll('.label')
+				.data(chartData)
+				.enter()
+				.append('text')
+				.attr('x', (d) => x(d.value))
+				.attr('y', (d, i) => y(i + 1))
+				.attr('dx', 12)
+				.attr('dy', 4)
+				.attr('fill', textColor)
+				.style('fill', textColor)
+				.attr('font-size', '11px')
+				.attr('font-weight', '500')
+				.attr('font-family', 'inherit')
+				.text((d) => d.label)
+
+			if (showTrendline) {
+				const n = chartData.length
+				const xValues = chartData.map((d) => d.value)
+				const yValues = chartData.map((_, i) => i + 1)
+
+				const xMean = xValues.reduce((a, b) => a + b, 0) / n
+				const yMean = yValues.reduce((a, b) => a + b, 0) / n
+
+				let numerator = 0
+				let denominator = 0
+				for (let i = 0; i < n; i++) {
+					numerator += (xValues[i] - xMean) * (yValues[i] - yMean)
+					denominator += (xValues[i] - xMean) ** 2
+				}
+
+				const slope = denominator !== 0 ? numerator / denominator : 0
+				const intercept = yMean - slope * xMean
+
+				const xMin = Math.min(...xValues)
+				const xMax = Math.max(...xValues)
+				const yStart = slope * xMin + intercept
+				const yEnd = slope * xMax + intercept
+
+				g.append('line')
+					.attr('x1', x(xMin))
+					.attr('y1', y(yStart))
+					.attr('x2', x(xMax))
+					.attr('y2', y(yEnd))
+					.style('stroke', trendlineColor)
+					.style('stroke-width', 2)
+					.style('stroke-dasharray', '6,4')
+					.style('opacity', 0.8)
+			}
+		}
+
+		const observer = new ResizeObserver(() => initChart())
+		observer.observe(container)
+
+		initChart()
+	})
+</script>
