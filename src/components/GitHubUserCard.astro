@@ -1,0 +1,45 @@
+---
+import { fetchGitHubUser } from '../utils/github'
+
+interface Props {
+	username: string
+}
+
+const { username } = Astro.props
+
+const cleanUsername = username.startsWith('@') ? username.slice(1) : username
+const user = await fetchGitHubUser(cleanUsername)
+const githubUrl = `https://github.com/${cleanUsername}`
+---
+
+{
+	user ? (
+		<a
+			href={githubUrl}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity group"
+			aria-label={`GitHub: ${user.name || user.login}`}
+		>
+			<img
+				src={user.avatar_url}
+				alt={user.name || user.login}
+				class="w-6 h-6 rounded-full border border-border dark:border-border-dark"
+				loading="lazy"
+			/>
+			<span class="text-sm text-muted-foreground dark:text-muted-dark-foreground group-hover:text-foreground dark:group-hover:text-foreground-dark transition-colors">
+				{user.name || user.login}
+			</span>
+		</a>
+	) : (
+		<a
+			href={githubUrl}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+		>
+			<span class="i-lucide-github w-4 h-4 text-muted-foreground dark:text-muted-dark-foreground" />
+			<span class="text-sm text-muted-foreground dark:text-muted-dark-foreground">{username}</span>
+		</a>
+	)
+}
