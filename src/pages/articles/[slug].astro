@@ -27,7 +27,7 @@ const { Content, headings } = await render(article)
 const categorySlug = article.data.category.toLowerCase().replace(/\s+/g, '-')
 const langPrefix = article.data.lang === 'en' ? '/en' : ''
 const articleUrl = `${SITE.origin}${langPrefix}/articles/${article.data.slug}`
-const ogImageUrl = `/og/${article.data.slug}.png`
+const ogImageUrl = `/og/${article.data.lang}/${article.data.slug}.png`
 
 const publishedDate = new Date(article.data.date)
 const isoDate = publishedDate.toISOString()
