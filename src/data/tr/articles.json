@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "title": "Linear Regression Nedir?",
+    "slug": "linear-regression-nedir",
+    "category": "machine-learning"
+  },
+  {
+    "title": "Supervised Learning Nedir?",
+    "slug": "supervised-learning-nedir",
+    "category": "machine-learning"
+  }
+]

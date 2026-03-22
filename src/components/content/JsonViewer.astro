@@ -1,0 +1,432 @@
+---
+interface Props {
+	data?: any
+	id?: string
+	pageSize?: number
+	searchable?: boolean
+	title?: string
+	expanded?: boolean
+}
+
+const { data, id = '', pageSize = 50, searchable = true, title = 'JSON Data', expanded = false } = Astro.props
+
+const uniqueId = `json-viewer-${id || Math.random().toString(36).slice(2, 9)}`
+const viewerData = JSON.stringify(data)
+const viewerPageSize = pageSize
+const viewerSearchable = searchable
+const viewerTitle = title
+const viewerExpanded = expanded
+---
+
+<div
+	class="json-viewer-wrapper"
+	data-viewer-id={uniqueId}
+	data-viewer-data={viewerData}
+	data-viewer-page-size={viewerPageSize}
+	data-viewer-searchable={viewerSearchable}
+	data-viewer-title={viewerTitle}
+	data-viewer-expanded={viewerExpanded}
+>
+	<div class="not-prose w-full overflow-hidden rounded-lg border border-border bg-card dark:bg-card-dark">
+		<div
+			class="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-muted dark:bg-muted-dark"
+		>
+			<h3 class="text-sm font-semibold text-card-foreground dark:text-card-dark-foreground truncate">{title}</h3>
+			<div class="flex items-center gap-2">
+				{
+					searchable && (
+						<div class="relative">
+							<i class="i-lucide-search absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground dark:text-muted-dark-foreground" />
+							<input
+								type="text"
+								class="search-input pl-9 pr-3 py-1.5 w-48 md:w-64 rounded-md border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 dark:bg-background-dark dark:text-foreground-dark dark:border-input-dark dark:placeholder:text-muted-dark-foreground dark:focus:ring-ring-dark"
+								placeholder="Search keys or values..."
+							/>
+						</div>
+					)
+				}
+				<div class="flex items-center gap-1 border-l border-border pl-2 ml-1">
+					<button
+						class="expand-all-btn p-1.5 rounded-md hover:bg-accent transition-colors dark:hover:bg-accent-dark"
+						title="Expand all"
+					>
+						<i class="i-lucide-maximize-2 w-4 h-4 text-muted-foreground dark:text-muted-dark-foreground"
+						></i>
+					</button>
+					<button
+						class="collapse-all-btn p-1.5 rounded-md hover:bg-accent transition-colors dark:hover:bg-accent-dark"
+						title="Collapse all"
+					>
+						<i class="i-lucide-minimize-2 w-4 h-4 text-muted-foreground dark:text-muted-dark-foreground"
+						></i>
+					</button>
+					<button
+						class="copy-all-btn p-1.5 rounded-md hover:bg-accent transition-colors dark:hover:bg-accent-dark"
+						title="Copy JSON"
+					>
+						<i class="i-lucide-copy w-4 h-4 text-muted-foreground dark:text-muted-dark-foreground"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="overflow-auto max-h-96 md:max-h-[32rem] p-4">
+			<div class="json-content font-mono text-sm"></div>
+		</div>
+
+		<div
+			class="flex items-center justify-between gap-4 px-4 py-3 border-t border-border bg-muted/50 dark:bg-muted-dark/50"
+		>
+			<div class="text-xs text-muted-foreground dark:text-muted-dark-foreground">
+				<span class="node-count">0</span> nodes
+			</div>
+			<div class="flex items-center gap-1">
+				<button
+					class="prev-btn p-1.5 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:hover:bg-accent-dark"
+					disabled
+				>
+					<i class="i-lucide-chevron-left w-4 h-4 text-foreground dark:text-foreground-dark"></i>
+				</button>
+				<span class="page-info px-2 text-xs text-foreground dark:text-foreground-dark">1 / 1</span>
+				<button
+					class="next-btn p-1.5 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:hover:bg-accent-dark"
+					disabled
+				>
+					<i class="i-lucide-chevron-right w-4 h-4 text-foreground dark:text-foreground-dark"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	interface JsonNode {
+		id: string
+		key: string
+		value: any
+		type: 'string' | 'number' | 'boolean' | 'null' | 'object' | 'array'
+		depth: number
+		path: string
+		children?: JsonNode[]
+	}
+
+	interface JsonViewerState {
+		root: JsonNode | null
+		allNodes: JsonNode[]
+		expandedIds: Set<string>
+		currentPage: number
+		pageSize: number
+		searchTerm: string
+		initialExpand: boolean
+	}
+
+	class JsonViewer {
+		private wrapper: HTMLElement
+		private content: HTMLElement
+		private searchInput: HTMLInputElement | null
+		private prevBtn: HTMLButtonElement
+		private nextBtn: HTMLButtonElement
+		private pageInfo: HTMLElement
+		private nodeCount: HTMLElement
+		private copyBtn: HTMLButtonElement
+		private expandAllBtn: HTMLButtonElement
+		private collapseAllBtn: HTMLButtonElement
+		private state: JsonViewerState
+		private nodeIdCounter = 0
+
+		constructor(wrapper: HTMLElement) {
+			this.wrapper = wrapper
+			this.content = wrapper.querySelector('.json-content') as HTMLElement
+			this.searchInput = wrapper.querySelector('.search-input')
+			this.prevBtn = wrapper.querySelector('.prev-btn') as HTMLButtonElement
+			this.nextBtn = wrapper.querySelector('.next-btn') as HTMLButtonElement
+			this.pageInfo = wrapper.querySelector('.page-info') as HTMLElement
+			this.nodeCount = wrapper.querySelector('.node-count') as HTMLElement
+			this.copyBtn = wrapper.querySelector('.copy-all-btn') as HTMLButtonElement
+			this.expandAllBtn = wrapper.querySelector('.expand-all-btn') as HTMLButtonElement
+			this.collapseAllBtn = wrapper.querySelector('.collapse-all-btn') as HTMLButtonElement
+
+			const rawData = wrapper.dataset.viewerData
+			const pageSize = parseInt(wrapper.dataset.viewerPageSize || '50')
+			const searchable = wrapper.dataset.viewerSearchable !== 'false'
+			const initialExpand = wrapper.dataset.viewerExpanded === 'true'
+
+			this.state = {
+				root: null,
+				allNodes: [],
+				expandedIds: new Set(),
+				currentPage: 1,
+				pageSize: pageSize,
+				searchTerm: '',
+				initialExpand,
+			}
+
+			if (rawData) {
+				try {
+					const parsed = JSON.parse(rawData)
+					this.state.root = this.buildTree(parsed, 'root', 'root', 0)
+					this.collectNodes(this.state.root)
+					if (initialExpand) {
+						this.expandAllNodes(this.state.root)
+					}
+				} catch {
+					this.content.innerHTML = '<span class="text-destructive">Invalid JSON</span>'
+					return
+				}
+			}
+
+			this.setupEventListeners(searchable)
+			this.render()
+		}
+
+		private buildTree(value: any, key: string, path: string, depth: number): JsonNode {
+			const type = this.getType(value)
+			const node: JsonNode = {
+				id: `node-${++this.nodeIdCounter}`,
+				key,
+				value,
+				type,
+				depth,
+				path,
+			}
+
+			if (type === 'object' && value !== null) {
+				node.children = Object.entries(value).map(([k, v], i: number) =>
+					this.buildTree(v, k, `${path}.${i}`, depth + 1),
+				)
+			} else if (type === 'array') {
+				node.children = value.map((item: any, i: number) =>
+					this.buildTree(item, String(i), `${path}.${i}`, depth + 1),
+				)
+			}
+
+			return node
+		}
+
+		private getType(value: any): JsonNode['type'] {
+			if (value === null) return 'null'
+			if (Array.isArray(value)) return 'array'
+			return typeof value as JsonNode['type']
+		}
+
+		private collectNodes(node: JsonNode) {
+			this.state.allNodes.push(node)
+			if (node.children) {
+				node.children.forEach((child) => this.collectNodes(child))
+			}
+		}
+
+		private expandAllNodes(node: JsonNode) {
+			if (node.children && node.children.length > 0) {
+				this.state.expandedIds.add(node.id)
+				node.children.forEach((child) => this.expandAllNodes(child))
+			}
+		}
+
+		private toggleNode(nodeId: string) {
+			if (this.state.expandedIds.has(nodeId)) {
+				this.state.expandedIds.delete(nodeId)
+			} else {
+				this.state.expandedIds.add(nodeId)
+			}
+			this.render()
+		}
+
+		private getVisibleNodes(): JsonNode[] {
+			if (!this.state.root) return []
+
+			const result: JsonNode[] = []
+			const stack: JsonNode[] = [this.state.root]
+			const searchTerm = this.state.searchTerm.toLowerCase()
+
+			while (stack.length > 0) {
+				const node = stack.shift()!
+
+				const matchesSearch =
+					!searchTerm ||
+					node.key.toLowerCase().includes(searchTerm) ||
+					String(node.value).toLowerCase().includes(searchTerm) ||
+					(node.children || []).some(
+						(child) =>
+							child.key.toLowerCase().includes(searchTerm) ||
+							String(child.value).toLowerCase().includes(searchTerm) ||
+							(child.children || []).some(
+								(gc) =>
+									gc.key.toLowerCase().includes(searchTerm) ||
+									String(gc.value).toLowerCase().includes(searchTerm),
+							),
+					)
+
+				if (matchesSearch) {
+					result.push(node)
+				}
+
+				if (node.children && node.children.length > 0) {
+					if (this.state.expandedIds.has(node.id)) {
+						const childrenToAdd = searchTerm
+							? node.children.filter(
+									(child) =>
+										child.key.toLowerCase().includes(searchTerm) ||
+										String(child.value).toLowerCase().includes(searchTerm) ||
+										(child.children || []).some(
+											(gc) =>
+												gc.key.toLowerCase().includes(searchTerm) ||
+												String(gc.value).toLowerCase().includes(searchTerm),
+										),
+								)
+							: node.children
+						stack.unshift(...childrenToAdd)
+					}
+				}
+			}
+
+			return result
+		}
+
+		private renderNode(node: JsonNode, isLast: boolean): string {
+			const indent = node.depth * 1.5
+			const indentStyle = `padding-left: ${indent}rem`
+			const isExpandable = node.type === 'object' || node.type === 'array'
+			const isExpanded = this.state.expandedIds.has(node.id)
+			const hasChildren = node.children && node.children.length > 0
+
+			let collapseIcon = ''
+			let toggleBtn = ''
+			let valueHtml = ''
+
+			if (isExpandable && hasChildren) {
+				const childCount = node.children!.length
+				const bracket = node.type === 'array' ? `[${childCount}]` : `{${childCount}}`
+				collapseIcon = `<button class="toggle-btn w-4 h-4 flex items-center justify-center rounded hover:bg-accent/50 transition-colors mr-1 flex-shrink-0" data-id="${node.id}"><i class="i-lucide-${isExpanded ? 'chevron-down' : 'chevron-right'} w-3 h-3"></i></button>`
+				valueHtml = `<span class="bracket text-muted-foreground dark:text-muted-dark-foreground">${bracket}</span>`
+				toggleBtn = `<button class="toggle-value font-medium hover:underline text-foreground dark:text-foreground-dark mr-1" data-id="${node.id}">${node.type === 'array' ? '[' : '{'}</button>`
+			}
+
+			const keyHtml =
+				node.key !== 'root'
+					? `<span class="key text-primary dark:text-primary-dark">"${this.escapeHtml(node.key)}"</span><span class="colon text-muted-foreground dark:text-muted-dark-foreground">: </span>`
+					: ''
+
+			if (!isExpandable || !hasChildren) {
+				valueHtml = this.renderValue(node)
+			}
+
+			const comma = !isLast
+				? '<span class="comma text-muted-foreground dark:text-muted-dark-foreground">,</span>'
+				: ''
+
+			if (!isExpandable || !hasChildren) {
+				return `<div class="json-line flex items-start py-0.5" style="${indentStyle}" data-id="${node.id}">${collapseIcon}${keyHtml}${valueHtml}${comma}</div>`
+			}
+
+			return `<div class="json-line flex items-start py-0.5" style="${indentStyle}" data-id="${node.id}">${collapseIcon}${keyHtml}${toggleBtn}${valueHtml}</div>`
+		}
+
+		private renderValue(node: JsonNode): string {
+			switch (node.type) {
+				case 'string':
+					return `<span class="value-string text-green-600 dark:text-green-400">"${this.escapeHtml(node.value)}"</span>`
+				case 'number':
+					return `<span class="value-number text-blue-600 dark:text-blue-400">${node.value}</span>`
+				case 'boolean':
+					return `<span class="value-boolean text-purple-600 dark:text-purple-400">${node.value}</span>`
+				case 'null':
+					return `<span class="value-null text-muted-foreground dark:text-muted-dark-foreground italic">null</span>`
+				default:
+					return `<span class="text-foreground dark:text-foreground-dark">${this.escapeHtml(String(node.value))}</span>`
+			}
+		}
+
+		private escapeHtml(str: string): string {
+			return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+		}
+
+		private render() {
+			const visibleNodes = this.getVisibleNodes()
+			const totalPages = Math.ceil(visibleNodes.length / this.state.pageSize)
+			const start = (this.state.currentPage - 1) * this.state.pageSize
+			const pageNodes = visibleNodes.slice(start, start + this.state.pageSize)
+
+			if (!this.state.root) {
+				this.content.innerHTML = '<div class="text-muted-foreground py-4">No data</div>'
+				return
+			}
+
+			let html = ''
+			pageNodes.forEach((node, index) => {
+				const isLast = index === pageNodes.length - 1 || pageNodes[index + 1].depth <= node.depth
+				html += this.renderNode(node, isLast)
+			})
+
+			this.content.innerHTML = html
+
+			if (pageNodes.length === 0 && this.state.searchTerm) {
+				this.content.innerHTML = '<div class="text-muted-foreground py-4 text-center">No matching results</div>'
+			}
+
+			this.content.querySelectorAll('.toggle-btn, .toggle-value').forEach((btn) => {
+				btn.addEventListener('click', (e) => {
+					e.stopPropagation()
+					const id = (btn as HTMLElement).dataset.id
+					if (id) this.toggleNode(id)
+				})
+			})
+
+			this.nodeCount.textContent = String(visibleNodes.length)
+			this.pageInfo.textContent = `${this.state.currentPage} / ${totalPages || 1}`
+			this.prevBtn.disabled = this.state.currentPage <= 1
+			this.nextBtn.disabled = this.state.currentPage >= totalPages
+		}
+
+		private setupEventListeners(searchable: boolean) {
+			if (searchable && this.searchInput) {
+				this.searchInput.addEventListener('input', (e) => {
+					this.state.searchTerm = (e.target as HTMLInputElement).value
+					this.state.currentPage = 1
+					this.render()
+				})
+			}
+
+			this.prevBtn.addEventListener('click', () => {
+				if (this.state.currentPage > 1) {
+					this.state.currentPage--
+					this.render()
+				}
+			})
+
+			this.nextBtn.addEventListener('click', () => {
+				const totalPages = Math.ceil(this.getVisibleNodes().length / this.state.pageSize)
+				if (this.state.currentPage < totalPages) {
+					this.state.currentPage++
+					this.render()
+				}
+			})
+
+			this.expandAllBtn.addEventListener('click', () => {
+				if (this.state.root) this.expandAllNodes(this.state.root)
+				this.render()
+			})
+
+			this.collapseAllBtn.addEventListener('click', () => {
+				this.state.expandedIds.clear()
+				this.render()
+			})
+
+			this.copyBtn.addEventListener('click', () => {
+				const rawData = this.wrapper.dataset.viewerData
+				if (rawData) {
+					navigator.clipboard.writeText(rawData).then(() => {
+						const originalIcon = this.copyBtn.innerHTML
+						this.copyBtn.innerHTML = '<i class="i-lucide-check w-4 h-4 text-green-500"></i>'
+						setTimeout(() => {
+							this.copyBtn.innerHTML = originalIcon
+						}, 1500)
+					})
+				}
+			})
+		}
+	}
+
+	const wrappers = document.querySelectorAll('.json-viewer-wrapper')
+	wrappers.forEach((wrapper) => new JsonViewer(wrapper as HTMLElement))
+</script>

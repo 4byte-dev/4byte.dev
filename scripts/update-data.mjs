@@ -29,7 +29,7 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 
 		let mdFiles = []
 		try {
-			mdFiles = (await fs.readdir(contentDir)).filter((f) => f.endsWith('.md'))
+			mdFiles = (await fs.readdir(contentDir)).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
 		} catch {
 			console.log(`No content directory for language '${lang}': ${contentDir}`)
 			console.log('Skipping article generation.')
@@ -64,7 +64,7 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 
 			const catName = data.category?.trim()
 			if (catName) {
-				const existing = categories.find((c) => c.name === catName)
+				const existing = categories.find((c) => c.slug === catName)
 				if (existing) {
 					existing.articleCount = (existing.articleCount ?? 0) + 1
 				} else {
@@ -109,11 +109,6 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 					lines.push(`## New categories added for ${lang} (please add descriptions)`)
 					for (const c of addedCategories) lines.push(`- \`${c}\``)
 					lines.push('')
-				}
-				if (lines.length) {
-					const comment = lines.join('\n')
-					const { execFileSync } = await import('child_process')
-					execFileSync('gh', ['pr', 'comment', String(prNumber), '--body', comment])
 				}
 			}
 		}

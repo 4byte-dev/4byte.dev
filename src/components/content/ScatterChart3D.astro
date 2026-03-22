@@ -1,0 +1,536 @@
+---
+import type { DataPoint } from '../../utils/chartUtils'
+
+interface AxisConfig {
+	min?: number
+	max?: number
+	tickInterval?: number
+	label?: string
+}
+
+interface Props {
+	data?: DataPoint[]
+	id?: string
+	height?: number
+	colors?: string[]
+	animated?: boolean
+	pointSize?: number
+	pointOpacity?: number
+	showGrid?: boolean
+	xAxis?: AxisConfig
+	yAxis?: AxisConfig
+	zAxis?: AxisConfig
+	title?: string
+}
+
+const {
+	data = [],
+	id = '',
+	height = 400,
+	colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'],
+	animated = true,
+	pointSize = 8,
+	pointOpacity = 1,
+	showGrid = true,
+	xAxis = {},
+	yAxis = {},
+	zAxis = {},
+	title = '',
+} = Astro.props
+
+const chartId = `scatter3d-chart-${id || Math.random().toString(36).slice(2, 9)}`
+const chartData = JSON.stringify(data)
+const chartColors = JSON.stringify(colors)
+---
+
+<div
+	class="chart-wrapper"
+	data-chart-id={chartId}
+	data-chart-data={chartData}
+	data-chart-colors={chartColors}
+	data-chart-animated={animated}
+	data-chart-point-size={pointSize}
+	data-chart-point-opacity={pointOpacity}
+	data-chart-show-grid={showGrid}
+	data-chart-x-axis={JSON.stringify(xAxis)}
+	data-chart-y-axis={JSON.stringify(yAxis)}
+	data-chart-z-axis={JSON.stringify(zAxis)}
+	data-chart-title={title}
+	data-chart-height={height}
+	style="position: relative;"
+>
+	<div id={chartId} style={`min-height: ${height}px; width: 100%; position: relative;`}></div>
+	<div
+		class="chart-controls mt-9"
+		style="display: flex; gap: 8px; justify-content: flex-end; position: relative; z-index: 10;"
+	>
+		<button
+			class="chart-btn zoom-in"
+			title="Zoom In"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg
+			>
+		</button>
+		<button
+			class="chart-btn zoom-out"
+			title="Zoom Out"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><line x1="5" y1="12" x2="19" y2="12"></line></svg
+			>
+		</button>
+		<button
+			class="chart-btn reset"
+			title="Reset View"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg
+			>
+		</button>
+	</div>
+</div>
+
+<script>
+	import * as THREE from 'three'
+	import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+	import * as d3 from 'd3'
+	import { getThemeColors, getColor, createTooltip, showTooltip, hideTooltip } from '../../utils/chartUtils'
+
+	const CUBE = 1.8
+
+	const wrappers = document.querySelectorAll('.chart-wrapper[data-chart-id^="scatter3d-chart"]')
+
+	wrappers.forEach((wrapper) => {
+		const container = wrapper.querySelector('div') as HTMLElement
+		if (!container) return
+
+		const rawData = (wrapper as HTMLElement).dataset.chartData
+		const chartData: Array<{ x: number; y: number; z: number; color?: string; label?: string }> = rawData
+			? JSON.parse(rawData).map((d: { x: number; y: number; z?: number; color?: string; label?: string }) => ({
+					...d,
+					z: d.z ?? 0,
+				}))
+			: []
+
+		if (!chartData.length) return
+
+		const colors: string[] = JSON.parse((wrapper as HTMLElement).dataset.chartColors || '[]')
+		const animated = (wrapper as HTMLElement).dataset.chartAnimated !== 'false'
+		const pointSize = parseFloat((wrapper as HTMLElement).dataset.chartPointSize || '8')
+		const pointOpacity = parseFloat((wrapper as HTMLElement).dataset.chartPointOpacity || '1')
+		const showGrid = (wrapper as HTMLElement).dataset.chartShowGrid !== 'false'
+		const xAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartXAxis || '{}')
+		const yAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartYAxis || '{}')
+		const zAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartZAxis || '{}')
+		const chartHeight = parseInt((wrapper as HTMLElement).dataset.chartHeight || '400')
+		const chartTitle = (wrapper as HTMLElement).dataset.chartTitle || ''
+
+		const xMin = xAxisConfig.min ?? d3.min(chartData, (d) => d.x) ?? 0
+		const xMax = xAxisConfig.max ?? d3.max(chartData, (d) => d.x) ?? 1
+		const yMin = yAxisConfig.min ?? d3.min(chartData, (d) => d.y) ?? 0
+		const yMax = yAxisConfig.max ?? d3.max(chartData, (d) => d.y) ?? 1
+		const zMin = zAxisConfig.min ?? d3.min(chartData, (d) => d.z) ?? 0
+		const zMax = zAxisConfig.max ?? d3.max(chartData, (d) => d.z) ?? 1
+
+		const scaleX = d3.scaleLinear().domain([xMin, xMax]).range([0, CUBE])
+		const scaleY = d3.scaleLinear().domain([yMin, yMax]).range([0, CUBE])
+		const scaleZ = d3.scaleLinear().domain([zMin, zMax]).range([0, CUBE])
+
+		let scene: THREE.Scene
+		let camera: THREE.PerspectiveCamera
+		let renderer: THREE.WebGLRenderer
+		let controls: OrbitControls
+		let pointsGroup: THREE.Group
+		let raycaster: THREE.Raycaster
+		let mouse: THREE.Vector2
+		let hoveredMesh: THREE.Mesh | null = null
+
+		const DEFAULT_EYE = new THREE.Vector3(CUBE * 0.5, CUBE * 0.6, CUBE * 2.5)
+		const CENTER = new THREE.Vector3(CUBE / 2, CUBE / 2, CUBE / 2)
+
+		function makeLabel(
+			text: string,
+			position: THREE.Vector3,
+			colorHex: number,
+			scaleW = 0.28,
+			scaleH = 0.1,
+			fontPx = 28,
+		) {
+			const canvas = document.createElement('canvas')
+			canvas.width = 256
+			canvas.height = 64
+			const ctx = canvas.getContext('2d')!
+			ctx.clearRect(0, 0, 256, 64)
+			ctx.fillStyle = `#${colorHex.toString(16).padStart(6, '0')}`
+			ctx.font = `${fontPx}px monospace`
+			ctx.textAlign = 'center'
+			ctx.textBaseline = 'middle'
+			ctx.fillText(text, 128, 32)
+			const texture = new THREE.CanvasTexture(canvas)
+			texture.needsUpdate = true
+			const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false })
+			const sprite = new THREE.Sprite(mat)
+			sprite.position.copy(position)
+			sprite.scale.set(scaleW, scaleH, 1)
+			return sprite
+		}
+
+		function makeFaceGrid(
+			origin: THREE.Vector3,
+			uDir: THREE.Vector3,
+			vDir: THREE.Vector3,
+			divisions: number,
+			color: number,
+		) {
+			const points: THREE.Vector3[] = []
+			for (let i = 0; i <= divisions; i++) {
+				const t = (i / divisions) * CUBE
+				points.push(origin.clone().addScaledVector(vDir, t))
+				points.push(origin.clone().addScaledVector(uDir, CUBE).addScaledVector(vDir, t))
+				points.push(origin.clone().addScaledVector(uDir, t))
+				points.push(origin.clone().addScaledVector(uDir, t).addScaledVector(vDir, CUBE))
+			}
+			const geo = new THREE.BufferGeometry().setFromPoints(points)
+			const mat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.35 })
+			return new THREE.LineSegments(geo, mat)
+		}
+
+		function initChart() {
+			container.innerHTML = ''
+			const isDark = document.documentElement.classList.contains('dark')
+			const textColor = isDark ? 0xd4d4d8 : 0x52525b
+			const gridColor = isDark ? 0x3f3f46 : 0xdde1e7
+			const axisColor = isDark ? 0x71717a : 0x94a3b8
+			const faceColor = isDark ? 0x18181b : 0xf1f5f9
+			const bgCss = isDark ? '#0c0c0e' : '#f8fafc'
+
+			if (chartTitle) {
+				const titleEl = document.createElement('div')
+				titleEl.textContent = chartTitle
+				titleEl.style.cssText = `
+					font-size: 15px; font-weight: 600; text-align: center;
+					color: ${isDark ? '#e4e4e7' : '#27272a'}; margin-bottom: 4px;
+				`
+				container.prepend(titleEl)
+			}
+
+			const width = container.clientWidth
+			const h = chartHeight
+
+			scene = new THREE.Scene()
+
+			scene.add(new THREE.AmbientLight(0xffffff, 0.7))
+			const dLight = new THREE.DirectionalLight(0xffffff, 0.9)
+			dLight.position.set(3, 5, 3)
+			scene.add(dLight)
+			const dLight2 = new THREE.DirectionalLight(0xffffff, 0.25)
+			dLight2.position.set(-2, -1, -2)
+			scene.add(dLight2)
+
+			camera = new THREE.PerspectiveCamera(40, width / h, 0.01, 200)
+			camera.position.copy(DEFAULT_EYE)
+			camera.lookAt(CENTER)
+
+			renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+			renderer.setSize(width, h)
+			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+			renderer.setClearColor(0x000000, 0)
+			renderer.domElement.style.cssText = `position:absolute;top:0;left:0;z-index:1;border-radius:8px;`
+			container.style.position = 'relative'
+			container.appendChild(renderer.domElement)
+
+			const tooltip = createTooltip(container)
+
+			controls = new OrbitControls(camera, renderer.domElement)
+			controls.enableDamping = true
+			controls.dampingFactor = 0.06
+			controls.rotateSpeed = 0.7
+			controls.zoomSpeed = 1.2
+			controls.minDistance = CUBE * 0.5
+			controls.maxDistance = CUBE * 8
+			controls.target.copy(CENTER)
+			controls.update()
+
+			const corners = [
+				[0, 0, 0],
+				[CUBE, 0, 0],
+				[CUBE, CUBE, 0],
+				[0, CUBE, 0],
+				[0, 0, CUBE],
+				[CUBE, 0, CUBE],
+				[CUBE, CUBE, CUBE],
+				[0, CUBE, CUBE],
+			].map(([x, y, z]) => new THREE.Vector3(x, y, z))
+
+			const edgePairs = [
+				[0, 1],
+				[1, 2],
+				[2, 3],
+				[3, 0],
+				[4, 5],
+				[5, 6],
+				[6, 7],
+				[7, 4],
+				[0, 4],
+				[1, 5],
+				[2, 6],
+				[3, 7],
+			]
+			const edgePoints: THREE.Vector3[] = []
+			edgePairs.forEach(([a, b]) => {
+				edgePoints.push(corners[a], corners[b])
+			})
+			const edgeGeo = new THREE.BufferGeometry().setFromPoints(edgePoints)
+			const edgeMat = new THREE.LineBasicMaterial({ color: axisColor, transparent: true, opacity: 0.6 })
+			scene.add(new THREE.LineSegments(edgeGeo, edgeMat))
+
+			if (showGrid) {
+				const DIVS = 6
+				scene.add(
+					makeFaceGrid(
+						new THREE.Vector3(0, 0, 0),
+						new THREE.Vector3(1, 0, 0),
+						new THREE.Vector3(0, 0, 1),
+						DIVS,
+						gridColor,
+					),
+				)
+				scene.add(
+					makeFaceGrid(
+						new THREE.Vector3(0, 0, 0),
+						new THREE.Vector3(1, 0, 0),
+						new THREE.Vector3(0, 1, 0),
+						DIVS,
+						gridColor,
+					),
+				)
+				scene.add(
+					makeFaceGrid(
+						new THREE.Vector3(0, 0, 0),
+						new THREE.Vector3(0, 0, 1),
+						new THREE.Vector3(0, 1, 0),
+						DIVS,
+						gridColor,
+					),
+				)
+			}
+
+			const TICKS = 5
+			const tickOffset = CUBE * 0.02
+
+			for (let i = 0; i <= TICKS; i++) {
+				const t = i / TICKS
+				const xVal = xMin + t * (xMax - xMin)
+				const yVal = yMin + t * (yMax - yMin)
+				const zVal = zMin + t * (zMax - zMin)
+				const xW = t * CUBE
+				const yW = t * CUBE
+				const zW = t * CUBE
+
+				scene.add(
+					makeLabel(
+						xVal.toFixed(1),
+						new THREE.Vector3(xW, -tickOffset, CUBE + tickOffset),
+						textColor,
+						0.2,
+						0.08,
+						24,
+					),
+				)
+				scene.add(
+					makeLabel(
+						yVal.toFixed(1),
+						new THREE.Vector3(-tickOffset * 1.5, yW, CUBE + tickOffset),
+						textColor,
+						0.2,
+						0.08,
+						24,
+					),
+				)
+				scene.add(
+					makeLabel(
+						zVal.toFixed(1),
+						new THREE.Vector3(-tickOffset * 1.5, -tickOffset, zW),
+						textColor,
+						0.2,
+						0.08,
+						24,
+					),
+				)
+			}
+
+			const xLabel = xAxisConfig.label || 'X'
+			const yLabel = yAxisConfig.label || 'Y'
+			const zLabel = zAxisConfig.label || 'Z'
+			scene.add(
+				makeLabel(
+					xLabel,
+					new THREE.Vector3(CUBE / 2, -tickOffset * 2.5, CUBE + tickOffset * 2),
+					textColor,
+					0.3,
+					0.1,
+					30,
+				),
+			)
+			scene.add(
+				makeLabel(
+					yLabel,
+					new THREE.Vector3(-tickOffset * 3, CUBE / 2, CUBE + tickOffset * 2),
+					textColor,
+					0.3,
+					0.1,
+					30,
+				),
+			)
+			scene.add(
+				makeLabel(
+					zLabel,
+					new THREE.Vector3(-tickOffset * 3, -tickOffset * 2.5, CUBE / 2),
+					textColor,
+					0.3,
+					0.1,
+					30,
+				),
+			)
+
+			pointsGroup = new THREE.Group()
+			const sphereGeo = new THREE.SphereGeometry(pointSize * 0.005, 20, 20)
+
+			chartData.forEach((d, i) => {
+				const color = new THREE.Color(d.color || getColor(i, colors))
+				const mat = new THREE.MeshStandardMaterial({
+					color,
+					transparent: pointOpacity < 1,
+					opacity: pointOpacity,
+					roughness: 0.35,
+					metalness: 0.15,
+				})
+				const mesh = new THREE.Mesh(sphereGeo, mat)
+				mesh.position.set(scaleX(d.x), scaleY(d.y), scaleZ(d.z))
+				mesh.userData = { index: i, originalColor: color.clone() }
+				pointsGroup.add(mesh)
+			})
+			scene.add(pointsGroup)
+
+			if (animated) {
+				pointsGroup.scale.setScalar(0)
+				const t0 = performance.now()
+				const dur = 700
+				function animateIn() {
+					const p = Math.min((performance.now() - t0) / dur, 1)
+					pointsGroup.scale.setScalar(1 - Math.pow(1 - p, 3))
+					if (p < 1) requestAnimationFrame(animateIn)
+				}
+				animateIn()
+			}
+
+			wrapper.querySelectorAll('.chart-btn').forEach((btn) => {
+				btn.addEventListener('click', () => {
+					if ((btn as HTMLElement).classList.contains('zoom-in')) {
+						controls.dollyIn(1.4)
+					} else if ((btn as HTMLElement).classList.contains('zoom-out')) {
+						controls.dollyOut(1.4)
+					} else {
+						// Smooth reset
+						const resetStart = performance.now()
+						const fromPos = camera.position.clone()
+						const toPos = DEFAULT_EYE.clone()
+						function resetAnim() {
+							const p = Math.min((performance.now() - resetStart) / 400, 1)
+							const e = 1 - Math.pow(1 - p, 3)
+							camera.position.lerpVectors(fromPos, toPos, e)
+							controls.target.copy(CENTER)
+							controls.update()
+							if (p < 1) requestAnimationFrame(resetAnim)
+						}
+						resetAnim()
+					}
+				})
+			})
+
+			raycaster = new THREE.Raycaster()
+			raycaster.params.Points = { threshold: 0.02 }
+			mouse = new THREE.Vector2()
+
+			renderer.domElement.addEventListener('mousemove', (e: MouseEvent) => {
+				const rect = renderer.domElement.getBoundingClientRect()
+				mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
+				mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+
+				raycaster.setFromCamera(mouse, camera)
+				const hits = raycaster.intersectObjects(pointsGroup.children, false)
+
+				if (hoveredMesh && (!hits.length || hits[0].object !== hoveredMesh)) {
+					;(hoveredMesh.material as THREE.MeshStandardMaterial).color.copy(hoveredMesh.userData.originalColor)
+					;(hoveredMesh.material as THREE.MeshStandardMaterial).emissive.set(0x000000)
+					hoveredMesh = null
+					hideTooltip(tooltip)
+				}
+
+				renderer.domElement.style.cursor = hits.length ? 'pointer' : 'grab'
+
+				if (hits.length) {
+					const mesh = hits[0].object as THREE.Mesh
+					if (mesh !== hoveredMesh) {
+						hoveredMesh = mesh
+						;(mesh.material as THREE.MeshStandardMaterial).color.set(0xffffff)
+						;(mesh.material as THREE.MeshStandardMaterial).emissive.set(0x444444)
+					}
+					const d = chartData[mesh.userData.index]
+					const lbl = d.label ? `<strong>${d.label}</strong><br/>` : ''
+					showTooltip(
+						tooltip,
+						e.offsetX,
+						e.offsetY,
+						`${lbl}x: ${d.x.toFixed(2)}<br/>y: ${d.y.toFixed(2)}<br/>z: ${d.z.toFixed(2)}`,
+						container.getBoundingClientRect(),
+					)
+				}
+			})
+
+			renderer.domElement.addEventListener('click', (e: MouseEvent) => {
+				const rect = renderer.domElement.getBoundingClientRect()
+				mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
+				mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+				raycaster.setFromCamera(mouse, camera)
+				const hits = raycaster.intersectObjects(pointsGroup.children, false)
+				if (hits.length) {
+					const d = chartData[(hits[0].object as THREE.Mesh).userData.index]
+					container.dispatchEvent(
+						new CustomEvent('chart:click', {
+							bubbles: true,
+							detail: { type: 'scatter3d', x: d.x, y: d.y, z: d.z, label: d.label },
+						}),
+					)
+				}
+			})
+
+			let rafId: number
+			function animate() {
+				rafId = requestAnimationFrame(animate)
+				controls.update()
+				renderer.render(scene, camera)
+			}
+			animate()
+			;(container as any).__cleanup = () => {
+				cancelAnimationFrame(rafId)
+				renderer.dispose()
+			}
+		}
+
+		const resizeObs = new ResizeObserver(() => {
+			if (!renderer || !camera) return
+			const w = container.clientWidth
+			camera.aspect = w / chartHeight
+			camera.updateProjectionMatrix()
+			renderer.setSize(w, chartHeight)
+		})
+		resizeObs.observe(container)
+
+		initChart()
+	})
+</script>

@@ -1,0 +1,118 @@
+---
+lang: 'tr'
+slug: 'supervised-learning-nedir'
+title: 'Supervised Learning Nedir?'
+excerpt: 'Supervised Learning, etiketlenmiş veri setiyle input ve output verisi arasındaki ilişkiyi anlayan makine öğrenmesi tekniğidir'
+category: 'machine-learning'
+tags: ['supervised-learning', 'teori']
+author: '@omerfdmrl'
+date: '2026-03-21'
+views: 0
+status: 'Published'
+---
+
+import CsvViewer from '../../../components/content/CsvViewer.astro'
+
+Supervised Learning (Denetimli Öğrenme), etiketlenmiş veri setiyle input (girdi) ve output (çıktı) verisi arasındaki ilişkiyi anlayan makine öğrenmesi tekniğidir.
+Input verisi ve o veriye karşılık gelen output daha önceden hazırlanır ve daha önce görmediği verilerin sonucunu tahmin etmeye çalışır.
+
+Eğitim sırasında modelin algoritması, input ve output verileri arasındaki potansiyel korelasyonları keşfetmek için veri kümelerini işler.
+Ardından modelin başarısını, başarılı şekilde eğitilip eğitilmediğini bulmak için farklı bir test veri setiyle Cross-Validation (çapraz doğrulama) uygulanır.
+
+Örnek bir veri seti aşağıdaki gibi görünür.
+
+<CsvViewer
+	data="Çalışma Saati,Sınav Puanı, Tip
+	1,42,egitim
+	2,48,egitim
+	4,61,egitim
+	5,67,egitim
+	6,74,egitim
+	8,86,egitim,
+	3,58,test,
+	9,95,test,
+	1,30,test,
+	7,82,test"
+	title="Öğrenci Çalışma ve Sınav Puanı Verisi"
+	pageSize={5}
+/>
+
+Yukarıdaki tabloda, çalışma saati (input) ile sınav puanı (output) arasındaki ilişkiyi görebiliriz. Modelimiz bu eğitim verisini inceleyerek aradaki matematiksel bağıntıyı öğrenir. Daha sonra, test verisindeki (örneğin 7 saat çalışma) bir durumu modele sorduğumuzda, daha önce öğrendiklerinden yola çıkarak bize tahmini bir sınav puanı (örneğin 82'ye yakın bir değer) üretir.
+
+## Çıktı Türlerine Göre Denetimli Öğrenme Çeşitleri
+
+Denetimli öğrenmede, tahmin etmeye çalıştığımız output'a göre kullanıcağımız yöntem de değişir. Temelde iki ana problem türü vardır:
+
+### Regresyon (Regression)
+
+Tahmin etmeye çalıştığımız çıktı nicel (quantitative) yani sürekli bir sayısal değerse, bu işleme regresyon denir.
+
+**Örneğin:** Yukarıdaki tabloda çalışma saatine bakarak sınav puanını (82.5, 90.1 gibi) tahmin etmek bir regresyon problemidir.
+Veya atmosferik ölçümlere bakarak yarınki ozon seviyesini tahmin etmek de bir nicel bir ölçümdür.
+
+### Sınıflandırma (Classification)
+
+Eğer tahmin etmeye çalıştığımız çıktı nitel (qualitative) yani belirli sınıf veya kategorilerden biriyse, buna sınıflandırma denir.
+Sınıflar arasında matematiksel olarak büyüklük-küçüklük ilişkisi yoktur.
+
+**Örneğin:** Meşhur _MNIST_ veriseti, el yazısı ile yazılmış rakam görseline bakıp bunun hangi rakam (0,1...8,9) olduğunu bulmak.
+
+Örnek bir veri göstermek gerekirse:
+
+<CsvViewer
+	data="Çanak Yaprak (cm),Taç Yaprak (cm),Tür
+	5.1,1.4,Setosa
+	4.9,1.4,Setosa
+	7.0,4.7,Versicolor
+	6.4,4.5,Versicolor
+	6.3,6.0,Virginica
+	5.8,5.1,Virginica"
+	title="İris Çiçeği Sınıflandırma Verisi (Fisher's Iris)"
+	pageSize={6}
+/>
+
+Yukarıdaki tabloda, bir çiçeğin fiziksel ölçümleri olan Çanak ve Taç yaprak uzunlukları bizim girdilerimizdir (X). Bu girdilere bakarak tahmin etmeye çalıştığımız Tür (Setosa, Versicolor, Virginica) ise bizim kategorik çıktımızdır (G).
+Model, bu ölçümler ile çiçek türleri arasındaki örüntüyü öğrenerek, doğada yeni bulduğumuz bir çiçeğin yapraklarını ölçtüğümüzde onun hangi türe ait olduğunu sınıflandırabilir.
+
+### Topluluk Öğrenmesi (Ensemble Learning)
+
+Regresyon veya sınıflandırma problemlerini çözerken her zaman tek bir modele bel bağlamak zorunda değiliz. İşte bu noktada Ensemble Learning (Topluluk Öğrenmesi) devreye girer. Bu yöntem, aynı görev için birden fazla modelin eğitildiği ve sonuçlarının bir araya getirildiği bir "üst düzey (meta)" yaklaşımdır. Havuzdaki tüm modellerin tahminleri birleştirilerek (örneğin ortalaması alınarak veya oylama yapılarak) problemi çözmek için en güçlü genel sonuç elde edilir.
+
+Bu büyük topluluk yapısının içinde çalışan her bir bireysel algoritmaya zayıf öğreniciler (weak learners) veya temel modeller (base models) adı verilir.
+
+Peki neden birden fazla zayıf öğreniciye ihtiyaç duyarız?
+
+Bazı zayıf öğrenicilerin yanlılığı (bias) yüksek olabilir (veriyi fazla basite indirgerler).
+
+Bazılarının ise varyansı (variance) yüksek olabilir (eğitim verisine aşırı ezber yapıp, yeni verilerde çuvallarlar).
+
+Teorik olarak Ensemble Learning, her bir temel modelin en iyi yönlerini bir araya getirerek bu ünlü yanlılık-varyans açmazını (bias-variance tradeoff) hafifletir. Tıpkı zor bir hastalığın teşhisi için tek bir doktorun fikrine güvenmek yerine, farklı uzmanlıklara sahip bir doktorlar kurulundan (konsilyum) ortak bir karar çıkarmak gibidir. Biri yanılsa bile, çoğunluğun kararı genellikle gerçeğe en yakın olanı verir.
+
+## Notasyonlar
+
+Literatürde veya farklı kaynaklarda araştırma yaparken, bu input ve output değerlerinin her zaman belirli matematiksel sembollerle ifade edildiğini göreceksin:
+
+- X (Girdi / Input): Modele verdiğimiz özellikleri temsil eder. Gözlemlediğimiz değerler genellikle küçük `x` ile, matrisler (tüm veri seti) ise büyük ve kalın harflerle ifade edilir.
+- Y (Nicel Çıktı) / G (Nitel Çıktı): Hedeflediğimiz gerçek sonuçlardır. Kategorik (Grup) çıktılar için genellikle `G` harfi de kullanılır.
+- $\hat{Y}$ (Tahmin / Prediction): Modelimizin ürettiği tahmini değeri ifade eder. Asıl amacımız, elimizdeki eğitim verisini (Training Data) kullanarak $\hat{Y}$ değerini gerçek $Y$ değerine en yakın hale getirecek kuralları bulmaktır.
+
+## Kategorik Verileri Bilgisayara Aktarmak
+
+Peki çıktı değerimiz sayı değil de "Başarılı/Başarısız" veya "Kedi/Köpek" gibi metinsel (nitel) verilerse bilgisayar bunu nasıl anlar?
+
+Modeller matematiksel denklemlerle çalıştığı için bu kategorileri sayılara çevirmemiz (kodlamamız) gerekir:
+
+- İkili Sınıflar: En kolay yöntemdir. "Hayatta kaldı" için `1`, "Öldü" için `0` (veya `-1` ve `1`) gibi binary (ikili) değerler atanır. Model tahminde bulunurken `.5` eşik değerini baz alabilir ($\hat{Y} > 0.5$ ise 1. sınıftır gibi).
+- Çoklu Sınıflar (Dummy Variables): İkiden fazla kategori varsa (Örn: Kırmızı, Mavi, Yeşil), Dummy Variables adı verilen bir yöntem kullanılır. Her renk için ayrı bir sütun açılır ve o anki veri hangi renkse o sütun `1` (açık), diğerleri `1` (kapalı) olacak şekilde vektörler oluşturulur.
+
+<CsvViewer
+	data="Araç,Fiyat (TL),Renk_Kirmizi,Renk_Mavi,Renk_Yesil
+	Araç A,850000,1,0,0
+	Araç B,820000,0,1,0
+	Araç C,790000,0,0,1
+	Araç D,860000,1,0,0"
+	title="Kukla Değişkenler (Dummy Variables) Uygulanmış Veri Seti"
+	pageSize={4}
+/>
+
+Dikkat ederseniz, "Araç A" kırmızı olduğu için sadece Renk_Kirmizi sütunu 1 değerini aldı. Artık modelimiz metinlerle değil, tamamen 1 ve 0'lardan oluşan matematiksel matrislerle çalışmaya hazır!

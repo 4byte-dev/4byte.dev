@@ -1,0 +1,431 @@
+---
+import type { DataPoint } from '../../utils/chartUtils'
+
+interface AxisConfig {
+	min?: number
+	max?: number
+	tickInterval?: number
+}
+
+interface Props {
+	data?: DataPoint[]
+	id?: string
+	height?: number
+	colors?: string[]
+	animated?: boolean
+	showDots?: boolean
+	showGrid?: boolean
+	strokeWidth?: number
+	pointSize?: number
+	xAxis?: AxisConfig
+	yAxis?: AxisConfig
+	title?: string
+}
+
+const {
+	data = [],
+	id = '',
+	height = 300,
+	colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'],
+	animated = true,
+	showDots = true,
+	showGrid = true,
+	strokeWidth = 2.5,
+	pointSize = 5,
+	xAxis = {},
+	yAxis = {},
+	title = '',
+} = Astro.props
+
+const chartId = `line-chart-${id || Math.random().toString(36).slice(2, 9)}`
+const chartData = JSON.stringify(data)
+const chartColors = JSON.stringify(colors)
+---
+
+<div
+	class="chart-wrapper"
+	data-chart-id={chartId}
+	data-chart-data={chartData}
+	data-chart-colors={chartColors}
+	data-chart-animated={animated}
+	data-chart-show-dots={showDots}
+	data-chart-show-grid={showGrid}
+	data-chart-stroke-width={strokeWidth}
+	data-chart-point-size={pointSize}
+	data-chart-x-axis={JSON.stringify(xAxis)}
+	data-chart-y-axis={JSON.stringify(yAxis)}
+	data-chart-title={title}
+	data-chart-height={height}
+>
+	<div id={chartId} style={`min-height: ${height}px; width: 100%;`}></div>
+	<div class="chart-controls" style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">
+		<button
+			class="chart-btn zoom-in"
+			title="Zoom In"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg
+			>
+		</button>
+		<button
+			class="chart-btn zoom-out"
+			title="Zoom Out"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><line x1="5" y1="12" x2="19" y2="12"></line></svg
+			>
+		</button>
+		<button
+			class="chart-btn reset"
+			title="Reset"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg
+			>
+		</button>
+	</div>
+</div>
+
+<script>
+	import * as d3 from 'd3'
+	import { getThemeColors, getColor, createTooltip, showTooltip, hideTooltip } from '../../utils/chartUtils'
+
+	const wrappers = document.querySelectorAll('.chart-wrapper[data-chart-id^="line-chart"]')
+
+	wrappers.forEach((wrapper) => {
+		const container = wrapper.querySelector('div') as HTMLElement
+		if (!container) return
+
+		const rawData = (wrapper as HTMLElement).dataset.chartData
+		const chartData: Array<{ x: number; y: number; label?: string; color?: string }> = rawData
+			? JSON.parse(rawData)
+			: []
+		const colors: string[] = JSON.parse((wrapper as HTMLElement).dataset.chartColors || '[]')
+		const animated = (wrapper as HTMLElement).dataset.chartAnimated !== 'false'
+		const showDots = (wrapper as HTMLElement).dataset.chartShowDots !== 'false'
+		const showGrid = (wrapper as HTMLElement).dataset.chartShowGrid !== 'false'
+		const strokeWidth = parseFloat((wrapper as HTMLElement).dataset.chartStrokeWidth || '2.5')
+		const pointSize = parseFloat((wrapper as HTMLElement).dataset.chartPointSize || '5')
+		const xAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartXAxis || '{}')
+		const yAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartYAxis || '{}')
+		const chartTitle = (wrapper as HTMLElement).dataset.chartTitle || ''
+		const chartHeight = parseInt((wrapper as HTMLElement).dataset.chartHeight || '300')
+		const chartId = parseInt((wrapper as HTMLElement).dataset.chartId || 'uid')
+
+		if (!chartData.length) return
+
+		const margin = { top: 20, right: 20, bottom: 40, left: 60 }
+		const tooltip = createTooltip(container)
+
+		function applyAxisStyles(axisG: d3.Selection<SVGGElement, unknown, null, undefined>, textColor: string) {
+			const { axisColor } = getThemeColors()
+			axisG.select('.domain').style('stroke', axisColor).style('stroke-width', 1.5)
+			axisG.selectAll('.tick line').style('stroke', axisColor).style('stroke-width', 1)
+			axisG
+				.selectAll('.tick text')
+				.attr('fill', textColor)
+				.style('fill', textColor)
+				.attr('font-size', '12px')
+				.attr('font-family', 'inherit')
+				.style('font-weight', '500')
+		}
+
+		function renderGrid(
+			g: d3.Selection<SVGGElement, unknown, null, undefined>,
+			y: d3.ScaleLinear<number, number>,
+			w: number,
+			gridColor: string,
+		) {
+			const gridG = g.append('g').attr('class', 'grid')
+			gridG.call(
+				d3
+					.axisLeft(y)
+					.tickSize(-w)
+					.tickFormat(() => ''),
+			)
+			gridG.selectAll('line').style('stroke', gridColor).style('stroke-dasharray', '3,3').style('stroke-width', 1)
+			gridG.select('.domain').remove()
+			return gridG
+		}
+
+		function initChart() {
+			container.innerHTML = ''
+			const width = container.clientWidth
+			const h = chartHeight
+			const innerWidth = width - margin.left - margin.right
+			const innerHeight = h - margin.top - margin.bottom
+
+			if (chartTitle) {
+				const titleEl = document.createElement('div')
+				titleEl.className = 'chart-title'
+				titleEl.textContent = chartTitle
+				titleEl.style.cssText = `
+					font-size: 16px;
+					font-weight: 600;
+					text-align: center;
+					color: ${getThemeColors().textColor};
+				`
+				container.appendChild(titleEl)
+			}
+
+			const svg = d3
+				.select(container)
+				.append('svg')
+				.attr('width', width)
+				.attr('height', h)
+				.attr('viewBox', `0 0 ${width} ${h}`)
+				.attr('preserveAspectRatio', 'xMidYMid meet')
+				.style('overflow', 'hidden')
+				.style('cursor', 'grab')
+
+			const defs = svg.append('defs')
+			const clipId = `clip-${chartId}`
+			defs.append('clipPath')
+				.attr('id', clipId)
+				.append('rect')
+				.attr('width', innerWidth)
+				.attr('height', innerHeight)
+			const gradient = defs
+				.append('linearGradient')
+				.attr('id', `line-glow-${chartId}`)
+				.attr('gradientUnits', 'userSpaceOnUse')
+				.attr('x1', 0)
+				.attr('y1', 0)
+				.attr('x2', 0)
+				.attr('y2', innerHeight)
+			gradient.append('stop').attr('offset', '0%').attr('stop-color', colors[0]).attr('stop-opacity', 0.3)
+			gradient.append('stop').attr('offset', '100%').attr('stop-color', colors[0]).attr('stop-opacity', 0)
+
+			const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+			const chartContent = g.append('g').attr('clip-path', `url(#${clipId})`)
+			const { textColor, gridColor } = getThemeColors()
+
+			const x = d3
+				.scalePoint()
+				.domain(chartData.map((d) => d.label || String(d.x)))
+				.range([0, innerWidth])
+
+			const yMin = yAxisConfig.min ?? 0
+			const yMax = yAxisConfig.max ?? d3.max(chartData, (d) => d.y)! * 1.1
+
+			const y = d3.scaleLinear().domain([yMin, yMax]).nice().range([innerHeight, 0])
+
+			if (showGrid) {
+				renderGrid(g, y, innerWidth, gridColor)
+			}
+
+			const xAxisG = g.append('g').attr('class', 'x-axis').attr('transform', `translate(0,${innerHeight})`)
+			xAxisG.call(d3.axisBottom(x))
+			applyAxisStyles(xAxisG, textColor)
+
+			const yAxisG = g.append('g').attr('class', 'y-axis')
+			yAxisG.call(d3.axisLeft(y).ticks(5))
+			applyAxisStyles(yAxisG, textColor)
+
+			const line = d3
+				.line<{ x: number; y: number; label?: string }>()
+				.x((d) => x(d.label || String(d.x))!)
+				.y((d) => y(d.y))
+				.curve(d3.curveMonotoneX)
+
+			const area = d3
+				.area<{ x: number; y: number; label?: string }>()
+				.x((d) => x(d.label || String(d.x))!)
+				.y0(innerHeight)
+				.y1((d) => y(d.y))
+				.curve(d3.curveMonotoneX)
+
+			chartContent
+				.append('path')
+				.datum(chartData)
+				.attr('class', 'area-fill')
+				.attr('fill', `url(#line-glow-${chartId})`)
+				.attr('d', area)
+
+			const linePath = chartContent
+				.append('path')
+				.datum(chartData)
+				.attr('class', 'line-path')
+				.attr('fill', 'none')
+				.attr('stroke', colors[0])
+				.attr('stroke-width', strokeWidth)
+				.attr('d', line)
+				.style('filter', `drop-shadow(0 0 4px ${colors[0]}50)`)
+
+			if (animated) {
+				const totalLength = (linePath.node() as SVGPathElement).getTotalLength()
+				linePath
+					.attr('stroke-dasharray', `${totalLength} ${totalLength}`)
+					.attr('stroke-dashoffset', totalLength)
+					.transition()
+					.duration(1200)
+					.ease(d3.easeCubicOut)
+					.attr('stroke-dashoffset', 0)
+			}
+
+			if (showDots) {
+				const dots = chartContent
+					.selectAll('.dot')
+					.data(chartData)
+					.enter()
+					.append('circle')
+					.attr('class', 'dot')
+					.attr('cx', (d) => x(d.label || String(d.x))!)
+					.attr('cy', (d) => y(d.y))
+					.attr('r', pointSize)
+					.attr('fill', colors[0])
+					.attr('stroke', '#fff')
+					.attr('stroke-width', 2)
+					.style('cursor', 'pointer')
+
+				dots.on('mousemove', function (event, d) {
+					d3.select(this)
+						.transition()
+						.duration(150)
+						.attr('r', pointSize + 3)
+						.style('filter', `drop-shadow(0 0 6px ${colors[0]})`)
+
+					const labelText = d.label ? `<strong>${d.label}</strong><br/>` : ''
+					showTooltip(
+						tooltip,
+						event.offsetX,
+						event.offsetY,
+						`${labelText}y: ${d.y.toLocaleString()}`,
+						container.getBoundingClientRect(),
+					)
+				})
+
+				dots.on('mouseleave', function () {
+					d3.select(this)
+						.transition()
+						.duration(150)
+						.attr('r', pointSize)
+						.style('filter', `drop-shadow(0 0 4px ${colors[0]}50)`)
+
+					hideTooltip(tooltip)
+				})
+
+				if (animated) {
+					dots.attr('opacity', 0)
+						.transition()
+						.duration(400)
+						.delay((_, i) => 800 + i * 100)
+						.attr('opacity', 1)
+				}
+			}
+
+			const hoverLine = g
+				.append('line')
+				.attr('class', 'hover-line')
+				.attr('y1', 0)
+				.attr('y2', innerHeight)
+				.attr('stroke', gridColor)
+				.attr('stroke-width', 1)
+				.attr('stroke-dasharray', '4,4')
+				.style('opacity', 0)
+				.style('pointer-events', 'none')
+
+			const overlay = g
+				.append('rect')
+				.attr('width', innerWidth)
+				.attr('height', innerHeight)
+				.attr('fill', 'transparent')
+				.style('cursor', 'crosshair')
+
+			overlay.on('mousemove', function (event) {
+				const [mx] = d3.pointer(event)
+				const n = chartData.length
+				const step = innerWidth / Math.max(n - 1, 1)
+				const rawIdx = mx / step
+				const idx = Math.max(0, Math.min(n - 1, Math.round(rawIdx)))
+				const d = chartData[idx]
+				if (!d) return
+
+				hoverLine
+					.attr('x1', x(d.label || String(d.x))!)
+					.attr('x2', x(d.label || String(d.x))!)
+					.style('opacity', 1)
+
+				const labelText = d.label ? `<strong>${d.label}</strong><br/>` : ''
+				showTooltip(
+					tooltip,
+					event.offsetX,
+					event.offsetY,
+					`${labelText}y: ${d.y.toLocaleString()}`,
+					container.getBoundingClientRect(),
+				)
+			})
+
+			overlay.on('mouseleave', function () {
+				hoverLine.style('opacity', 0)
+				hideTooltip(tooltip)
+			})
+
+			const zoom = d3
+				.zoom<SVGSVGElement, unknown>()
+				.scaleExtent([1, chartData.length])
+				.translateExtent([
+					[0, 0],
+					[innerWidth, innerHeight],
+				])
+				.on('zoom', (event) => {
+					const k = event.transform.k
+					const offset = -event.transform.x / k
+					const zoomedX = d3
+						.scalePoint()
+						.domain(chartData.map((d) => d.label || String(d.x)))
+						.range([offset, innerWidth + offset])
+
+					const newLine = d3
+						.line<{ x: number; y: number; label?: string }>()
+						.x((d) => zoomedX(d.label || String(d.x))!)
+						.y((d) => y(d.y))
+						.curve(d3.curveMonotoneX)
+
+					const newArea = d3
+						.area<{ x: number; y: number; label?: string }>()
+						.x((d) => zoomedX(d.label || String(d.x))!)
+						.y0(innerHeight)
+						.y1((d) => y(d.y))
+						.curve(d3.curveMonotoneX)
+
+					linePath.attr('d', newLine(chartData) || '')
+					chartContent.select('.area-fill').attr('d', newArea(chartData) || '')
+					xAxisG.call(d3.axisBottom(zoomedX))
+					applyAxisStyles(xAxisG, textColor)
+
+					if (showDots) {
+						chartContent
+							.selectAll<SVGCircleElement, { x: number; y: number; label?: string }>('.dot')
+							.attr('cx', (d) => zoomedX(d.label || String(d.x))!)
+					}
+
+					hoverLine
+						.attr('x1', zoomedX(chartData[0].label || String(chartData[0].x))!)
+						.attr('x2', zoomedX(chartData[0].label || String(chartData[0].x))!)
+				})
+
+			svg.call(zoom)
+
+			const zoomBtns = wrapper.querySelectorAll('.chart-btn')
+			zoomBtns.forEach((btn) => {
+				btn.addEventListener('click', () => {
+					if ((btn as HTMLElement).classList.contains('zoom-in')) {
+						svg.transition().duration(300).call(zoom.scaleBy, 1.5)
+					} else if ((btn as HTMLElement).classList.contains('zoom-out')) {
+						svg.transition().duration(300).call(zoom.scaleBy, 0.67)
+					} else {
+						svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity)
+					}
+				})
+			})
+		}
+
+		const observer = new ResizeObserver(() => initChart())
+		observer.observe(container)
+		initChart()
+	})
+</script>

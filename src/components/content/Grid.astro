@@ -1,0 +1,112 @@
+---
+interface ColumnConfig {
+	sm?: number
+	md?: number
+	lg?: number
+	xl?: number
+	'2xl'?: number
+}
+
+interface Props {
+	columns?: number | ColumnConfig
+	gap?: number
+	mobileColumns?: number
+	minItemWidth?: string
+	class?: string
+}
+
+const { columns = 1, gap = 4, mobileColumns, minItemWidth, class: className = '' } = Astro.props
+
+const gapValue = `${gap * 0.25}rem`
+---
+
+<div
+	class={`grid ${className}`}
+	style={`gap: ${gapValue}; ${minItemWidth ? `--min-item-width: ${minItemWidth}` : ''}`}
+	data-columns={JSON.stringify(columns)}
+	data-mobile-columns={mobileColumns}
+>
+	<slot />
+</div>
+
+<style>
+	.grid {
+		display: grid;
+	}
+
+	.grid[data-columns] {
+		grid-template-columns: repeat(var(--col-mobile, 1), 1fr);
+	}
+
+	@media (min-width: 640px) {
+		.grid[data-columns] {
+			grid-template-columns: repeat(var(--col-sm, 1), 1fr);
+		}
+	}
+
+	@media (min-width: 768px) {
+		.grid[data-columns] {
+			grid-template-columns: repeat(var(--col-md, 1), 1fr);
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.grid[data-columns] {
+			grid-template-columns: repeat(var(--col-lg, 1), 1fr);
+		}
+	}
+
+	@media (min-width: 1280px) {
+		.grid[data-columns] {
+			grid-template-columns: repeat(var(--col-xl, 1), 1fr);
+		}
+	}
+
+	@media (min-width: 1536px) {
+		.grid[data-columns] {
+			grid-template-columns: repeat(var(--col-2xl, 1), 1fr);
+		}
+	}
+
+	.grid :global([data-grid-item]) {
+		min-width: var(--min-item-width, 0);
+	}
+</style>
+
+<script>
+	function initGrid() {
+		const grids = document.querySelectorAll('.grid[data-columns]')
+
+		grids.forEach((grid) => {
+			const el = grid as HTMLElement
+			const columnsRaw = el.dataset.columns
+			const mobileColumns = el.dataset.mobileColumns
+
+			if (columnsRaw) {
+				const columns = JSON.parse(columnsRaw)
+
+				if (typeof columns === 'number') {
+					el.style.setProperty('--col-mobile', String(mobileColumns || columns))
+					el.style.setProperty('--col-sm', String(columns))
+					el.style.setProperty('--col-md', String(columns))
+					el.style.setProperty('--col-lg', String(columns))
+					el.style.setProperty('--col-xl', String(columns))
+					el.style.setProperty('--col-2xl', String(columns))
+				} else {
+					el.style.setProperty('--col-mobile', String(mobileColumns || columns.sm || 1))
+					el.style.setProperty('--col-sm', String(columns.sm || 1))
+					el.style.setProperty('--col-md', String(columns.md || columns.sm || 1))
+					el.style.setProperty('--col-lg', String(columns.lg || columns.md || columns.sm || 1))
+					el.style.setProperty('--col-xl', String(columns.xl || columns.lg || columns.md || columns.sm || 1))
+					el.style.setProperty(
+						'--col-2xl',
+						String(columns['2xl'] || columns.xl || columns.lg || columns.md || columns.sm || 1),
+					)
+				}
+			}
+		})
+	}
+
+	initGrid()
+	document.addEventListener('astro:after-swap', initGrid)
+</script>

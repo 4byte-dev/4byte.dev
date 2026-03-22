@@ -1,0 +1,462 @@
+---
+interface Props {
+	data?: Record<string, any>[]
+	csvData?: string
+	id?: string
+	pageSize?: number
+	searchable?: boolean
+	sortable?: boolean
+	title?: string
+	delimiter?: string
+}
+
+const {
+	data,
+	csvData,
+	id = '',
+	pageSize = 50,
+	searchable = true,
+	sortable = true,
+	title = 'CSV Data',
+	delimiter = ',',
+} = Astro.props
+
+const uniqueId = `csv-viewer-${id || Math.random().toString(36).slice(2, 9)}`
+const viewerData = csvData ? JSON.stringify(csvData) : JSON.stringify(data || [])
+const viewerPageSize = pageSize
+const viewerSearchable = searchable
+const viewerSortable = sortable
+const viewerTitle = title
+const viewerDelimiter = delimiter
+---
+
+<div
+	class="csv-viewer-wrapper"
+	data-viewer-id={uniqueId}
+	data-viewer-data={viewerData}
+	data-viewer-page-size={viewerPageSize}
+	data-viewer-searchable={viewerSearchable}
+	data-viewer-sortable={viewerSortable}
+	data-viewer-title={viewerTitle}
+	data-viewer-delimiter={viewerDelimiter}
+>
+	<div class="not-prose w-full overflow-hidden rounded-lg border border-border bg-card dark:bg-card-dark">
+		<div
+			class="flex items-center justify-between gap-4 px-4 py-3 border-b border-border bg-muted dark:bg-muted-dark"
+		>
+			<h3 class="text-sm font-semibold text-card-foreground dark:text-card-dark-foreground truncate">{title}</h3>
+			<div class="flex items-center gap-2">
+				{
+					searchable && (
+						<div class="relative">
+							<i class="i-lucide-search absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground dark:text-muted-dark-foreground" />
+							<input
+								type="text"
+								class="search-input pl-9 pr-3 py-1.5 w-48 md:w-64 rounded-md border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 dark:bg-background-dark dark:text-foreground-dark dark:border-input-dark dark:placeholder:text-muted-dark-foreground dark:focus:ring-ring-dark"
+								placeholder="Search..."
+							/>
+						</div>
+					)
+				}
+				<button
+					class="copy-all-btn p-1.5 rounded-md hover:bg-accent transition-colors dark:hover:bg-accent-dark"
+					title="Copy all data"
+				>
+					<i class="i-lucide-copy w-4 h-4 text-muted-foreground dark:text-muted-dark-foreground"></i>
+				</button>
+			</div>
+		</div>
+
+		<div class="overflow-x-auto max-h-96 md:max-h-[32rem]">
+			<table class="data-table w-full text-sm text-left">
+				<thead class="sticky top-0 bg-muted dark:bg-muted-dark text-foreground dark:text-foreground-dark">
+					<tr></tr>
+				</thead>
+				<tbody class="table-body"></tbody>
+			</table>
+		</div>
+
+		<div
+			class="flex items-center justify-between gap-4 px-4 py-3 border-t border-border bg-muted/50 dark:bg-muted-dark/50"
+		>
+			<div class="text-xs text-muted-foreground dark:text-muted-dark-foreground">
+				<span class="row-count">0</span> rows
+			</div>
+			<div class="flex items-center gap-1">
+				<button
+					class="prev-btn p-1.5 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:hover:bg-accent-dark"
+					disabled
+				>
+					<i class="i-lucide-chevron-left w-4 h-4 text-foreground dark:text-foreground-dark"></i>
+				</button>
+				<span class="page-info px-2 text-xs text-foreground dark:text-foreground-dark">1 / 1</span>
+				<button
+					class="next-btn p-1.5 rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:hover:bg-accent-dark"
+					disabled
+				>
+					<i class="i-lucide-chevron-right w-4 h-4 text-foreground dark:text-foreground-dark"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	interface SortConfig {
+		column: string
+		direction: 'asc' | 'desc'
+	}
+
+	interface CsvViewerState {
+		allData: Record<string, any>[]
+		filteredData: Record<string, any>[]
+		columns: string[]
+		currentPage: number
+		pageSize: number
+		sortConfig: SortConfig | null
+		searchTerm: string
+		isRawCsv: boolean
+		sortable: boolean
+	}
+
+	class CsvViewer {
+		private _wrapper: HTMLElement
+		private table: HTMLTableElement
+		private thead: HTMLTableSectionElement
+		private tbody: HTMLTableSectionElement
+		private searchInput: HTMLInputElement | null
+		private prevBtn: HTMLButtonElement
+		private nextBtn: HTMLButtonElement
+		private pageInfo: HTMLElement
+		private rowCount: HTMLElement
+		private copyBtn: HTMLButtonElement
+		private state: CsvViewerState
+		private sortDirection: Map<string, HTMLTableCellElement> = new Map()
+
+		constructor(wrapper: HTMLElement) {
+			this._wrapper = wrapper
+			this.table = wrapper.querySelector('.data-table') as HTMLTableElement
+			this.thead = this.table.querySelector('thead') as HTMLTableSectionElement
+			this.tbody = this.table.querySelector('.table-body') as HTMLTableSectionElement
+			this.searchInput = wrapper.querySelector('.search-input')
+			this.prevBtn = wrapper.querySelector('.prev-btn') as HTMLButtonElement
+			this.nextBtn = wrapper.querySelector('.next-btn') as HTMLButtonElement
+			this.pageInfo = wrapper.querySelector('.page-info') as HTMLElement
+			this.rowCount = wrapper.querySelector('.row-count') as HTMLElement
+			this.copyBtn = wrapper.querySelector('.copy-all-btn') as HTMLButtonElement
+
+			const rawData = this._wrapper.dataset.viewerData
+			const pageSize = parseInt(wrapper.dataset.viewerPageSize || '50')
+			const searchable = wrapper.dataset.viewerSearchable !== 'false'
+			const sortable = wrapper.dataset.viewerSortable !== 'false'
+			const delimiter = wrapper.dataset.viewerDelimiter || ','
+
+			let parsedData: Record<string, any>[] = []
+			let isRawCsv = false
+
+			if (rawData) {
+				try {
+					const parsed = JSON.parse(rawData)
+					if (Array.isArray(parsed)) {
+						parsedData = parsed
+					} else if (typeof parsed === 'string') {
+						parsedData = this.parseRawCsv(parsed, delimiter)
+						isRawCsv = parsedData.length > 0
+					}
+				} catch {
+					parsedData = this.parseRawCsv(rawData, delimiter)
+					isRawCsv = parsedData.length > 0
+				}
+			}
+
+			this.state = {
+				allData: parsedData,
+				filteredData: [],
+				columns: [],
+				currentPage: 1,
+				pageSize: pageSize,
+				sortConfig: null,
+				searchTerm: '',
+				isRawCsv,
+				sortable,
+			}
+
+			this.init()
+			this.setupEventListeners(searchable)
+		}
+
+		private parseRawCsv(csvString: string, delimiter: string): Record<string, any>[] {
+			const lines = csvString.trim().split('\n')
+			if (lines.length === 0) return []
+
+			const delimiterChar = delimiter || ','
+			const result: Record<string, any>[] = []
+			const headers = this.parseCsvLine(lines[0], delimiterChar)
+
+			for (let i = 1; i < lines.length; i++) {
+				const values = this.parseCsvLine(lines[i], delimiterChar)
+				const row: Record<string, any> = {}
+				headers.forEach((header, index) => {
+					let value: any = values[index] || ''
+					if (value === '') {
+						row[header] = null
+					} else if (!isNaN(Number(value)) && value.trim() !== '') {
+						row[header] = Number(value)
+					} else if (value.toLowerCase() === 'true') {
+						row[header] = true
+					} else if (value.toLowerCase() === 'false') {
+						row[header] = false
+					} else {
+						row[header] = value
+					}
+				})
+				result.push(row)
+			}
+
+			return result
+		}
+
+		private parseCsvLine(line: string, delimiter: string): string[] {
+			const result: string[] = []
+			let current = ''
+			let inQuotes = false
+
+			for (let i = 0; i < line.length; i++) {
+				const char = line[i]
+				const nextChar = line[i + 1]
+
+				if (char === '"') {
+					if (inQuotes && nextChar === '"') {
+						current += '"'
+						i++
+					} else {
+						inQuotes = !inQuotes
+					}
+				} else if (char === delimiter && !inQuotes) {
+					result.push(current.trim())
+					current = ''
+				} else {
+					current += char
+				}
+			}
+
+			result.push(current.trim())
+			return result
+		}
+
+		private init() {
+			this.state.columns = this.state.allData.length > 0 ? Object.keys(this.state.allData[0]) : []
+			this.renderHeader()
+			this.applyFilters()
+		}
+
+		private renderHeader() {
+			this.thead.innerHTML = ''
+			const tr = document.createElement('tr')
+
+			const rowNumTh = document.createElement('th')
+			rowNumTh.className = 'px-3 py-2.5 font-semibold text-xs uppercase tracking-wide w-12 border-r border-border'
+			rowNumTh.textContent = '#'
+			tr.appendChild(rowNumTh)
+
+			this.state.columns.forEach((col) => {
+				const th = document.createElement('th')
+				const sortableClass = this.state.sortable ? 'cursor-pointer hover:bg-accent/50' : ''
+				th.className = `px-4 py-2.5 font-semibold text-xs uppercase tracking-wide ${sortableClass} transition-colors whitespace-nowrap`
+				th.textContent = col
+				th.dataset.column = col
+
+				const sortIcon = document.createElement('span')
+				sortIcon.className = 'ml-1.5 inline-block w-3 h-3 opacity-30'
+				sortIcon.innerHTML = '<i class="i-lucide-arrow-up w-3 h-3"></i>'
+				th.appendChild(sortIcon)
+
+				if (this.state.sortable) {
+					th.addEventListener('click', () => this.handleSort(col, th))
+				}
+				this.sortDirection.set(col, th)
+				tr.appendChild(th)
+			})
+
+			this.thead.appendChild(tr)
+		}
+
+		private handleSort(column: string, th: HTMLElement) {
+			const currentSort = this.state.sortConfig
+
+			this.state.columns.forEach((col) => {
+				const header = this.sortDirection.get(col)
+				if (header) {
+					header.classList.remove('text-primary', 'bg-accent/30')
+					const icon = header.querySelector('span')
+					if (icon) {
+						icon.innerHTML = '<i class="i-lucide-arrow-up w-3 h-3"></i>'
+						icon.classList.remove('rotate-180')
+					}
+				}
+			})
+
+			if (currentSort?.column === column) {
+				if (currentSort.direction === 'asc') {
+					this.state.sortConfig = { column, direction: 'desc' }
+					th.classList.add('text-primary', 'bg-accent/30')
+					const icon = th.querySelector('span')
+					if (icon) {
+						icon.innerHTML = '<i class="i-lucide-arrow-down w-3 h-3"></i>'
+					}
+				} else {
+					this.state.sortConfig = null
+				}
+			} else {
+				this.state.sortConfig = { column, direction: 'asc' }
+				th.classList.add('text-primary', 'bg-accent/30')
+				const icon = th.querySelector('span')
+				if (icon) {
+					icon.innerHTML = '<i class="i-lucide-arrow-up w-3 h-3"></i>'
+				}
+			}
+
+			this.applyFilters()
+		}
+
+		private applyFilters() {
+			let filtered = [...this.state.allData]
+
+			if (this.state.searchTerm) {
+				const term = this.state.searchTerm.toLowerCase()
+				filtered = filtered.filter((row) =>
+					this.state.columns.some((col) =>
+						String(row[col] ?? '')
+							.toLowerCase()
+							.includes(term),
+					),
+				)
+			}
+
+			if (this.state.sortConfig) {
+				const { column, direction } = this.state.sortConfig
+				filtered.sort((a, b) => {
+					const aVal = a[column]
+					const bVal = b[column]
+					if (aVal == null && bVal == null) return 0
+					if (aVal == null) return direction === 'asc' ? 1 : -1
+					if (bVal == null) return direction === 'asc' ? -1 : 1
+					if (typeof aVal === 'number' && typeof bVal === 'number') {
+						return direction === 'asc' ? aVal - bVal : bVal - aVal
+					}
+					const aStr = String(aVal).toLowerCase()
+					const bStr = String(bVal).toLowerCase()
+					return direction === 'asc' ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr)
+				})
+			}
+
+			this.state.filteredData = filtered
+			this.state.currentPage = 1
+			this.renderTable()
+		}
+
+		private renderTable() {
+			this.tbody.innerHTML = ''
+			const totalPages = Math.ceil(this.state.filteredData.length / this.state.pageSize)
+			const start = (this.state.currentPage - 1) * this.state.pageSize
+			const end = start + this.state.pageSize
+			const pageData = this.state.filteredData.slice(start, end)
+
+			if (pageData.length === 0) {
+				const tr = document.createElement('tr')
+				const td = document.createElement('td')
+				td.colSpan = this.state.columns.length + 1
+				td.className = 'px-4 py-12 text-center text-muted-foreground'
+				td.textContent = this.state.searchTerm ? 'No matching results found' : 'No data available'
+				tr.appendChild(td)
+				this.tbody.appendChild(tr)
+				return
+			}
+
+			pageData.forEach((row, rowIndex) => {
+				const tr = document.createElement('tr')
+				tr.className =
+					'border-b border-border/50 hover:bg-accent/30 transition-colors dark:hover:bg-accent-dark/30'
+
+				const rowNumTd = document.createElement('td')
+				rowNumTd.className = 'px-3 py-2.5 text-muted-foreground text-xs border-r border-border'
+				rowNumTd.textContent = String(start + rowIndex + 1)
+				tr.appendChild(rowNumTd)
+
+				this.state.columns.forEach((col) => {
+					const td = document.createElement('td')
+					td.className = 'px-4 py-2.5 max-w-xs truncate text-foreground dark:text-foreground-dark'
+					const value = row[col]
+					const displayValue = value === null || value === undefined ? '' : String(value)
+					td.textContent = displayValue
+					td.title = displayValue
+					tr.appendChild(td)
+				})
+
+				this.tbody.appendChild(tr)
+			})
+
+			this.rowCount.textContent = String(this.state.filteredData.length)
+			this.pageInfo.textContent = `${this.state.currentPage} / ${totalPages || 1}`
+			this.prevBtn.disabled = this.state.currentPage <= 1
+			this.nextBtn.disabled = this.state.currentPage >= totalPages
+		}
+
+		private setupEventListeners(searchable: boolean) {
+			if (searchable && this.searchInput) {
+				this.searchInput.addEventListener('input', (e) => {
+					this.state.searchTerm = (e.target as HTMLInputElement).value
+					this.applyFilters()
+				})
+			}
+
+			this.prevBtn.addEventListener('click', () => {
+				if (this.state.currentPage > 1) {
+					this.state.currentPage--
+					this.renderTable()
+				}
+			})
+
+			this.nextBtn.addEventListener('click', () => {
+				const totalPages = Math.ceil(this.state.filteredData.length / this.state.pageSize)
+				if (this.state.currentPage < totalPages) {
+					this.state.currentPage++
+					this.renderTable()
+				}
+			})
+
+			this.copyBtn.addEventListener('click', () => {
+				const csv = this.getCsvString()
+				navigator.clipboard.writeText(csv).then(() => {
+					const originalIcon = this.copyBtn.innerHTML
+					this.copyBtn.innerHTML = '<i class="i-lucide-check w-4 h-4 text-green-500"></i>'
+					setTimeout(() => {
+						this.copyBtn.innerHTML = originalIcon
+					}, 1500)
+				})
+			})
+		}
+
+		private getCsvString(): string {
+			const header = ['#', ...this.state.columns].join(',')
+			const rows = this.state.filteredData.map((row, idx) => {
+				const values = [
+					String(idx + 1),
+					...this.state.columns.map((col) => {
+						const val = row[col]
+						if (val === null || val === undefined) return ''
+						const str = String(val)
+						return str.includes(',') || str.includes('"') || str.includes('\n')
+							? `"${str.replace(/"/g, '""')}"`
+							: str
+					}),
+				]
+				return values.join(',')
+			})
+			return [header, ...rows].join('\n')
+		}
+	}
+
+	const wrappers = document.querySelectorAll('.csv-viewer-wrapper')
+	wrappers.forEach((wrapper) => new CsvViewer(wrapper as HTMLElement))
+</script>
