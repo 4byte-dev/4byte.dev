@@ -29,7 +29,7 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 
 		let mdFiles = []
 		try {
-			mdFiles = (await fs.readdir(contentDir)).filter((f) => f.endsWith('.md'))
+			mdFiles = (await fs.readdir(contentDir)).filter((f) => f.endsWith('.md') || f.endsWith('.mdx'))
 		} catch {
 			console.log(`No content directory for language '${lang}': ${contentDir}`)
 			console.log('Skipping article generation.')
