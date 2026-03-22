@@ -434,12 +434,43 @@ const chartColors = JSON.stringify(colors)
 
 				wrapper.querySelectorAll('.chart-btn').forEach((btn) => {
 					btn.addEventListener('click', () => {
+						const duration = 300
+						const zoomFactor = 0.75
 						if ((btn as HTMLElement).classList.contains('zoom-in')) {
-							controls.dollyIn(1.4)
+							const targetPos = camera.position
+								.clone()
+								.sub(controls.target)
+								.normalize()
+								.multiplyScalar(camera.position.distanceTo(controls.target) * zoomFactor)
+								.add(controls.target)
+							const startPos = camera.position.clone()
+							const zoomStart = performance.now()
+							function zoomInAnim() {
+								const p = Math.min((performance.now() - zoomStart) / duration, 1)
+								const e = 1 - Math.pow(1 - p, 3)
+								camera.position.lerpVectors(startPos, targetPos, e)
+								controls.update()
+								if (p < 1) requestAnimationFrame(zoomInAnim)
+							}
+							zoomInAnim()
 						} else if ((btn as HTMLElement).classList.contains('zoom-out')) {
-							controls.dollyOut(1.4)
+							const targetPos = camera.position
+								.clone()
+								.sub(controls.target)
+								.normalize()
+								.multiplyScalar(camera.position.distanceTo(controls.target) / zoomFactor)
+								.add(controls.target)
+							const startPos = camera.position.clone()
+							const zoomStart = performance.now()
+							function zoomOutAnim() {
+								const p = Math.min((performance.now() - zoomStart) / duration, 1)
+								const e = 1 - Math.pow(1 - p, 3)
+								camera.position.lerpVectors(startPos, targetPos, e)
+								controls.update()
+								if (p < 1) requestAnimationFrame(zoomOutAnim)
+							}
+							zoomOutAnim()
 						} else {
-							// Smooth reset
 							const resetStart = performance.now()
 							const fromPos = camera.position.clone()
 							const toPos = DEFAULT_EYE.clone()
