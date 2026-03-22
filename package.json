@@ -17,7 +17,8 @@
 		"prepare": "husky",
 		"check": "astro check",
 		"generate:og": "node scripts/generate-og.mjs",
-		"generate:data": "node scripts/update-data.mjs"
+		"generate:data": "node scripts/update-data.mjs",
+		"check:slugs": "node scripts/check-slugs.mjs"
 	},
 	"dependencies": {
 		"@astrojs/mdx": "^5.0.2",
