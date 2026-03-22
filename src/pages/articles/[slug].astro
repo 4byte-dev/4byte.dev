@@ -1,6 +1,7 @@
 ---
 import DocsLayout from '../../layouts/DocsLayout.astro'
 import ShareButtons from '../../components/ShareButtons.astro'
+import GitHubUserCard from '../../components/GitHubUserCard.astro'
 import { getCollection, render } from 'astro:content'
 import { SITE } from '../../config.mjs'
 import { getLangFromUrl, t } from '../../i18n/index.ts'
@@ -63,7 +64,6 @@ const jsonLdArticle = {
 
 const homeLabel = t(labels, 'article.home')
 const articlesLabel = t(labels, 'nav.articles')
-const byLabel = t(labels, 'article.by')
 const onThisPageLabel = t(labels, 'article.onThisPage')
 ---
 
@@ -118,9 +118,13 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 				<h1 class="text-3xl font-bold tracking-tight text-foreground dark:text-foreground-dark mb-4">
 					{article.data.title}
 				</h1>
-				<div class="flex items-center gap-4 text-sm text-muted-foreground dark:text-muted-dark-foreground mb-4">
-					<span>{byLabel} {article.data.author}</span>
+				<div
+					class="flex items-center gap-4 text-sm text-muted-foreground dark:text-muted-dark-foreground mb-4 flex-wrap"
+				>
+					<GitHubUserCard username={article.data.author} />
+					<span class="text-muted-foreground/50 dark:text-muted-dark-foreground/50">·</span>
 					<span>{article.data.date}</span>
+					<span class="text-muted-foreground/50 dark:text-muted-dark-foreground/50">·</span>
 					<span class="flex items-center gap-1"
 						><span class="i-lucide-eye w-3.5 h-3.5"></span>{article.data.views.toLocaleString()}</span
 					>
