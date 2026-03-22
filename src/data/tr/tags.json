@@ -1,23 +1,23 @@
 [
-	{
-		"id": "1",
-		"name": "linear-regression",
-		"slug": "linear-regression",
-		"articleCount": 1,
-		"description": "Sürekli sayısal değerleri tahmin etmek için kullanılan, değişkenler arasındaki doğrusal ilişkiyi matematiksel olarak modelleyen temel makine öğrenmesi algoritması."
-	},
-	{
-		"id": "2",
-		"name": "supervised-learning",
-		"slug": "supervised-learning",
-		"articleCount": 2,
-		"description": "Modelin önceden etiketlenmiş eğitim verileriyle (girdi ve doğru çıktı eşleşmeleri) eğitilerek, yeni ve görülmemiş veriler üzerinde tahmin yapmasını sağlayan öğrenme yaklaşımı."
-	},
-	{
-		"id": "3",
-		"name": "teori",
-		"slug": "teori",
-		"articleCount": 2,
-		"description": "Algoritmaların sadece nasıl kodlandığını değil; arkasındaki matematiği, çalışma mantığını ve 'neden' sorusunun cevabını detaylandıran kavramsal içerikler."
-	}
+  {
+    "id": "1",
+    "name": "linear-regression",
+    "slug": "linear-regression",
+    "articleCount": 1,
+    "description": "Sürekli sayısal değerleri tahmin etmek için kullanılan, değişkenler arasındaki doğrusal ilişkiyi matematiksel olarak modelleyen temel makine öğrenmesi algoritması."
+  },
+  {
+    "id": "2",
+    "name": "supervised-learning",
+    "slug": "supervised-learning",
+    "articleCount": 2,
+    "description": "Modelin önceden etiketlenmiş eğitim verileriyle (girdi ve doğru çıktı eşleşmeleri) eğitilerek, yeni ve görülmemiş veriler üzerinde tahmin yapmasını sağlayan öğrenme yaklaşımı."
+  },
+  {
+    "id": "3",
+    "name": "teori",
+    "slug": "teori",
+    "articleCount": 2,
+    "description": "Algoritmaların sadece nasıl kodlandığını değil; arkasındaki matematiği, çalışma mantığını ve 'neden' sorusunun cevabını detaylandıran kavramsal içerikler."
+  }
 ]
