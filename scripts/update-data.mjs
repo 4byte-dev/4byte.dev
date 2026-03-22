@@ -110,11 +110,6 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 					for (const c of addedCategories) lines.push(`- \`${c}\``)
 					lines.push('')
 				}
-				if (lines.length) {
-					const comment = lines.join('\n')
-					const { execFileSync } = await import('child_process')
-					execFileSync('gh', ['pr', 'comment', String(prNumber), '--body', comment])
-				}
 			}
 		}
 	}
