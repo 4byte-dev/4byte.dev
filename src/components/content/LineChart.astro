@@ -1,6 +1,12 @@
 ---
 import type { DataPoint } from '../../utils/chartUtils'
 
+interface AxisConfig {
+	min?: number
+	max?: number
+	tickInterval?: number
+}
+
 interface Props {
 	data?: DataPoint[]
 	id?: string
@@ -10,6 +16,10 @@ interface Props {
 	showDots?: boolean
 	showGrid?: boolean
 	strokeWidth?: number
+	pointSize?: number
+	xAxis?: AxisConfig
+	yAxis?: AxisConfig
+	title?: string
 }
 
 const {
@@ -21,6 +31,10 @@ const {
 	showDots = true,
 	showGrid = true,
 	strokeWidth = 2.5,
+	pointSize = 5,
+	xAxis = {},
+	yAxis = {},
+	title = '',
 } = Astro.props
 
 const chartId = `line-chart-${id || Math.random().toString(36).slice(2, 9)}`
@@ -37,6 +51,10 @@ const chartColors = JSON.stringify(colors)
 	data-chart-show-dots={showDots}
 	data-chart-show-grid={showGrid}
 	data-chart-stroke-width={strokeWidth}
+	data-chart-point-size={pointSize}
+	data-chart-x-axis={JSON.stringify(xAxis)}
+	data-chart-y-axis={JSON.stringify(yAxis)}
+	data-chart-title={title}
 	data-chart-height={height}
 >
 	<div id={chartId} style={`min-height: ${height}px; width: 100%;`}></div>
@@ -82,12 +100,18 @@ const chartColors = JSON.stringify(colors)
 		if (!container) return
 
 		const rawData = (wrapper as HTMLElement).dataset.chartData
-		const chartData: Array<{ label: string; value: number; color?: string }> = rawData ? JSON.parse(rawData) : []
+		const chartData: Array<{ x: number; y: number; label?: string; color?: string }> = rawData
+			? JSON.parse(rawData)
+			: []
 		const colors: string[] = JSON.parse((wrapper as HTMLElement).dataset.chartColors || '[]')
 		const animated = (wrapper as HTMLElement).dataset.chartAnimated !== 'false'
 		const showDots = (wrapper as HTMLElement).dataset.chartShowDots !== 'false'
 		const showGrid = (wrapper as HTMLElement).dataset.chartShowGrid !== 'false'
 		const strokeWidth = parseFloat((wrapper as HTMLElement).dataset.chartStrokeWidth || '2.5')
+		const pointSize = parseFloat((wrapper as HTMLElement).dataset.chartPointSize || '5')
+		const xAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartXAxis || '{}')
+		const yAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartYAxis || '{}')
+		const chartTitle = (wrapper as HTMLElement).dataset.chartTitle || ''
 		const chartHeight = parseInt((wrapper as HTMLElement).dataset.chartHeight || '300')
 		const chartId = parseInt((wrapper as HTMLElement).dataset.chartId || 'uid')
 
@@ -116,7 +140,12 @@ const chartColors = JSON.stringify(colors)
 			gridColor: string,
 		) {
 			const gridG = g.append('g').attr('class', 'grid')
-			gridG.call(d3.axisLeft(y).tickSize(-w).tickFormat(''))
+			gridG.call(
+				d3
+					.axisLeft(y)
+					.tickSize(-w)
+					.tickFormat(() => ''),
+			)
 			gridG.selectAll('line').style('stroke', gridColor).style('stroke-dasharray', '3,3').style('stroke-width', 1)
 			gridG.select('.domain').remove()
 			return gridG
@@ -128,6 +157,19 @@ const chartColors = JSON.stringify(colors)
 			const h = chartHeight
 			const innerWidth = width - margin.left - margin.right
 			const innerHeight = h - margin.top - margin.bottom
+
+			if (chartTitle) {
+				const titleEl = document.createElement('div')
+				titleEl.className = 'chart-title'
+				titleEl.textContent = chartTitle
+				titleEl.style.cssText = `
+					font-size: 16px;
+					font-weight: 600;
+					text-align: center;
+					color: ${getThemeColors().textColor};
+				`
+				container.appendChild(titleEl)
+			}
 
 			const svg = d3
 				.select(container)
@@ -163,14 +205,13 @@ const chartColors = JSON.stringify(colors)
 
 			const x = d3
 				.scalePoint()
-				.domain(chartData.map((d) => d.label))
+				.domain(chartData.map((d) => d.label || String(d.x)))
 				.range([0, innerWidth])
 
-			const y = d3
-				.scaleLinear()
-				.domain([0, d3.max(chartData, (d) => d.value)! * 1.1])
-				.nice()
-				.range([innerHeight, 0])
+			const yMin = yAxisConfig.min ?? 0
+			const yMax = yAxisConfig.max ?? d3.max(chartData, (d) => d.y)! * 1.1
+
+			const y = d3.scaleLinear().domain([yMin, yMax]).nice().range([innerHeight, 0])
 
 			if (showGrid) {
 				renderGrid(g, y, innerWidth, gridColor)
@@ -185,16 +226,16 @@ const chartColors = JSON.stringify(colors)
 			applyAxisStyles(yAxisG, textColor)
 
 			const line = d3
-				.line<{ label: string; value: number }>()
-				.x((d) => x(d.label)!)
-				.y((d) => y(d.value))
+				.line<{ x: number; y: number; label?: string }>()
+				.x((d) => x(d.label || String(d.x))!)
+				.y((d) => y(d.y))
 				.curve(d3.curveMonotoneX)
 
 			const area = d3
-				.area<{ label: string; value: number }>()
-				.x((d) => x(d.label)!)
+				.area<{ x: number; y: number; label?: string }>()
+				.x((d) => x(d.label || String(d.x))!)
 				.y0(innerHeight)
-				.y1((d) => y(d.value))
+				.y1((d) => y(d.y))
 				.curve(d3.curveMonotoneX)
 
 			chartContent
@@ -232,9 +273,9 @@ const chartColors = JSON.stringify(colors)
 					.enter()
 					.append('circle')
 					.attr('class', 'dot')
-					.attr('cx', (d) => x(d.label)!)
-					.attr('cy', (d) => y(d.value))
-					.attr('r', 5)
+					.attr('cx', (d) => x(d.label || String(d.x))!)
+					.attr('cy', (d) => y(d.y))
+					.attr('r', pointSize)
 					.attr('fill', colors[0])
 					.attr('stroke', '#fff')
 					.attr('stroke-width', 2)
@@ -244,14 +285,15 @@ const chartColors = JSON.stringify(colors)
 					d3.select(this)
 						.transition()
 						.duration(150)
-						.attr('r', 8)
+						.attr('r', pointSize + 3)
 						.style('filter', `drop-shadow(0 0 6px ${colors[0]})`)
 
+					const labelText = d.label ? `<strong>${d.label}</strong><br/>` : ''
 					showTooltip(
 						tooltip,
 						event.offsetX,
 						event.offsetY,
-						`<strong>${d.label}</strong><br/>Value: ${d.value.toLocaleString()}`,
+						`${labelText}y: ${d.y.toLocaleString()}`,
 						container.getBoundingClientRect(),
 					)
 				})
@@ -260,7 +302,7 @@ const chartColors = JSON.stringify(colors)
 					d3.select(this)
 						.transition()
 						.duration(150)
-						.attr('r', 5)
+						.attr('r', pointSize)
 						.style('filter', `drop-shadow(0 0 4px ${colors[0]}50)`)
 
 					hideTooltip(tooltip)
@@ -302,13 +344,17 @@ const chartColors = JSON.stringify(colors)
 				const d = chartData[idx]
 				if (!d) return
 
-				hoverLine.attr('x1', x(d.label)!).attr('x2', x(d.label)!).style('opacity', 1)
+				hoverLine
+					.attr('x1', x(d.label || String(d.x))!)
+					.attr('x2', x(d.label || String(d.x))!)
+					.style('opacity', 1)
 
+				const labelText = d.label ? `<strong>${d.label}</strong><br/>` : ''
 				showTooltip(
 					tooltip,
 					event.offsetX,
 					event.offsetY,
-					`<strong>${d.label}</strong><br/>Value: ${d.value.toLocaleString()}`,
+					`${labelText}y: ${d.y.toLocaleString()}`,
 					container.getBoundingClientRect(),
 				)
 			})
@@ -327,29 +373,39 @@ const chartColors = JSON.stringify(colors)
 				])
 				.on('zoom', (event) => {
 					const k = event.transform.k
-					const newRange: [number, number] = [0, innerWidth / k]
 					const offset = -event.transform.x / k
 					const zoomedX = d3
 						.scalePoint()
-						.domain(chartData.map((d) => d.label))
+						.domain(chartData.map((d) => d.label || String(d.x)))
 						.range([offset, innerWidth + offset])
 
-					linePath.attr(
-						'd',
-						line.x((d) => zoomedX(d.label)!),
-					)
-					chartContent.select('.area-fill').attr(
-						'd',
-						area.x((d) => zoomedX(d.label)!),
-					)
+					const newLine = d3
+						.line<{ x: number; y: number; label?: string }>()
+						.x((d) => zoomedX(d.label || String(d.x))!)
+						.y((d) => y(d.y))
+						.curve(d3.curveMonotoneX)
+
+					const newArea = d3
+						.area<{ x: number; y: number; label?: string }>()
+						.x((d) => zoomedX(d.label || String(d.x))!)
+						.y0(innerHeight)
+						.y1((d) => y(d.y))
+						.curve(d3.curveMonotoneX)
+
+					linePath.attr('d', newLine(chartData) || '')
+					chartContent.select('.area-fill').attr('d', newArea(chartData) || '')
 					xAxisG.call(d3.axisBottom(zoomedX))
 					applyAxisStyles(xAxisG, textColor)
 
 					if (showDots) {
-						chartContent.selectAll('.dot').attr('cx', (d) => zoomedX((d as { label: string }).label)!)
+						chartContent
+							.selectAll<SVGCircleElement, { x: number; y: number; label?: string }>('.dot')
+							.attr('cx', (d) => zoomedX(d.label || String(d.x))!)
 					}
 
-					hoverLine.attr('x1', zoomedX(chartData[0].label)!).attr('x2', zoomedX(chartData[0].label)!)
+					hoverLine
+						.attr('x1', zoomedX(chartData[0].label || String(chartData[0].x))!)
+						.attr('x2', zoomedX(chartData[0].label || String(chartData[0].x))!)
 				})
 
 			svg.call(zoom)

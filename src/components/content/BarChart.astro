@@ -1,12 +1,22 @@
 ---
 import type { DataPoint } from '../../utils/chartUtils'
 
+interface AxisConfig {
+	min?: number
+	max?: number
+	tickInterval?: number
+}
+
 interface Props {
 	data?: DataPoint[]
 	id?: string
 	height?: number
 	colors?: string[]
 	animated?: boolean
+	showGrid?: boolean
+	xAxis?: AxisConfig
+	yAxis?: AxisConfig
+	title?: string
 }
 
 const {
@@ -15,23 +25,30 @@ const {
 	height = 300,
 	colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'],
 	animated = true,
+	showGrid = true,
+	xAxis = {},
+	yAxis = {},
+	title = '',
 } = Astro.props
 
-const uniqueId = `bar-chart-${id || Math.random().toString(36).slice(2, 9)}`
+const chartId = `bar-chart-${id || Math.random().toString(36).slice(2, 9)}`
 const chartData = JSON.stringify(data)
 const chartColors = JSON.stringify(colors)
-const chartAnimated = animated
 ---
 
 <div
 	class="chart-wrapper"
-	data-chart-id={uniqueId}
+	data-chart-id={chartId}
 	data-chart-data={chartData}
 	data-chart-colors={chartColors}
-	data-chart-animated={chartAnimated}
+	data-chart-animated={animated}
+	data-chart-show-grid={showGrid}
+	data-chart-x-axis={JSON.stringify(xAxis)}
+	data-chart-y-axis={JSON.stringify(yAxis)}
+	data-chart-title={title}
 	data-chart-height={height}
 >
-	<div id={uniqueId} style={`min-height: ${height}px; width: 100%;`}></div>
+	<div id={chartId} style={`min-height: ${height}px; width: 100%;`}></div>
 </div>
 
 <script>
@@ -45,9 +62,15 @@ const chartAnimated = animated
 		if (!container) return
 
 		const rawData = (wrapper as HTMLElement).dataset.chartData
-		const chartData: Array<{ label: string; value: number; color?: string }> = rawData ? JSON.parse(rawData) : []
+		const chartData: Array<{ x: number; y: number; label?: string; color?: string }> = rawData
+			? JSON.parse(rawData)
+			: []
 		const colors: string[] = JSON.parse((wrapper as HTMLElement).dataset.chartColors || '[]')
 		const animated = (wrapper as HTMLElement).dataset.chartAnimated !== 'false'
+		const showGrid = (wrapper as HTMLElement).dataset.chartShowGrid !== 'false'
+		const xAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartXAxis || '{}')
+		const yAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartYAxis || '{}')
+		const chartTitle = (wrapper as HTMLElement).dataset.chartTitle || ''
 		const chartHeight = parseInt((wrapper as HTMLElement).dataset.chartHeight || '300')
 
 		if (!chartData.length) return
@@ -75,7 +98,12 @@ const chartAnimated = animated
 			gridColor: string,
 		) {
 			const gridG = g.append('g').attr('class', 'grid')
-			gridG.call(d3.axisLeft(y).tickSize(-w).tickFormat(''))
+			gridG.call(
+				d3
+					.axisLeft(y)
+					.tickSize(-w)
+					.tickFormat(() => ''),
+			)
 			gridG.selectAll('line').style('stroke', gridColor).style('stroke-dasharray', '3,3').style('stroke-width', 1)
 			gridG.select('.domain').remove()
 			return gridG
@@ -87,6 +115,19 @@ const chartAnimated = animated
 			const h = chartHeight
 			const innerWidth = width - margin.left - margin.right
 			const innerHeight = h - margin.top - margin.bottom
+
+			if (chartTitle) {
+				const titleEl = document.createElement('div')
+				titleEl.className = 'chart-title'
+				titleEl.textContent = chartTitle
+				titleEl.style.cssText = `
+					font-size: 16px;
+					font-weight: 600;
+					text-align: center;
+					color: ${getThemeColors().textColor};
+				`
+				container.appendChild(titleEl)
+			}
 
 			const svg = d3
 				.select(container)
@@ -102,17 +143,18 @@ const chartAnimated = animated
 
 			const x = d3
 				.scaleBand()
-				.domain(chartData.map((d) => d.label))
+				.domain(chartData.map((d) => d.label || String(d.x)))
 				.range([0, innerWidth])
 				.padding(0.25)
 
-			const y = d3
-				.scaleLinear()
-				.domain([0, d3.max(chartData, (d) => d.value)! * 1.1])
-				.nice()
-				.range([innerHeight, 0])
+			const yMin = yAxisConfig.min ?? 0
+			const yMax = yAxisConfig.max ?? d3.max(chartData, (d) => d.y)! * 1.1
 
-			renderGrid(g, y, innerWidth, gridColor)
+			const y = d3.scaleLinear().domain([yMin, yMax]).nice().range([innerHeight, 0])
+
+			if (showGrid) {
+				renderGrid(g, y, innerWidth, gridColor)
+			}
 
 			const xAxisG = g.append('g').attr('transform', `translate(0,${innerHeight})`)
 			xAxisG.call(d3.axisBottom(x))
@@ -127,10 +169,10 @@ const chartAnimated = animated
 				.data(chartData)
 				.enter()
 				.append('rect')
-				.attr('x', (d) => x(d.label)!)
-				.attr('y', (d) => y(d.value))
+				.attr('x', (d) => x(d.label || String(d.x))!)
+				.attr('y', (d) => y(d.y))
 				.attr('width', x.bandwidth())
-				.attr('height', (d) => innerHeight - y(d.value))
+				.attr('height', (d) => innerHeight - y(d.y))
 				.attr('fill', (d, i) => d.color || getColor(i, colors))
 				.attr('rx', 6)
 				.style('cursor', 'pointer')
@@ -145,8 +187,8 @@ const chartAnimated = animated
 					.delay((_, i) => i * 80)
 					.ease(d3.easeCubicOut)
 					.attr('opacity', 1)
-					.attr('y', (d) => y(d.value))
-					.attr('height', (d) => innerHeight - y(d.value))
+					.attr('y', (d) => y(d.y))
+					.attr('height', (d) => innerHeight - y(d.y))
 			}
 
 			bars.on('mousemove', function (event, d) {
@@ -157,16 +199,17 @@ const chartAnimated = animated
 					.style('filter', 'drop-shadow(0 6px 12px rgba(0,0,0,0.25))')
 					.attr('opacity', 1)
 
+				const labelText = d.label ? `<strong>${d.label}</strong><br/>` : ''
 				showTooltip(
 					tooltip,
 					event.offsetX,
 					event.offsetY,
-					`<strong>${d.label}</strong><br/>Value: ${d.value.toLocaleString()}`,
+					`${labelText}y: ${d.y.toLocaleString()}`,
 					container.getBoundingClientRect(),
 				)
 			})
 
-			bars.on('mouseleave', function (_, d) {
+			bars.on('mouseleave', function () {
 				d3.select(this)
 					.transition()
 					.duration(150)
@@ -179,7 +222,7 @@ const chartAnimated = animated
 			bars.on('click', function (_, d) {
 				const customEvent = new CustomEvent('chart:click', {
 					bubbles: true,
-					detail: { type: 'bar', label: d.label, value: d.value },
+					detail: { type: 'bar', x: d.x, y: d.y, label: d.label },
 				})
 				container.dispatchEvent(customEvent)
 			})
@@ -190,15 +233,15 @@ const chartAnimated = animated
 				.enter()
 				.append('text')
 				.attr('class', 'value-label')
-				.attr('x', (d) => x(d.label)! + x.bandwidth() / 2)
-				.attr('y', (d) => y(d.value) - 8)
+				.attr('x', (d) => x(d.label || String(d.x))! + x.bandwidth() / 2)
+				.attr('y', (d) => y(d.y) - 8)
 				.attr('text-anchor', 'middle')
 				.attr('fill', textColor)
 				.attr('font-size', '11px')
 				.attr('font-weight', '600')
 				.attr('font-family', 'inherit')
 				.style('pointer-events', 'none')
-				.text((d) => (d.value >= 10 ? d.value.toLocaleString() : d.value))
+				.text((d) => (d.y >= 10 ? d.y.toLocaleString() : d.y))
 
 			if (animated) {
 				valueLabels

@@ -11,6 +11,7 @@ interface Props {
 	donutRatio?: number
 	showLabels?: boolean
 	showPercentages?: boolean
+	title?: string
 }
 
 const {
@@ -23,6 +24,7 @@ const {
 	donutRatio = 0.55,
 	showLabels = true,
 	showPercentages = true,
+	title = '',
 } = Astro.props
 
 const uniqueId = `pie-chart-${id || Math.random().toString(36).slice(2, 9)}`
@@ -40,6 +42,7 @@ const chartColors = JSON.stringify(colors)
 	data-chart-donut-ratio={donutRatio}
 	data-chart-show-labels={showLabels}
 	data-chart-show-percentages={showPercentages}
+	data-chart-title={title}
 	data-chart-height={height}
 >
 	<div id={uniqueId} style={`min-height: ${height}px; width: 100%;`}></div>
@@ -56,18 +59,21 @@ const chartColors = JSON.stringify(colors)
 		if (!container) return
 
 		const rawData = (wrapper as HTMLElement).dataset.chartData
-		const chartData: Array<{ label: string; value: number; color?: string }> = rawData ? JSON.parse(rawData) : []
+		const chartData: Array<{ x: number; y: number; label?: string; color?: string }> = rawData
+			? JSON.parse(rawData)
+			: []
 		const colors: string[] = JSON.parse((wrapper as HTMLElement).dataset.chartColors || '[]')
 		const animated = (wrapper as HTMLElement).dataset.chartAnimated !== 'false'
 		const donut = (wrapper as HTMLElement).dataset.chartDonut === 'true'
 		const donutRatio = parseFloat((wrapper as HTMLElement).dataset.chartDonutRatio || '0.55')
 		const showLabels = (wrapper as HTMLElement).dataset.chartShowLabels !== 'false'
 		const showPercentages = (wrapper as HTMLElement).dataset.chartShowPercentages !== 'false'
+		const chartTitle = (wrapper as HTMLElement).dataset.chartTitle || ''
 		const chartHeight = parseInt((wrapper as HTMLElement).dataset.chartHeight || '300')
 
 		if (!chartData.length) return
 
-		const total = chartData.reduce((sum, d) => sum + d.value, 0)
+		const total = chartData.reduce((sum, d) => sum + d.y, 0)
 		const tooltip = createTooltip(container)
 
 		function initChart() {
@@ -75,6 +81,19 @@ const chartColors = JSON.stringify(colors)
 			const width = container.clientWidth
 			const h = chartHeight
 			const radius = Math.min(width, h) / 2 - 20
+
+			if (chartTitle) {
+				const titleEl = document.createElement('div')
+				titleEl.className = 'chart-title'
+				titleEl.textContent = chartTitle
+				titleEl.style.cssText = `
+					font-size: 16px;
+					font-weight: 600;
+					text-align: center;
+					color: ${getThemeColors().textColor};
+				`
+				container.appendChild(titleEl)
+			}
 
 			const svg = d3
 				.select(container)
@@ -91,23 +110,23 @@ const chartColors = JSON.stringify(colors)
 			const innerRadius = donut ? radius * donutRatio : 0
 
 			const pie = d3
-				.pie<{ label: string; value: number; color?: string }>()
-				.value((d) => d.value)
+				.pie<{ x: number; y: number; label?: string; color?: string }>()
+				.value((d) => d.y)
 				.sort(null)
 				.padAngle(0.02)
 
 			const arc = d3
-				.arc<d3.PieArcDatum<{ label: string; value: number; color?: string }>>()
+				.arc<d3.PieArcDatum<{ x: number; y: number; label?: string; color?: string }>>()
 				.innerRadius(innerRadius)
 				.outerRadius(radius)
 
 			const arcHover = d3
-				.arc<d3.PieArcDatum<{ label: string; value: number; color?: string }>>()
+				.arc<d3.PieArcDatum<{ x: number; y: number; label?: string; color?: string }>>()
 				.innerRadius(innerRadius)
 				.outerRadius(radius + 12)
 
 			const arcLabel = d3
-				.arc<d3.PieArcDatum<{ label: string; value: number; color?: string }>>()
+				.arc<d3.PieArcDatum<{ x: number; y: number; label?: string; color?: string }>>()
 				.innerRadius(radius * 0.8)
 				.outerRadius(radius * 0.8)
 
@@ -126,7 +145,7 @@ const chartColors = JSON.stringify(colors)
 					.attr(
 						'd',
 						d3
-							.arc<d3.PieArcDatum<{ label: string; value: number }>>()
+							.arc<d3.PieArcDatum<{ x: number; y: number; label?: string; color?: string }>>()
 							.innerRadius(innerRadius)
 							.outerRadius(innerRadius),
 					)
@@ -147,25 +166,33 @@ const chartColors = JSON.stringify(colors)
 					.attr('d', arcHover(d)!)
 					.style('filter', `drop-shadow(0 4px 12px rgba(0,0,0,0.25))`)
 
-				const percentage = ((d.data.value / total) * 100).toFixed(1)
+				const percentage = ((d.data.y / total) * 100).toFixed(1)
 				const display = showPercentages
-					? `<strong>${d.data.label}</strong><br/>Value: ${d.data.value.toLocaleString()}<br/>${percentage}%`
-					: `<strong>${d.data.label}</strong><br/>Value: ${d.data.value.toLocaleString()}`
+					? `<strong>${d.data.label}</strong><br/>Value: ${d.data.y.toLocaleString()}<br/>${percentage}%`
+					: `<strong>${d.data.label}</strong><br/>Value: ${d.data.y.toLocaleString()}`
 
 				showTooltip(tooltip, event.offsetX, event.offsetY, display, container.getBoundingClientRect())
 			})
 
-			paths.on('mouseleave', function (event, d) {
-				d3.select(this).transition().duration(200).attr('d', arc(d)!).style('filter', 'none')
+			paths.on('mouseleave', function (this: SVGPathElement) {
+				const datum = d3
+					.select<
+						SVGPathElement,
+						d3.PieArcDatum<{ x: number; y: number; label?: string; color?: string }>
+					>(this)
+					.datum()
+				d3.select(this).transition().duration(200).attr('d', arc(datum)!).style('filter', 'none')
 
 				hideTooltip(tooltip)
 			})
 
-			paths.on('click', function (_, d) {
-				g.selectAll('path')
+			paths.on('click', function (this: SVGPathElement, _, d) {
+				g.selectAll<SVGPathElement, d3.PieArcDatum<{ x: number; y: number; label?: string; color?: string }>>(
+					'path',
+				)
 					.transition()
 					.duration(300)
-					.attr('opacity', (p: d3.PieArcDatum<{ label: string; value: number }>) => (p === d ? 1 : 0.3))
+					.attr('opacity', (p) => (p === d ? 1 : 0.3))
 
 				d3.select(this)
 					.transition()
@@ -175,17 +202,19 @@ const chartColors = JSON.stringify(colors)
 
 				const customEvent = new CustomEvent('chart:click', {
 					bubbles: true,
-					detail: { type: 'pie', label: d.data.label, value: d.data.value },
+					detail: { type: 'pie', x: d.data.x, y: d.data.y, label: d.data.label },
 				})
 				container.dispatchEvent(customEvent)
 			})
 
 			container.addEventListener('chart:reset', () => {
-				g.selectAll('path')
+				g.selectAll<SVGPathElement, d3.PieArcDatum<{ x: number; y: number; label?: string; color?: string }>>(
+					'path',
+				)
 					.transition()
 					.duration(300)
 					.attr('opacity', 1)
-					.attr('d', (d) => arc(d as d3.PieArcDatum<{ label: string; value: number; color?: string }>)!)
+					.attr('d', (d) => arc(d)!)
 					.style('filter', 'none')
 			})
 
@@ -201,7 +230,7 @@ const chartColors = JSON.stringify(colors)
 					.attr('font-family', 'inherit')
 					.style('pointer-events', 'none')
 					.text((d) => {
-						const pct = (d.data.value / total) * 100
+						const pct = (d.data.y / total) * 100
 						return pct >= 5 ? `${pct.toFixed(0)}%` : ''
 					})
 					.attr('opacity', 0)
@@ -268,15 +297,18 @@ const chartColors = JSON.stringify(colors)
 				.attr('font-size', '11px')
 				.attr('font-weight', '500')
 				.attr('font-family', 'inherit')
-				.text((d) => (d.label.length > 10 ? d.label.slice(0, 10) + '…' : d.label))
+				.text((d) => {
+					const label = d.label || String(d.x)
+					return label.length > 10 ? label.slice(0, 10) + '…' : label
+				})
 
-			legendItems.on('mousemove', function (event, d) {
-				g.selectAll('path')
+			legendItems.on('mousemove', function (_, d) {
+				g.selectAll<SVGPathElement, d3.PieArcDatum<{ x: number; y: number; label?: string; color?: string }>>(
+					'path',
+				)
 					.transition()
 					.duration(200)
-					.attr('opacity', (p: d3.PieArcDatum<{ label: string; value: number }>) =>
-						p.data.label === d.label ? 1 : 0.3,
-					)
+					.attr('opacity', (p) => ((p.data.label || String(p.data.x)) === (d.label || String(d.x)) ? 1 : 0.3))
 			})
 
 			legendItems.on('mouseleave', function () {

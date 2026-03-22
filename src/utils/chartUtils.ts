@@ -1,6 +1,7 @@
 export interface DataPoint {
-	label: string
-	value: number
+	x: number
+	y: number
+	label?: string
 	color?: string
 }
 
