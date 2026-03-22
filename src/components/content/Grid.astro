@@ -15,7 +15,7 @@ interface Props {
 	class?: string
 }
 
-const { columns = 1, gap = 4, mobileColumns, minItemWidth, class: className = '' } = Astro.props
+const { columns = 1, gap = 4, mobileColumns = 1, minItemWidth, class: className = '' } = Astro.props
 
 const gapValue = `${gap * 0.25}rem`
 ---
@@ -23,7 +23,7 @@ const gapValue = `${gap * 0.25}rem`
 <div
 	class={`grid ${className}`}
 	style={`gap: ${gapValue}; ${minItemWidth ? `--min-item-width: ${minItemWidth}` : ''}`}
-	data-columns={JSON.stringify(columns)}
+	data-columns={JSON.stringify(columns ?? 1)}
 	data-mobile-columns={mobileColumns}
 >
 	<slot />
@@ -83,25 +83,32 @@ const gapValue = `${gap * 0.25}rem`
 			const mobileColumns = el.dataset.mobileColumns
 
 			if (columnsRaw) {
-				const columns = JSON.parse(columnsRaw)
+				try {
+					const columns = JSON.parse(columnsRaw)
 
-				if (typeof columns === 'number') {
-					el.style.setProperty('--col-mobile', String(mobileColumns || columns))
-					el.style.setProperty('--col-sm', String(columns))
-					el.style.setProperty('--col-md', String(columns))
-					el.style.setProperty('--col-lg', String(columns))
-					el.style.setProperty('--col-xl', String(columns))
-					el.style.setProperty('--col-2xl', String(columns))
-				} else {
-					el.style.setProperty('--col-mobile', String(mobileColumns || columns.sm || 1))
-					el.style.setProperty('--col-sm', String(columns.sm || 1))
-					el.style.setProperty('--col-md', String(columns.md || columns.sm || 1))
-					el.style.setProperty('--col-lg', String(columns.lg || columns.md || columns.sm || 1))
-					el.style.setProperty('--col-xl', String(columns.xl || columns.lg || columns.md || columns.sm || 1))
-					el.style.setProperty(
-						'--col-2xl',
-						String(columns['2xl'] || columns.xl || columns.lg || columns.md || columns.sm || 1),
-					)
+					if (typeof columns === 'number') {
+						el.style.setProperty('--col-mobile', String(mobileColumns || columns))
+						el.style.setProperty('--col-sm', String(columns))
+						el.style.setProperty('--col-md', String(columns))
+						el.style.setProperty('--col-lg', String(columns))
+						el.style.setProperty('--col-xl', String(columns))
+						el.style.setProperty('--col-2xl', String(columns))
+					} else {
+						el.style.setProperty('--col-mobile', String(mobileColumns || columns.sm || 1))
+						el.style.setProperty('--col-sm', String(columns.sm || 1))
+						el.style.setProperty('--col-md', String(columns.md || columns.sm || 1))
+						el.style.setProperty('--col-lg', String(columns.lg || columns.md || columns.sm || 1))
+						el.style.setProperty(
+							'--col-xl',
+							String(columns.xl || columns.lg || columns.md || columns.sm || 1),
+						)
+						el.style.setProperty(
+							'--col-2xl',
+							String(columns['2xl'] || columns.xl || columns.lg || columns.md || columns.sm || 1),
+						)
+					}
+				} catch (e) {
+					console.error('Grid: Failed to parse columns config', e)
 				}
 			}
 		})
