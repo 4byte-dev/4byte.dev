@@ -1,0 +1,217 @@
+---
+lang: 'tr'
+slug: 'linear-regression-nedir'
+title: 'Linear Regression Nedir?'
+excerpt: 'Linear regression etiketlenmiş veri setlerinden doğrusal ilişkiyi modellemek için kullanılan supervised makine öğrenmesi algoritmasıdır'
+category: 'machine-learning'
+tags: ['linear-regression', 'supervised-learning', 'teori']
+author: '@omerfdmrl'
+date: '2026-03-22'
+views: 0
+status: 'Published'
+---
+
+import ScatterChart3D from '../../../components/content/ScatterChart3D.astro'
+import ScatterChart from '../../../components/content/ScatterChart.astro'
+import CsvViewer from '../../../components/content/CsvViewer.astro'
+import JsonViewer from '../../../components/content/JsonViewer.astro'
+import Grid from '../../../components/content/Grid.astro'
+
+Linear regression etiketlenmiş veri setlerinden doğrusal ilişkiyi modellemek için kullanılan supervised makine öğrenmesi algoritmasıdır.
+Oluşturulan bu model, farklı bir veri seti üzerinde tahmin yapabilmemizi sağlar.
+Kullanabilmek için input ve output arasında linear bir ilişki olmalıdır, yani input noktası değiştikçe çıktının sabit bir oranla değişmesi gerekir.
+Bu sayede düz bir çizgi ile veriyi ayırabiliriz.
+
+<Grid columns={2} >
+	<ScatterChart
+		title={"Linear"}
+		height={350}
+		showTrendline={true}
+		xAxis={{
+			min: 0,
+			max: 11,
+			tickInterval: 1,
+		}}
+		yAxis={{
+			min: 0,
+			max: 120,
+		}}
+		data={[
+			{ x: 1, y: 12 },
+			{ x: 2, y: 24 },
+			{ x: 3, y: 35 },
+			{ x: 4, y: 48 },
+			{ x: 5, y: 55 },
+			{ x: 6, y: 68 },
+			{ x: 7, y: 74 },
+			{ x: 8, y: 89 },
+			{ x: 9, y: 95 },
+			{ x: 10, y: 108 },
+		]}
+	/>
+
+    <ScatterChart
+    	title={"Non-Linear"}
+    	height={350}
+    	showTrendline={true}
+    	xAxis={{
+    		min: -6,
+    		max: 6,
+    		tickInterval: 1,
+    	}}
+    	yAxis={{
+    		min: 0,
+    		max: 40,
+    	}}
+    	data={[
+    		{ x: -5, y: 29 },
+    		{ x: -4, y: 20 },
+    		{ x: -3, y: 13 },
+    		{ x: -2, y: 8 },
+    		{ x: -1, y: 5 },
+    		{ x: 0, y: 4 },
+    		{ x: 1, y: 5 },
+    		{ x: 2, y: 8 },
+    		{ x: 3, y: 13 },
+    		{ x: 4, y: 20 },
+    		{ x: 5, y: 29 },
+    	]}
+    />
+
+</Grid>
+
+Buradaki ilk grafikteki veri setimizi linear olduğu için ayırabiliriz, fakat ikinci örnekteki $y = x^2 + 4$ parabolünü ayıramayız.
+
+## Değişkenler ve Terminoloji
+
+İstatistik literatüründe input değerleri yordayıcı (predictor) veya daha çok kullanacağımız bağımsız değişken (independent variable) olarak adlandırılır.
+Çıktılar ise bağımlı değişken (dependent variable) olarak kullanılır.
+
+**Örneğin:** Öğrencilerin kaç saat ders çalıştığını ve aldığı sınav puanlarını tutan bir veri setimiz olsun.
+
+<CsvViewer
+	data="Çalışma Saati,Sınav Puanı
+	1,42
+	2,48
+	3,55
+	4,61
+	5,67
+	6,74
+	7,81
+	8,86"
+	title="Öğrenci Çalışma ve Sınav Puanı Verisi"
+	pageSize={5}
+/>
+
+Verilerden yola çıkarak çalışma saati arttıkça notun da yükseldiğini görebiliriz.
+Yani bu örnekte sınav notu tahmini çalışma saatine göre yapılmaktadır.
+
+- **Bağımsız Değişken:** Çalışma saati çünkü kontrol edip gözlemleyebiliyoruz.
+- **Bağımlı Değişken:** Sınav sonucu çünkü kaaç saat ders çalıştığına bağlı.
+
+Bağımsız değişkeni (input) bağımlı değişkeni (output) tahmin etmek için kullanırız.
+Eğer bu örnğimizde olduğu gibi bir adet bağımlı ve bir adet bağımsız değişken varsa buna **basit (simple) linear regresyon** denir.
+
+<Grid columns={2} >
+	<ScatterChart
+		title={"Basit Linear Regression"}
+		height={350}
+		xAxis={{
+			min: 0,
+			max: 11,
+			tickInterval: 1,
+		}}
+		yAxis={{
+			min: 0,
+			max: 120,
+		}}
+		data={[
+			{ x: 1, y: 12 },
+			{ x: 2, y: 24 },
+			{ x: 3, y: 35 },
+			{ x: 4, y: 48 },
+			{ x: 5, y: 55 },
+			{ x: 6, y: 68 },
+			{ x: 7, y: 74 },
+			{ x: 8, y: 89 },
+			{ x: 9, y: 95 },
+			{ x: 10, y: 108 },
+		]}
+	/>
+
+    <ScatterChart3D
+    	title={"Çoklu Linear Regression"}
+    	height={350}
+    	xAxis={{
+    		min: 0,
+    		max: 11,
+    		tickInterval: 1,
+    	}}
+    	yAxis={{
+    		min: 0,
+    		max: 120,
+    	}}
+    	data={[
+    		{ x: 1, z: 5, y: 18, color: "red" },
+    		{ x: 2, z: 7, y: 25, color: "red" },
+    		{ x: 3, z: 6, y: 29, color: "blue" },
+    		{ x: 4, z: 8, y: 38, color: "blue" },
+    		{ x: 5, z: 10, y: 46, color: "green" },
+    		{ x: 6, z: 9, y: 50, color: "green" },
+    		{ x: 7, z: 12, y: 61, color: "orange" },
+    		{ x: 8, z: 11, y: 66, color: "orange" },
+    		{ x: 9, z: 14, y: 78, color: "purple" },
+    		{ x: 10, z: 13, y: 82, color: "purple" }
+    	]}
+    />
+
+</Grid>
+
+Buradaki ilk örneğimizde olduğu gibi $y = a + bx$ basit bir regresyon örneğidir. Çünkü bağımsız değişkenimiz sadece `x`'dir.
+İkinci örnekte ise $y ≈ 5 + 4x + 2z$ formülünde `x` ve `z` bağımsız değişkendir yani toplam 2 adet bağımsız değişken vardır.
+Bu yüzden 1. örnekteki basit, ikinci örnekteki **çoklu (multiple) linear regression**'dur.
+
+Eğerki birden fazla bağımsız değişken (input) varsa ve birden fazla bağımlı (output) değişken tahmin etmeye çalışıyorsak **Çok Değişkenli (Multivariate) linear regression** denir.
+Yani diyelimki elimizde aşağıdaki gibi bir veri seti var:
+
+<CsvViewer
+	data="Çalışma Saati,Çözdükleri Deneme Sayısı,Matematik Sınav Puanı,Fizik Sınav Puanı
+	1,0,42,40
+	2,1,48,45
+	3,2,55,52
+	4,3,61,58
+	5,4,67,65
+	6,5,74,72
+	7,7,81,80
+	8,8,86,85"
+	title="Öğrenci Çalışma ve Sınav Puanı Verisi"
+	pageSize={5}
+/>
+
+Burada çalışma saati ve çözdükleri deneme sayısıyla; matematik ve fizik sınav sonuçlarını tahmin etmeye çalışıyoruz.
+
+- $$y_1 = \beta_{01} + \beta_{11}x_1 + \beta_{21}x_2 + \epsilon_1$$
+- $$y_2 = \beta_{02} + \beta_{12}x_1 + \beta_{22}x_2 + \epsilon_2$$
+
+olarak iki farklı denklem ortaya çıkar ve buna da multivariate linear regression denir.
+
+## Çalışma Prensibi
+
+Linear Regresyon'da ilişkiler daha öncede örneklerini gösterdiğimiz gibi bilinmeyen parametreleri, bilinen verilerden **linear predictor functions** kullanarak modellenir.
+Yani model, tüm değişkenlerin olasılık dağılımından ziyade, elimizdeki girdilere bakarak "Bu şartlar altında beklenen çıktı nedir?" sorunusuna cevap verir.
+
+Linear regresyon, tarihsel olarak istatistikte titizlikle incelenen ve pratik uygulamalarda yaygın olarak kullanılan ilk regresyon analizi türüdür.
+Bunun temel sebebi, bilinmeyen parametrelerine doğrusal olarak bağlı olan modellerin matematiksel olarak çözülmesinin ve uyarlanmasının (fitting), doğrusal olmayan modellere göre çok daha kolay olmasıdır.
+
+## Makine Öğrenimindeki Yeri
+
+Linear regresyon sadece klasik bir istatistiksel yöntem değil, aynı zamanda temel bir **makine öğrenimi (machine learning)** algoritmasıdır. Daha spesifik olarak, **gözetimli öğrenme (supervised learning)** kategorisine girer.
+
+Öğrenci notu örneklerimizde olduğu gibi, modele hem girdileri (çalışma saati) hem de doğru cevapları yani etiketleri (sınav puanı) veririz. Algoritma bu etiketlenmiş veri setinden öğrenir ve veri noktalarını, yeni ve daha önce görülmemiş veriler üzerinde tahmin yapmak için kullanılabilecek en optimize doğrusal fonksiyona eşler.
+
+## Temel Kullanım Alanları
+
+Linear regresyonun pratik uygulamaları genellikle iki ana kategoriye ayrılır:
+
+- **Tahmin ve Öngörü (Predicting / Forecasting):** Amacımız hatayı azaltarak gelecekteki veya elimizde olmayan bir değeri tahmin etmekse linear regresyon harika bir araçtır. Mevcut verilerle öngörücü bir model eğitilir. Daha sonra, elimizde sadece girdi değerleri (örneğin çalışma saati) olan yeni bir durum için çıktının ne olacağı (sınav notu) tahmin edilir.
+- **İlişkileri Açıklamak ve Varyansı Anlamak:** Bazen amaç sadece tahmin yapmak değil, değişkenler arasındaki ilişkinin gücünü sayısal olarak ölçmektir. Örneğin; bağımsız değişkenlerdeki değişimin, bağımlı değişkende ne kadarlık bir değişime yol açtığını bulmak, bazı değişkenlerin sonuçla hiçbir ilgisi olmadığını kanıtlamak veya hangi değişkenlerin birbiriyle gereksiz/tekrar eden bilgiler içerdiğini tespit etmek için kullanılır.
