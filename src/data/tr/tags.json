@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "id": "1",
+    "name": "linear-regression",
+    "slug": "linear-regression",
+    "articleCount": 1,
+    "description": ""
+  },
+  {
+    "id": "2",
+    "name": "supervised-learning",
+    "slug": "supervised-learning",
+    "articleCount": 2,
+    "description": ""
+  },
+  {
+    "id": "3",
+    "name": "teori",
+    "slug": "teori",
+    "articleCount": 2,
+    "description": ""
+  }
+]
