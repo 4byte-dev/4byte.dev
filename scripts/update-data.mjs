@@ -64,7 +64,7 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 
 			const catName = data.category?.trim()
 			if (catName) {
-				const existing = categories.find((c) => c.name === catName)
+				const existing = categories.find((c) => c.slug === catName)
 				if (existing) {
 					existing.articleCount = (existing.articleCount ?? 0) + 1
 				} else {
