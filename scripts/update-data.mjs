@@ -18,11 +18,14 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 		const categoriesPath = path.join(repoRoot, 'src/data', lang, 'categories.json')
 		const articlesPath = path.join(repoRoot, 'src/data', lang, 'articles.json')
 
-		const tags = (await readJSON(tagsPath)) ?? []
-		const categories = (await readJSON(categoriesPath)) ?? []
+		const existingTags = (await readJSON(tagsPath)) ?? []
+		const existingCategories = (await readJSON(categoriesPath)) ?? []
 
-		tags.forEach((t) => (t.articleCount = 0))
-		categories.forEach((c) => (c.articleCount = 0))
+		const tags = [...existingTags]
+		const categories = [...existingCategories]
+
+		const tagSlugs = new Set(tags.map((t) => t.slug))
+		const categorySlugs = new Set(categories.map((c) => c.slug))
 
 		const addedTags = new Set()
 		const addedCategories = new Set()
@@ -47,36 +50,42 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 
 			const fileTags = Array.isArray(data.tags) ? data.tags : []
 			for (const tagName of fileTags) {
-				const existing = tags.find((t) => t.name === tagName)
-				if (existing) {
-					existing.articleCount = (existing.articleCount ?? 0) + 1
-				} else {
+				const tagSlug = slugify(tagName, { lower: true })
+				if (!tagSlugs.has(tagSlug)) {
 					tags.push({
 						id: String(tags.length + 1),
 						name: tagName,
-						slug: slugify(tagName, { lower: true }),
-						articleCount: 1,
+						slug: tagSlug,
+						articleCount: 0,
 						description: '',
 					})
+					tagSlugs.add(tagSlug)
 					addedTags.add(tagName)
+				}
+				const existing = tags.find((t) => t.slug === tagSlug)
+				if (existing) {
+					existing.articleCount = (existing.articleCount ?? 0) + 1
 				}
 			}
 
 			const catName = data.category?.trim()
 			if (catName) {
-				const existing = categories.find((c) => c.slug === catName)
-				if (existing) {
-					existing.articleCount = (existing.articleCount ?? 0) + 1
-				} else {
+				const catSlug = slugify(catName, { lower: true })
+				if (!categorySlugs.has(catSlug)) {
 					categories.push({
 						id: String(categories.length + 1),
 						name: catName,
-						slug: slugify(catName, { lower: true }),
+						slug: catSlug,
 						description: '',
 						color: '',
-						articleCount: 1,
+						articleCount: 0,
 					})
+					categorySlugs.add(catSlug)
 					addedCategories.add(catName)
+				}
+				const existing = categories.find((c) => c.slug === catSlug)
+				if (existing) {
+					existing.articleCount = (existing.articleCount ?? 0) + 1
 				}
 			}
 
@@ -86,16 +95,31 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 		const filteredTags = tags.filter((t) => (t.articleCount ?? 0) > 0)
 		const filteredCategories = categories.filter((c) => (c.articleCount ?? 0) > 0)
 
-		await writeJSON(tagsPath, filteredTags)
-		await writeJSON(categoriesPath, filteredCategories)
-		await writeJSON(articlesPath, articles)
+		const hasChanges = addedTags.size > 0 || addedCategories.size > 0
+
+		if (hasChanges) {
+			await writeJSON(tagsPath, filteredTags)
+			await writeJSON(categoriesPath, filteredCategories)
+		}
+
+		const existingArticles = (await readJSON(articlesPath)) ?? []
+		const articlesChanged = JSON.stringify(articles) !== JSON.stringify(existingArticles)
+		if (articlesChanged) {
+			await writeJSON(articlesPath, articles)
+		}
+
+		const didWrite = hasChanges || articlesChanged
 
 		console.log(`Updated data for language: ${lang}`)
-		console.log(`  Articles: ${articles.length}`)
-		console.log(`  Categories: ${filteredCategories.length}`)
-		console.log(`  Tags: ${filteredTags.length}`)
+		console.log(`  Articles: ${articles.length} ${articlesChanged ? '(changed)' : '(unchanged)'}`)
+		console.log(
+			`  Categories: ${filteredCategories.length} ${addedCategories.size ? `(added: ${[...addedCategories].join(', ')})` : '(unchanged)'}`,
+		)
+		console.log(
+			`  Tags: ${filteredTags.length} ${addedTags.size ? `(added: ${[...addedTags].join(', ')})` : '(unchanged)'}`,
+		)
 
-		if (process.env.GITHUB_EVENT_PATH) {
+		if (didWrite && process.env.GITHUB_EVENT_PATH) {
 			const event = JSON.parse(await fs.readFile(process.env.GITHUB_EVENT_PATH, 'utf8'))
 			const prNumber = event.pull_request?.number
 			if (prNumber) {
@@ -109,6 +133,10 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 					lines.push(`## New categories added for ${lang} (please add descriptions)`)
 					for (const c of addedCategories) lines.push(`- \`${c}\``)
 					lines.push('')
+				}
+				if (lines.length) {
+					console.log('\nComment for PR:')
+					console.log(lines.join('\n'))
 				}
 			}
 		}
