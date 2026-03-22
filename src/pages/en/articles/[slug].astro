@@ -26,7 +26,7 @@ if (!article || article.data.status !== 'Published') {
 
 const { Content, headings } = await render(article)
 
-const categorySlug = article.data.category.toLowerCase().replace(/\s+/g, '-')
+const categorySlug = article.data.category
 const articleUrl = `${SITE.origin}/en/articles/${article.data.slug}`
 const ogImageUrl = `/og/${article.data.slug}.png`
 

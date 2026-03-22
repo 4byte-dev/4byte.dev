@@ -31,10 +31,7 @@ const langPrefix = catLang === 'en' ? '/en' : ''
 
 const allArticles = await getCollection('articles')
 const catArticles = allArticles.filter(
-	(a) =>
-		a.data.lang === catLang &&
-		a.data.category.toLowerCase().replace(/\s+/g, '-') === category.slug &&
-		a.data.status === 'Published',
+	(a) => a.data.lang === catLang && a.data.category === category.slug && a.data.status === 'Published',
 )
 ---
 
