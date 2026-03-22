@@ -63,299 +63,312 @@ const chartColors = JSON.stringify(colors)
 <script>
 	import * as d3 from 'd3'
 	import { getThemeColors, getColor, createTooltip, showTooltip, hideTooltip } from '../../utils/chartUtils'
+	import { onHydration } from '../../utils/hydration'
 
-	const wrappers = document.querySelectorAll('.chart-wrapper[data-chart-id^="area-chart"]')
+	function initAreaCharts() {
+		const wrappers = document.querySelectorAll('.chart-wrapper[data-chart-id^="area-chart"]')
 
-	wrappers.forEach((wrapper) => {
-		const container = wrapper.querySelector('div') as HTMLElement
-		if (!container) return
+		wrappers.forEach((wrapper) => {
+			const container = wrapper.querySelector('div') as HTMLElement
+			if (!container) return
 
-		const rawData = (wrapper as HTMLElement).dataset.chartData
-		const chartData: Array<{ x: number; y: number; label?: string; color?: string }> = rawData
-			? JSON.parse(rawData)
-			: []
-		const colors: string[] = JSON.parse((wrapper as HTMLElement).dataset.chartColors || '[]')
-		const animated = (wrapper as HTMLElement).dataset.chartAnimated !== 'false'
-		const showGrid = (wrapper as HTMLElement).dataset.chartShowGrid !== 'false'
-		const strokeWidth = parseFloat((wrapper as HTMLElement).dataset.chartStrokeWidth || '2.5')
-		const fillOpacity = parseFloat((wrapper as HTMLElement).dataset.chartFillOpacity || '0.2')
-		const pointSize = parseFloat((wrapper as HTMLElement).dataset.chartPointSize || '5')
-		const xAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartXAxis || '{}')
-		const yAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartYAxis || '{}')
-		const chartTitle = (wrapper as HTMLElement).dataset.chartTitle || ''
-		const chartHeight = parseInt((wrapper as HTMLElement).dataset.chartHeight || '300')
-		const chartId = parseInt((wrapper as HTMLElement).dataset.chartId || 'uid')
+			const rawData = (wrapper as HTMLElement).dataset.chartData
+			const chartData: Array<{ x: number; y: number; label?: string; color?: string }> = rawData
+				? JSON.parse(rawData)
+				: []
+			const colors: string[] = JSON.parse((wrapper as HTMLElement).dataset.chartColors || '[]')
+			const animated = (wrapper as HTMLElement).dataset.chartAnimated !== 'false'
+			const showGrid = (wrapper as HTMLElement).dataset.chartShowGrid !== 'false'
+			const strokeWidth = parseFloat((wrapper as HTMLElement).dataset.chartStrokeWidth || '2.5')
+			const fillOpacity = parseFloat((wrapper as HTMLElement).dataset.chartFillOpacity || '0.2')
+			const pointSize = parseFloat((wrapper as HTMLElement).dataset.chartPointSize || '5')
+			const xAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartXAxis || '{}')
+			const yAxisConfig = JSON.parse((wrapper as HTMLElement).dataset.chartYAxis || '{}')
+			const chartTitle = (wrapper as HTMLElement).dataset.chartTitle || ''
+			const chartHeight = parseInt((wrapper as HTMLElement).dataset.chartHeight || '300')
+			const chartId = parseInt((wrapper as HTMLElement).dataset.chartId || 'uid')
 
-		if (!chartData.length) return
+			if (!chartData.length) return
 
-		const margin = { top: 20, right: 20, bottom: 40, left: 60 }
-		const tooltip = createTooltip(container)
+			const margin = { top: 20, right: 20, bottom: 40, left: 60 }
+			const tooltip = createTooltip(container)
 
-		function applyAxisStyles(axisG: d3.Selection<SVGGElement, unknown, null, undefined>, textColor: string) {
-			const { axisColor } = getThemeColors()
-			axisG.select('.domain').style('stroke', axisColor).style('stroke-width', 1.5)
-			axisG.selectAll('.tick line').style('stroke', axisColor).style('stroke-width', 1)
-			axisG
-				.selectAll('.tick text')
-				.attr('fill', textColor)
-				.style('fill', textColor)
-				.attr('font-size', '12px')
-				.attr('font-family', 'inherit')
-				.style('font-weight', '500')
-		}
+			function applyAxisStyles(axisG: d3.Selection<SVGGElement, unknown, null, undefined>, textColor: string) {
+				const { axisColor } = getThemeColors()
+				axisG.select('.domain').style('stroke', axisColor).style('stroke-width', 1.5)
+				axisG.selectAll('.tick line').style('stroke', axisColor).style('stroke-width', 1)
+				axisG
+					.selectAll('.tick text')
+					.attr('fill', textColor)
+					.style('fill', textColor)
+					.attr('font-size', '12px')
+					.attr('font-family', 'inherit')
+					.style('font-weight', '500')
+			}
 
-		function renderGrid(
-			g: d3.Selection<SVGGElement, unknown, null, undefined>,
-			y: d3.ScaleLinear<number, number>,
-			w: number,
-			gridColor: string,
-		) {
-			const gridG = g.append('g').attr('class', 'grid')
-			gridG.call(
-				d3
-					.axisLeft(y)
-					.tickSize(-w)
-					.tickFormat(() => ''),
-			)
-			gridG.selectAll('line').style('stroke', gridColor).style('stroke-dasharray', '3,3').style('stroke-width', 1)
-			gridG.select('.domain').remove()
-			return gridG
-		}
+			function renderGrid(
+				g: d3.Selection<SVGGElement, unknown, null, undefined>,
+				y: d3.ScaleLinear<number, number>,
+				w: number,
+				gridColor: string,
+			) {
+				const gridG = g.append('g').attr('class', 'grid')
+				gridG.call(
+					d3
+						.axisLeft(y)
+						.tickSize(-w)
+						.tickFormat(() => ''),
+				)
+				gridG
+					.selectAll('line')
+					.style('stroke', gridColor)
+					.style('stroke-dasharray', '3,3')
+					.style('stroke-width', 1)
+				gridG.select('.domain').remove()
+				return gridG
+			}
 
-		function initChart() {
-			container.innerHTML = ''
-			const width = container.clientWidth
-			const h = chartHeight
-			const innerWidth = width - margin.left - margin.right
-			const innerHeight = h - margin.top - margin.bottom
+			function initChart() {
+				container.innerHTML = ''
+				const width = container.clientWidth
+				const h = chartHeight
+				const innerWidth = width - margin.left - margin.right
+				const innerHeight = h - margin.top - margin.bottom
 
-			if (chartTitle) {
-				const titleEl = document.createElement('div')
-				titleEl.className = 'chart-title'
-				titleEl.textContent = chartTitle
-				titleEl.style.cssText = `
+				if (chartTitle) {
+					const titleEl = document.createElement('div')
+					titleEl.className = 'chart-title'
+					titleEl.textContent = chartTitle
+					titleEl.style.cssText = `
 					font-size: 16px;
 					font-weight: 600;
 					text-align: center;
 					color: ${getThemeColors().textColor};
 				`
-				container.appendChild(titleEl)
-			}
+					container.appendChild(titleEl)
+				}
 
-			const svg = d3
-				.select(container)
-				.append('svg')
-				.attr('width', width)
-				.attr('height', h)
-				.attr('viewBox', `0 0 ${width} ${h}`)
-				.attr('preserveAspectRatio', 'xMidYMid meet')
-				.style('overflow', 'visible')
+				const svg = d3
+					.select(container)
+					.append('svg')
+					.attr('width', width)
+					.attr('height', h)
+					.attr('viewBox', `0 0 ${width} ${h}`)
+					.attr('preserveAspectRatio', 'xMidYMid meet')
+					.style('overflow', 'visible')
 
-			const defs = svg.append('defs')
+				const defs = svg.append('defs')
 
-			const gradient = defs
-				.append('linearGradient')
-				.attr('id', `area-grad-${chartId}`)
-				.attr('gradientUnits', 'userSpaceOnUse')
-				.attr('x1', 0)
-				.attr('y1', 0)
-				.attr('x2', 0)
-				.attr('y2', innerHeight)
+				const gradient = defs
+					.append('linearGradient')
+					.attr('id', `area-grad-${chartId}`)
+					.attr('gradientUnits', 'userSpaceOnUse')
+					.attr('x1', 0)
+					.attr('y1', 0)
+					.attr('x2', 0)
+					.attr('y2', innerHeight)
 
-			gradient.append('stop').attr('offset', '0%').attr('stop-color', colors[0]).attr('stop-opacity', fillOpacity)
+				gradient
+					.append('stop')
+					.attr('offset', '0%')
+					.attr('stop-color', colors[0])
+					.attr('stop-opacity', fillOpacity)
 
-			gradient
-				.append('stop')
-				.attr('offset', '80%')
-				.attr('stop-color', colors[0])
-				.attr('stop-opacity', fillOpacity * 0.5)
+				gradient
+					.append('stop')
+					.attr('offset', '80%')
+					.attr('stop-color', colors[0])
+					.attr('stop-opacity', fillOpacity * 0.5)
 
-			gradient.append('stop').attr('offset', '100%').attr('stop-color', colors[0]).attr('stop-opacity', 0)
+				gradient.append('stop').attr('offset', '100%').attr('stop-color', colors[0]).attr('stop-opacity', 0)
 
-			const glowFilter = defs.append('filter').attr('id', `area-glow-${chartId}`)
-			glowFilter.append('feGaussianBlur').attr('stdDeviation', 3).attr('result', 'coloredBlur')
-			const feMerge = glowFilter.append('feMerge')
-			feMerge.append('feMergeNode').attr('in', 'coloredBlur')
-			feMerge.append('feMergeNode').attr('in', 'SourceGraphic')
+				const glowFilter = defs.append('filter').attr('id', `area-glow-${chartId}`)
+				glowFilter.append('feGaussianBlur').attr('stdDeviation', 3).attr('result', 'coloredBlur')
+				const feMerge = glowFilter.append('feMerge')
+				feMerge.append('feMergeNode').attr('in', 'coloredBlur')
+				feMerge.append('feMergeNode').attr('in', 'SourceGraphic')
 
-			const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
-			const { textColor, gridColor } = getThemeColors()
+				const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+				const { textColor, gridColor } = getThemeColors()
 
-			const x = d3
-				.scalePoint()
-				.domain(chartData.map((d) => d.label || String(d.x)))
-				.range([0, innerWidth])
+				const x = d3
+					.scalePoint()
+					.domain(chartData.map((d) => d.label || String(d.x)))
+					.range([0, innerWidth])
 
-			const yMin = yAxisConfig.min ?? 0
-			const yMax = yAxisConfig.max ?? d3.max(chartData, (d) => d.y)! * 1.1
+				const yMin = yAxisConfig.min ?? 0
+				const yMax = yAxisConfig.max ?? d3.max(chartData, (d) => d.y)! * 1.1
 
-			const y = d3.scaleLinear().domain([yMin, yMax]).nice().range([innerHeight, 0])
+				const y = d3.scaleLinear().domain([yMin, yMax]).nice().range([innerHeight, 0])
 
-			if (showGrid) {
-				renderGrid(g, y, innerWidth, gridColor)
-			}
+				if (showGrid) {
+					renderGrid(g, y, innerWidth, gridColor)
+				}
 
-			const xAxisG = g.append('g').attr('transform', `translate(0,${innerHeight})`)
-			xAxisG.call(d3.axisBottom(x))
-			applyAxisStyles(xAxisG, textColor)
+				const xAxisG = g.append('g').attr('transform', `translate(0,${innerHeight})`)
+				xAxisG.call(d3.axisBottom(x))
+				applyAxisStyles(xAxisG, textColor)
 
-			const yAxisG = g.append('g')
-			yAxisG.call(d3.axisLeft(y).ticks(5))
-			applyAxisStyles(yAxisG, textColor)
+				const yAxisG = g.append('g')
+				yAxisG.call(d3.axisLeft(y).ticks(5))
+				applyAxisStyles(yAxisG, textColor)
 
-			const area = d3
-				.area<{ x: number; y: number; label?: string }>()
-				.x((d) => x(d.label || String(d.x))!)
-				.y0(innerHeight)
-				.y1((d) => y(d.y))
-				.curve(d3.curveMonotoneX)
+				const area = d3
+					.area<{ x: number; y: number; label?: string }>()
+					.x((d) => x(d.label || String(d.x))!)
+					.y0(innerHeight)
+					.y1((d) => y(d.y))
+					.curve(d3.curveMonotoneX)
 
-			const line = d3
-				.line<{ x: number; y: number; label?: string }>()
-				.x((d) => x(d.label || String(d.x))!)
-				.y((d) => y(d.y))
-				.curve(d3.curveMonotoneX)
+				const line = d3
+					.line<{ x: number; y: number; label?: string }>()
+					.x((d) => x(d.label || String(d.x))!)
+					.y((d) => y(d.y))
+					.curve(d3.curveMonotoneX)
 
-			const areaPath = g
-				.append('path')
-				.datum(chartData)
-				.attr('fill', `url(#area-grad-${chartId})`)
-				.attr('d', area)
+				const areaPath = g
+					.append('path')
+					.datum(chartData)
+					.attr('fill', `url(#area-grad-${chartId})`)
+					.attr('d', area)
 
-			if (animated) {
-				areaPath.attr('opacity', 0).transition().duration(800).ease(d3.easeCubicOut).attr('opacity', 1)
-			}
+				if (animated) {
+					areaPath.attr('opacity', 0).transition().duration(800).ease(d3.easeCubicOut).attr('opacity', 1)
+				}
 
-			const linePath = g
-				.append('path')
-				.datum(chartData)
-				.attr('fill', 'none')
-				.attr('stroke', colors[0])
-				.attr('stroke-width', strokeWidth)
-				.attr('d', line)
-				.style('filter', `url(#area-glow-${chartId})`)
-
-			if (animated) {
-				const totalLength = (linePath.node() as SVGPathElement).getTotalLength()
-				linePath
-					.attr('stroke-dasharray', `${totalLength} ${totalLength}`)
-					.attr('stroke-dashoffset', totalLength)
-					.transition()
-					.duration(1000)
-					.ease(d3.easeCubicOut)
-					.attr('stroke-dashoffset', 0)
-			}
-
-			const dots = g
-				.selectAll('.dot')
-				.data(chartData)
-				.enter()
-				.append('circle')
-				.attr('class', 'dot')
-				.attr('cx', (d) => x(d.label || String(d.x))!)
-				.attr('cy', (d) => y(d.y))
-				.attr('r', pointSize)
-				.attr('fill', colors[0])
-				.attr('stroke', '#fff')
-				.attr('stroke-width', 2)
-				.style('cursor', 'pointer')
-
-			dots.on('mousemove', function (event, d) {
-				d3.select(this)
-					.transition()
-					.duration(150)
-					.attr('r', pointSize + 3)
-					.style('filter', `drop-shadow(0 0 6px ${colors[0]})`)
-
-				const labelText = d.label ? `<strong>${d.label}</strong><br/>` : ''
-				showTooltip(
-					tooltip,
-					event.offsetX,
-					event.offsetY,
-					`${labelText}y: ${d.y.toLocaleString()}`,
-					container.getBoundingClientRect(),
-				)
-			})
-
-			dots.on('mouseleave', function () {
-				d3.select(this)
-					.transition()
-					.duration(150)
-					.attr('r', pointSize)
+				const linePath = g
+					.append('path')
+					.datum(chartData)
+					.attr('fill', 'none')
+					.attr('stroke', colors[0])
+					.attr('stroke-width', strokeWidth)
+					.attr('d', line)
 					.style('filter', `url(#area-glow-${chartId})`)
 
-				hideTooltip(tooltip)
-			})
+				if (animated) {
+					const totalLength = (linePath.node() as SVGPathElement).getTotalLength()
+					linePath
+						.attr('stroke-dasharray', `${totalLength} ${totalLength}`)
+						.attr('stroke-dashoffset', totalLength)
+						.transition()
+						.duration(1000)
+						.ease(d3.easeCubicOut)
+						.attr('stroke-dashoffset', 0)
+				}
 
-			if (animated) {
-				dots.attr('opacity', 0)
-					.transition()
-					.duration(400)
-					.delay((_, i) => 800 + i * 80)
-					.attr('opacity', 1)
+				const dots = g
+					.selectAll('.dot')
+					.data(chartData)
+					.enter()
+					.append('circle')
+					.attr('class', 'dot')
+					.attr('cx', (d) => x(d.label || String(d.x))!)
+					.attr('cy', (d) => y(d.y))
+					.attr('r', pointSize)
+					.attr('fill', colors[0])
+					.attr('stroke', '#fff')
+					.attr('stroke-width', 2)
+					.style('cursor', 'pointer')
+
+				dots.on('mousemove', function (event, d) {
+					d3.select(this)
+						.transition()
+						.duration(150)
+						.attr('r', pointSize + 3)
+						.style('filter', `drop-shadow(0 0 6px ${colors[0]})`)
+
+					const labelText = d.label ? `<strong>${d.label}</strong><br/>` : ''
+					showTooltip(
+						tooltip,
+						event.offsetX,
+						event.offsetY,
+						`${labelText}y: ${d.y.toLocaleString()}`,
+						container.getBoundingClientRect(),
+					)
+				})
+
+				dots.on('mouseleave', function () {
+					d3.select(this)
+						.transition()
+						.duration(150)
+						.attr('r', pointSize)
+						.style('filter', `url(#area-glow-${chartId})`)
+
+					hideTooltip(tooltip)
+				})
+
+				if (animated) {
+					dots.attr('opacity', 0)
+						.transition()
+						.duration(400)
+						.delay((_, i) => 800 + i * 80)
+						.attr('opacity', 1)
+				}
+
+				const hoverLine = g
+					.append('line')
+					.attr('class', 'hover-line')
+					.attr('y1', 0)
+					.attr('y2', innerHeight)
+					.attr('stroke', colors[0])
+					.attr('stroke-width', 2)
+					.attr('stroke-dasharray', '4,4')
+					.style('opacity', 0)
+					.style('pointer-events', 'none')
+
+				const hoverArea = g
+					.append('path')
+					.attr('class', 'hover-area')
+					.attr('fill', colors[0])
+					.attr('fill-opacity', fillOpacity * 0.3)
+					.style('opacity', 0)
+
+				const overlay = g
+					.append('rect')
+					.attr('width', innerWidth)
+					.attr('height', innerHeight)
+					.attr('fill', 'transparent')
+					.style('cursor', 'crosshair')
+
+				overlay.on('mousemove', function (event) {
+					const [mx] = d3.pointer(event)
+					const n = chartData.length
+					const step = innerWidth / Math.max(n - 1, 1)
+					const rawIdx = mx / step
+					const idx = Math.max(0, Math.min(n - 1, Math.round(rawIdx)))
+					const d = chartData[idx]
+					if (!d) return
+
+					hoverLine
+						.attr('x1', x(d.label || String(d.x))!)
+						.attr('x2', x(d.label || String(d.x))!)
+						.style('opacity', 0.6)
+
+					const hoverD = [d]
+					hoverArea.datum(hoverD).attr('d', area).style('opacity', 1)
+
+					const labelText = d.label ? `<strong>${d.label}</strong><br/>` : ''
+					showTooltip(
+						tooltip,
+						event.offsetX,
+						event.offsetY,
+						`${labelText}y: ${d.y.toLocaleString()}`,
+						container.getBoundingClientRect(),
+					)
+				})
+
+				overlay.on('mouseleave', function () {
+					hoverLine.style('opacity', 0)
+					hoverArea.style('opacity', 0)
+					hideTooltip(tooltip)
+				})
 			}
 
-			const hoverLine = g
-				.append('line')
-				.attr('class', 'hover-line')
-				.attr('y1', 0)
-				.attr('y2', innerHeight)
-				.attr('stroke', colors[0])
-				.attr('stroke-width', 2)
-				.attr('stroke-dasharray', '4,4')
-				.style('opacity', 0)
-				.style('pointer-events', 'none')
+			const observer = new ResizeObserver(() => initChart())
+			observer.observe(container)
+			initChart()
+		})
+	}
 
-			const hoverArea = g
-				.append('path')
-				.attr('class', 'hover-area')
-				.attr('fill', colors[0])
-				.attr('fill-opacity', fillOpacity * 0.3)
-				.style('opacity', 0)
-
-			const overlay = g
-				.append('rect')
-				.attr('width', innerWidth)
-				.attr('height', innerHeight)
-				.attr('fill', 'transparent')
-				.style('cursor', 'crosshair')
-
-			overlay.on('mousemove', function (event) {
-				const [mx] = d3.pointer(event)
-				const n = chartData.length
-				const step = innerWidth / Math.max(n - 1, 1)
-				const rawIdx = mx / step
-				const idx = Math.max(0, Math.min(n - 1, Math.round(rawIdx)))
-				const d = chartData[idx]
-				if (!d) return
-
-				hoverLine
-					.attr('x1', x(d.label || String(d.x))!)
-					.attr('x2', x(d.label || String(d.x))!)
-					.style('opacity', 0.6)
-
-				const hoverD = [d]
-				hoverArea.datum(hoverD).attr('d', area).style('opacity', 1)
-
-				const labelText = d.label ? `<strong>${d.label}</strong><br/>` : ''
-				showTooltip(
-					tooltip,
-					event.offsetX,
-					event.offsetY,
-					`${labelText}y: ${d.y.toLocaleString()}`,
-					container.getBoundingClientRect(),
-				)
-			})
-
-			overlay.on('mouseleave', function () {
-				hoverLine.style('opacity', 0)
-				hoverArea.style('opacity', 0)
-				hideTooltip(tooltip)
-			})
-		}
-
-		const observer = new ResizeObserver(() => initChart())
-		observer.observe(container)
-		initChart()
-	})
+	onHydration(initAreaCharts)
 </script>

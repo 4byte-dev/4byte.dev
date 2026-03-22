@@ -457,6 +457,11 @@ const viewerDelimiter = delimiter
 		}
 	}
 
-	const wrappers = document.querySelectorAll('.csv-viewer-wrapper')
-	wrappers.forEach((wrapper) => new CsvViewer(wrapper as HTMLElement))
+	function initCsvViewers() {
+		const wrappers = document.querySelectorAll('.csv-viewer-wrapper')
+		wrappers.forEach((wrapper) => new CsvViewer(wrapper as HTMLElement))
+	}
+
+	import { onHydration } from '../../utils/hydration'
+	onHydration(initCsvViewers)
 </script>

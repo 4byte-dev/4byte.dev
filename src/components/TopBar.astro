@@ -84,64 +84,70 @@ const mappedArticles = rawArticles.map((a) => ({
 </header>
 
 <script define:vars={{ mappedArticles }}>
-	const mobileToggle = document.getElementById('mobile-theme-toggle')
-	const desktopToggle = document.getElementById('desktop-theme-toggle')
-	const mobileIcon = mobileToggle?.querySelector('.mobile-theme-icon')
-	const desktopIcon = desktopToggle?.querySelector('.desktop-theme-icon')
+	import { onHydration } from '../utils/hydration'
 
-	function updateMobileTheme() {
-		const isDark = document.documentElement.classList.contains('dark')
-		if (mobileIcon) {
-			mobileIcon.className = `mobile-theme-icon w-4 h-4 ${isDark ? 'i-lucide-sun' : 'i-lucide-moon'}`
-		}
-		if (desktopIcon) {
-			desktopIcon.className = `desktop-theme-icon w-4 h-4 ${isDark ? 'i-lucide-sun' : 'i-lucide-moon'}`
-		}
-	}
+	function initTopBar() {
+		const mobileToggle = document.getElementById('mobile-theme-toggle')
+		const desktopToggle = document.getElementById('desktop-theme-toggle')
+		const mobileIcon = mobileToggle?.querySelector('.mobile-theme-icon')
+		const desktopIcon = desktopToggle?.querySelector('.desktop-theme-icon')
 
-	function toggleTheme() {
-		document.documentElement.classList.toggle('dark')
-		localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')
-		updateMobileTheme()
-	}
-
-	mobileToggle?.addEventListener('click', toggleTheme)
-	desktopToggle?.addEventListener('click', toggleTheme)
-
-	const searchInput = document.getElementById('search-input')
-	const searchResults = document.getElementById('search-results')
-
-	const articles = mappedArticles
-
-	searchInput?.addEventListener('input', (e) => {
-		const query = e.target.value
-		if (query.length < 2) {
-			searchResults?.classList.add('hidden')
-			return
+		function updateMobileTheme() {
+			const isDark = document.documentElement.classList.contains('dark')
+			if (mobileIcon) {
+				mobileIcon.className = `mobile-theme-icon w-4 h-4 ${isDark ? 'i-lucide-sun' : 'i-lucide-moon'}`
+			}
+			if (desktopIcon) {
+				desktopIcon.className = `desktop-theme-icon w-4 h-4 ${isDark ? 'i-lucide-sun' : 'i-lucide-moon'}`
+			}
 		}
 
-		const filtered = articles.filter((a) => a.title.toLowerCase().includes(query.toLowerCase())).slice(0, 5)
+		function toggleTheme() {
+			document.documentElement.classList.toggle('dark')
+			localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light')
+			updateMobileTheme()
+		}
 
-		if (filtered.length > 0 && searchResults) {
-			searchResults.innerHTML = filtered
-				.map(
-					(a) => `
+		mobileToggle?.addEventListener('click', toggleTheme)
+		desktopToggle?.addEventListener('click', toggleTheme)
+
+		const searchInput = document.getElementById('search-input')
+		const searchResults = document.getElementById('search-results')
+
+		const articles = mappedArticles
+
+		searchInput?.addEventListener('input', (e) => {
+			const query = e.target.value
+			if (query.length < 2) {
+				searchResults?.classList.add('hidden')
+				return
+			}
+
+			const filtered = articles.filter((a) => a.title.toLowerCase().includes(query.toLowerCase())).slice(0, 5)
+
+			if (filtered.length > 0 && searchResults) {
+				searchResults.innerHTML = filtered
+					.map(
+						(a) => `
         <a href="/articles/${a.id}" class="block w-full text-left px-4 py-3 text-sm hover:bg-muted dark:hover:bg-muted-dark transition-colors border-b border-border/50 dark:border-border-dark/50 last:border-0 text-foreground dark:text-foreground-dark">
           <div class="font-medium">${a.title}</div>
           <div class="text-xs text-muted-foreground dark:text-muted-dark-foreground mt-0.5">${a.category}</div>
         </a>
       `,
-				)
-				.join('')
-			searchResults.classList.remove('hidden')
-		} else {
-			searchResults?.classList.add('hidden')
-		}
-	})
+					)
+					.join('')
+				searchResults.classList.remove('hidden')
+			} else {
+				searchResults?.classList.add('hidden')
+			}
+		})
 
-	searchInput?.addEventListener('blur', () => {
-		setTimeout(() => searchResults?.classList.add('hidden'), 200)
-	})
+		searchInput?.addEventListener('blur', () => {
+			setTimeout(() => searchResults?.classList.add('hidden'), 200)
+		})
 
-	updateMobileTheme()
+		updateMobileTheme()
+	}
+
+	onHydration(initTopBar)
 </script>

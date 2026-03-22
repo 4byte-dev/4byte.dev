@@ -427,6 +427,11 @@ const viewerExpanded = expanded
 		}
 	}
 
-	const wrappers = document.querySelectorAll('.json-viewer-wrapper')
-	wrappers.forEach((wrapper) => new JsonViewer(wrapper as HTMLElement))
+	function initJsonViewers() {
+		const wrappers = document.querySelectorAll('.json-viewer-wrapper')
+		wrappers.forEach((wrapper) => new JsonViewer(wrapper as HTMLElement))
+	}
+
+	import { onHydration } from '../../utils/hydration'
+	onHydration(initJsonViewers)
 </script>

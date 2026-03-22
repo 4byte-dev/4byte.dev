@@ -61,39 +61,45 @@ const dropdownClass = isUp
 </div>
 
 <script>
-	document.querySelectorAll('[data-lang-wrapper]').forEach((wrapper) => {
-		const btn = wrapper.querySelector('[data-lang-btn]')
-		const dropdown = wrapper.querySelector('[data-lang-dropdown]')
-		const chevron = wrapper.querySelector('[data-lang-chevron]')
-		const isUp = wrapper.getAttribute('data-lang-direction') === 'up'
+	import { onHydration } from '../utils/hydration'
 
-		btn?.addEventListener('click', (e) => {
-			e.stopPropagation()
-			const isOpen = !dropdown?.classList.contains('hidden')
-			dropdown?.classList.toggle('hidden')
-			if (chevron && !isUp) {
-				chevron.classList.toggle('rotate-180', isOpen)
-			}
-		})
-	})
+	function initLangSelector() {
+		document.querySelectorAll('[data-lang-wrapper]').forEach((wrapper) => {
+			const btn = wrapper.querySelector('[data-lang-btn]')
+			const dropdown = wrapper.querySelector('[data-lang-dropdown]')
+			const chevron = wrapper.querySelector('[data-lang-chevron]')
+			const isUp = wrapper.getAttribute('data-lang-direction') === 'up'
 
-	document.addEventListener('click', () => {
-		document.querySelectorAll('[data-lang-dropdown]').forEach((dropdown) => {
-			dropdown.classList.add('hidden')
+			btn?.addEventListener('click', (e) => {
+				e.stopPropagation()
+				const isOpen = !dropdown?.classList.contains('hidden')
+				dropdown?.classList.toggle('hidden')
+				if (chevron && !isUp) {
+					chevron.classList.toggle('rotate-180', isOpen)
+				}
+			})
 		})
-		document.querySelectorAll('[data-lang-chevron]').forEach((chevron) => {
-			chevron.classList.remove('rotate-180')
-		})
-	})
 
-	document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape') {
+		document.addEventListener('click', () => {
 			document.querySelectorAll('[data-lang-dropdown]').forEach((dropdown) => {
 				dropdown.classList.add('hidden')
 			})
 			document.querySelectorAll('[data-lang-chevron]').forEach((chevron) => {
 				chevron.classList.remove('rotate-180')
 			})
-		}
-	})
+		})
+
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				document.querySelectorAll('[data-lang-dropdown]').forEach((dropdown) => {
+					dropdown.classList.add('hidden')
+				})
+				document.querySelectorAll('[data-lang-chevron]').forEach((chevron) => {
+					chevron.classList.remove('rotate-180')
+				})
+			}
+		})
+	}
+
+	onHydration(initLangSelector)
 </script>
