@@ -32,12 +32,14 @@
 		"rehype-katex": "^7.0.1",
 		"remark-math": "^6.0.0",
 		"satori": "^0.25.0",
-		"slugify": "^1.6.8"
+		"slugify": "^1.6.8",
+		"three": "^0.183.2"
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.8",
 		"@eslint/js": "^10.0.1",
 		"@types/d3": "^7.4.3",
+		"@types/three": "^0.183.1",
 		"@unocss/astro": "^66.6.6",
 		"@unocss/preset-typography": "^66.6.7",
 		"@unocss/reset": "^66.6.6",

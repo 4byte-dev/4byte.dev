@@ -1,6 +1,7 @@
 export interface DataPoint {
 	x: number
 	y: number
+	z?: number
 	label?: string
 	color?: string
 }
@@ -37,7 +38,7 @@ export function createTooltip(container: HTMLElement): HTMLElement {
 		position: absolute;
 		pointer-events: none;
 		background: oklch(0.15 0 0);
-		color: oklch(0.95 0 0 0);
+		color: oklch(0.95 0 0);
 		padding: 8px 12px;
 		border-radius: 6px;
 		font-size: 13px;
@@ -45,8 +46,9 @@ export function createTooltip(container: HTMLElement): HTMLElement {
 		opacity: 0;
 		transition: opacity 0.15s ease;
 		box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-		z-index: 1000;
+		z-index: 9999;
 		white-space: nowrap;
+		pointer-events: none;
 	`
 	container.style.position = 'relative'
 	container.appendChild(tooltip)
