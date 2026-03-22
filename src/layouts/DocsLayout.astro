@@ -2,6 +2,7 @@
 import BaseLayout from './BaseLayout.astro'
 import Sidebar from '../components/Sidebar.astro'
 import TopBar from '../components/TopBar.astro'
+import SearchModal from '../components/SearchModal.astro'
 import { getLangFromUrl, loadLabels, t } from '../i18n/index.ts'
 
 interface Props {
@@ -42,6 +43,7 @@ const footerLabel = t(labels, 'footer.copyright')
 		<Sidebar lang={lang} currentPath={Astro.url.pathname} labels={labels} />
 		<div class="flex-1 flex flex-col min-w-0">
 			<TopBar lang={lang} currentPath={Astro.url.pathname} labels={labels} />
+			<SearchModal lang={lang} />
 			<main class="flex-1">
 				<slot />
 			</main>

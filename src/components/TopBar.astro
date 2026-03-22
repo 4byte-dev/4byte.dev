@@ -1,6 +1,4 @@
 ---
-import rawArticlesTr from '../data/tr/articles.json'
-import rawArticlesEn from '../data/en/articles.json'
 import LanguageSelector from './LanguageSelector.astro'
 import { t } from '../i18n/index.ts'
 
@@ -11,18 +9,6 @@ interface Props {
 }
 
 const { lang, currentPath, labels } = Astro.props
-
-interface Article {
-	slug: string
-	title: string
-}
-
-const rawArticles: Article[] = lang === 'en' ? rawArticlesEn : rawArticlesTr
-const mappedArticles = rawArticles.map((a) => ({
-	id: a.slug,
-	title: a.title,
-	category: '',
-}))
 ---
 
 <header
@@ -46,20 +32,18 @@ const mappedArticles = rawArticles.map((a) => ({
 	</div>
 
 	<div class="relative flex-1 max-w-md hidden sm:block">
-		<span
-			class="absolute left-3 top-1/2 -translate-y-1/2 i-lucide-search w-4 h-4 text-muted-foreground dark:text-muted-dark-foreground"
-		></span>
-		<input
-			type="text"
-			id="search-input"
-			placeholder={t(labels, 'search.placeholder')}
-			class="w-full pl-9 pr-4 py-2 text-sm rounded-md ring-1 ring-border dark:ring-border-dark bg-muted/30 dark:bg-muted-dark/30 focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark outline-none transition-all text-foreground dark:text-foreground-dark placeholder:text-muted-foreground dark:placeholder:text-muted-dark-foreground"
-		/>
-		<div
-			id="search-results"
-			class="absolute top-full left-0 right-0 mt-1 bg-background dark:bg-background-dark shadow-flat-lg rounded-md overflow-hidden z-50 border border-border/50 dark:border-border-dark/50 hidden"
+		<button
+			data-search-trigger
+			class="w-full flex items-center gap-2 pl-3 pr-4 py-2 text-sm rounded-md ring-1 ring-border dark:ring-border-dark bg-muted/30 dark:bg-muted-dark/30 hover:ring-2 hover:ring-primary/50 dark:hover:ring-primary-dark/50 transition-all text-muted-foreground dark:text-muted-dark-foreground hover:text-muted-foreground/70 dark:hover:text-muted-dark-foreground/70"
 		>
-		</div>
+			<span class="i-lucide-search w-4 h-4"></span>
+			<span class="flex-1 text-left">{t(labels, 'search.placeholder')}</span>
+			<kbd
+				class="hidden lg:inline-flex items-center gap-0.5 rounded border border-border dark:border-border-dark bg-background dark:bg-background-dark px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground dark:text-muted-dark-foreground"
+			>
+				<span class="text-xs">⌘</span>K
+			</kbd>
+		</button>
 	</div>
 
 	<div class="flex items-center gap-2 lg:gap-3">
@@ -83,7 +67,7 @@ const mappedArticles = rawArticles.map((a) => ({
 	</div>
 </header>
 
-<script define:vars={{ mappedArticles }}>
+<script>
 	import { onHydration } from '../utils/hydration'
 
 	function initTopBar() {
@@ -110,41 +94,6 @@ const mappedArticles = rawArticles.map((a) => ({
 
 		mobileToggle?.addEventListener('click', toggleTheme)
 		desktopToggle?.addEventListener('click', toggleTheme)
-
-		const searchInput = document.getElementById('search-input')
-		const searchResults = document.getElementById('search-results')
-
-		const articles = mappedArticles
-
-		searchInput?.addEventListener('input', (e) => {
-			const query = e.target.value
-			if (query.length < 2) {
-				searchResults?.classList.add('hidden')
-				return
-			}
-
-			const filtered = articles.filter((a) => a.title.toLowerCase().includes(query.toLowerCase())).slice(0, 5)
-
-			if (filtered.length > 0 && searchResults) {
-				searchResults.innerHTML = filtered
-					.map(
-						(a) => `
-        <a href="/articles/${a.id}" class="block w-full text-left px-4 py-3 text-sm hover:bg-muted dark:hover:bg-muted-dark transition-colors border-b border-border/50 dark:border-border-dark/50 last:border-0 text-foreground dark:text-foreground-dark">
-          <div class="font-medium">${a.title}</div>
-          <div class="text-xs text-muted-foreground dark:text-muted-dark-foreground mt-0.5">${a.category}</div>
-        </a>
-      `,
-					)
-					.join('')
-				searchResults.classList.remove('hidden')
-			} else {
-				searchResults?.classList.add('hidden')
-			}
-		})
-
-		searchInput?.addEventListener('blur', () => {
-			setTimeout(() => searchResults?.classList.add('hidden'), 200)
-		})
 
 		updateMobileTheme()
 	}

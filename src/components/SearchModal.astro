@@ -1,0 +1,476 @@
+---
+import { getCollection } from 'astro:content'
+import rawCategoriesTr from '../data/tr/categories.json'
+import rawCategoriesEn from '../data/en/categories.json'
+import rawTagsTr from '../data/tr/tags.json'
+import rawTagsEn from '../data/en/tags.json'
+
+interface Props {
+	lang: string
+}
+
+const { lang } = Astro.props
+
+const allArticles = await getCollection('articles')
+const articles = allArticles
+	.filter((a) => a.data.status === 'Published' && a.data.lang === lang)
+	.map((a) => ({
+		id: a.data.slug,
+		title: a.data.title,
+		excerpt: a.data.excerpt || '',
+		category: a.data.category,
+		categorySlug: a.data.category.toLowerCase().replace(/\s+/g, '-'),
+		tags: a.data.tags || [],
+		views: a.data.views || 0,
+		url: `/${lang === 'en' ? 'en/' : ''}articles/${a.data.slug}`,
+	}))
+
+const rawCategories = lang === 'en' ? rawCategoriesEn : rawCategoriesTr
+const categories = rawCategories.map((c) => ({
+	id: c.slug,
+	name: c.name,
+	description: c.description || '',
+	articleCount: c.articleCount || 0,
+	color: c.color || '#6366F1',
+	url: `/${lang === 'en' ? 'en/' : ''}categories/${c.slug}`,
+}))
+
+const rawTags = lang === 'en' ? rawTagsEn : rawTagsTr
+const tags = rawTags.map((t) => ({
+	id: t.slug,
+	name: t.name,
+	slug: t.slug,
+	articleCount: t.articleCount || 0,
+	description: t.description || '',
+	url: `/${lang === 'en' ? 'en/' : ''}tags/${t.slug}`,
+}))
+
+const searchData = JSON.stringify({ articles, categories, tags })
+---
+
+<div
+	id="search-modal"
+	class="search-modal fixed inset-0 z-50 hidden"
+	role="dialog"
+	aria-modal="true"
+	aria-label="Search"
+	data-search={searchData}
+>
+	<div class="search-backdrop absolute inset-0 bg-black/50 backdrop-blur-sm" data-close></div>
+	<div
+		class="search-container relative left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-10 animate-modal-in"
+	>
+		<div
+			class="search-content bg-popover dark:bg-popover-dark rounded-lg shadow-2xl border border-border dark:border-border-dark overflow-hidden"
+		>
+			<div class="flex items-center gap-1 px-3 pt-3 pb-1">
+				<button
+					data-filter="all"
+					class="filter-btn inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-all bg-primary dark:bg-primary-dark text-primary-foreground dark:text-primary-dark-foreground shadow-sm"
+				>
+					<span class="i-lucide-search w-3 h-3"></span>
+					All
+				</button>
+				<button
+					data-filter="articles"
+					class="filter-btn inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-all text-muted-foreground dark:text-muted-dark-foreground hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark"
+				>
+					<span class="i-lucide-file-text w-3 h-3"></span>
+					Articles
+				</button>
+				<button
+					data-filter="categories"
+					class="filter-btn inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-all text-muted-foreground dark:text-muted-dark-foreground hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark"
+				>
+					<span class="i-lucide-folder-open w-3 h-3"></span>
+					Categories
+				</button>
+				<button
+					data-filter="tags"
+					class="filter-btn inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-all text-muted-foreground dark:text-muted-dark-foreground hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark"
+				>
+					<span class="i-lucide-tag w-3 h-3"></span>
+					Tags
+				</button>
+			</div>
+
+			<div class="flex items-center border-b border-border dark:border-border-dark px-3">
+				<span
+					class="i-lucide-search mr-2 h-4 w-4 shrink-0 text-muted-foreground dark:text-muted-dark-foreground"
+				></span>
+				<input
+					type="text"
+					id="modal-search-input"
+					placeholder="Search everything..."
+					class="flex h-11 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground dark:placeholder:text-muted-dark-foreground text-foreground dark:text-foreground-dark"
+					autocomplete="off"
+				/>
+			</div>
+
+			<div id="search-results" class="max-h-[300px] overflow-y-auto overflow-x-hidden">
+				<div id="search-results-content" class="p-1"></div>
+			</div>
+
+			<div
+				class="flex items-center justify-between border-t border-border dark:border-border-dark px-3 py-2 text-[10px] text-muted-foreground dark:text-muted-dark-foreground"
+			>
+				<div class="flex items-center gap-3">
+					<span class="flex items-center gap-1">
+						<kbd
+							class="rounded border border-border dark:border-border-dark bg-muted dark:bg-muted-dark px-1 py-0.5 font-mono text-[10px]"
+							>↑↓</kbd
+						>
+						navigate
+					</span>
+					<span class="flex items-center gap-1">
+						<kbd
+							class="rounded border border-border dark:border-border-dark bg-muted dark:bg-muted-dark px-1 py-0.5 font-mono text-[10px]"
+							>↵</kbd
+						>
+						select
+					</span>
+					<span class="flex items-center gap-1">
+						<kbd
+							class="rounded border border-border dark:border-border-dark bg-muted dark:bg-muted-dark px-1 py-0.5 font-mono text-[10px]"
+							>esc</kbd
+						>
+						close
+					</span>
+				</div>
+				<span class="i-lucide-filter w-3 h-3"></span>
+			</div>
+		</div>
+		<button
+			type="button"
+			class="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 transition-opacity text-muted-foreground dark:text-muted-dark-foreground hover:text-foreground dark:hover:text-foreground-dark"
+			data-close
+		>
+			<span class="i-lucide-x w-4 h-4"></span>
+			<span class="sr-only">Close</span>
+		</button>
+	</div>
+</div>
+
+<style>
+	@keyframes modal-in {
+		from {
+			opacity: 0;
+			transform: translate-x-[-50%] translate-y-[-50%] scale-0.95;
+		}
+		to {
+			opacity: 1;
+			transform: translate-x-[-50%] translate-y-[-50%] scale-1;
+		}
+	}
+	@keyframes modal-out {
+		from {
+			opacity: 1;
+			transform: translate-x-[-50%] translate-y-[-50%] scale-1;
+		}
+		to {
+			opacity: 0;
+			transform: translate-x-[-50%] translate-y-[-50%] scale-0.95;
+		}
+	}
+	.animate-modal-in {
+		animation: modal-in 200ms ease-out;
+	}
+	.animate-modal-out {
+		animation: modal-out 200ms ease-in forwards;
+	}
+</style>
+
+<script>
+	let currentFilter = 'all'
+	let selectedIndex = -1
+	let searchData = { articles: [], categories: [], tags: [] }
+
+	function initSearchModal() {
+		console.log('Search modal init')
+
+		const modal = document.getElementById('search-modal')
+		if (!modal) return
+
+		const dataAttr = modal.getAttribute('data-search')
+		if (dataAttr) {
+			searchData = JSON.parse(dataAttr)
+		}
+
+		document.querySelectorAll('[data-search-trigger]').forEach((trigger) => {
+			trigger.addEventListener('click', openModal)
+		})
+
+		document.querySelectorAll('.filter-btn').forEach((btn) => {
+			btn.addEventListener('click', () => {
+				currentFilter = btn.getAttribute('data-filter') || 'all'
+				updateFilterButtons()
+				const input = document.getElementById('modal-search-input')
+				if (input) renderResults(input.value)
+			})
+		})
+
+		const input = document.getElementById('modal-search-input')
+		input?.addEventListener('input', handleInput)
+
+		document.querySelectorAll('[data-close]').forEach((btn) => {
+			btn.addEventListener('click', closeModal)
+		})
+
+		modal.querySelector('.search-backdrop')?.addEventListener('click', closeModal)
+
+		document.addEventListener('keydown', (e) => {
+			if (!modal.classList.contains('hidden')) {
+				if (e.key === 'Escape') {
+					e.preventDefault()
+					closeModal()
+				} else if (e.key === 'ArrowDown') {
+					e.preventDefault()
+					navigate(1)
+				} else if (e.key === 'ArrowUp') {
+					e.preventDefault()
+					navigate(-1)
+				} else if (e.key === 'Enter') {
+					e.preventDefault()
+					selectCurrent()
+				}
+			}
+
+			if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+				e.preventDefault()
+				if (modal.classList.contains('hidden')) {
+					openModal()
+				} else {
+					closeModal()
+				}
+			}
+		})
+	}
+
+	function openModal() {
+		const modal = document.getElementById('search-modal')
+		const input = document.getElementById('modal-search-input')
+		if (modal && input) {
+			modal.classList.remove('hidden')
+			input.value = ''
+			input.focus()
+			currentFilter = 'all'
+			updateFilterButtons()
+			renderResults('')
+			selectedIndex = -1
+		}
+	}
+
+	function closeModal() {
+		const modal = document.getElementById('search-modal')
+		const container = modal?.querySelector('.search-container')
+		if (modal && container) {
+			container.classList.remove('animate-modal-in')
+			container.classList.add('animate-modal-out')
+			setTimeout(() => {
+				modal.classList.add('hidden')
+				container.classList.remove('animate-modal-out')
+				container.classList.add('animate-modal-in')
+			}, 200)
+		}
+	}
+
+	function updateFilterButtons() {
+		document.querySelectorAll('.filter-btn').forEach((btn) => {
+			const filter = btn.getAttribute('data-filter')
+			if (filter === currentFilter) {
+				btn.classList.add(
+					'bg-primary',
+					'dark:bg-primary-dark',
+					'text-primary-foreground',
+					'dark:text-primary-dark-foreground',
+					'shadow-sm',
+				)
+				btn.classList.remove(
+					'text-muted-foreground',
+					'dark:text-muted-dark-foreground',
+					'hover:bg-muted',
+					'dark:hover:bg-muted-dark',
+				)
+			} else {
+				btn.classList.remove(
+					'bg-primary',
+					'dark:bg-primary-dark',
+					'text-primary-foreground',
+					'dark:text-primary-dark-foreground',
+					'shadow-sm',
+				)
+				btn.classList.add(
+					'text-muted-foreground',
+					'dark:text-muted-dark-foreground',
+					'hover:bg-muted',
+					'dark:hover:bg-muted-dark',
+				)
+			}
+		})
+	}
+
+	function search(query) {
+		const q = query.toLowerCase().trim()
+		if (!q) {
+			return { articles: [], categories: [], tags: [] }
+		}
+		return {
+			articles: searchData.articles
+				.filter(
+					(a) =>
+						a.title.toLowerCase().includes(q) ||
+						a.excerpt.toLowerCase().includes(q) ||
+						a.tags.some((t) => t.toLowerCase().includes(q)),
+				)
+				.slice(0, 8),
+			categories: searchData.categories
+				.filter(
+					(c) =>
+						c.name.toLowerCase().includes(q) || (c.description && c.description.toLowerCase().includes(q)),
+				)
+				.slice(0, 5),
+			tags: searchData.tags
+				.filter((t) => t.name.toLowerCase().includes(q) || t.slug.toLowerCase().includes(q))
+				.slice(0, 10),
+		}
+	}
+
+	function renderResults(query) {
+		const container = document.getElementById('search-results-content')
+		if (!container) return
+
+		const results = search(query)
+		let html = ''
+
+		const filters = {
+			all: { articles: true, categories: true, tags: true },
+			articles: { articles: true, categories: false, tags: false },
+			categories: { articles: false, categories: true, tags: false },
+			tags: { articles: false, categories: false, tags: true },
+		}
+		const active = filters[currentFilter]
+
+		if (active.articles && results.articles.length > 0) {
+			html += `<div class="px-2 py-1.5 text-xs font-medium text-muted-foreground dark:text-muted-dark-foreground">Articles</div>`
+			results.articles.forEach((item) => {
+				html += `
+				<a href="${item.url}" class="result-item flex items-start gap-3 px-2 py-2.5 cursor-pointer rounded-sm text-sm hover:bg-accent dark:hover:bg-accent-dark transition-colors" data-type="article">
+					<span class="i-lucide-file-text w-4 h-4 mt-0.5 shrink-0 text-primary dark:text-primary-dark"></span>
+					<div class="min-w-0 flex-1">
+						<div class="text-sm font-medium text-foreground dark:text-foreground-dark">${item.title}</div>
+						${item.excerpt ? `<div class="text-xs text-muted-foreground dark:text-muted-dark-foreground line-clamp-1 mt-0.5">${item.excerpt}</div>` : ''}
+						${
+							item.category
+								? `<div class="flex items-center gap-1.5 mt-1">
+							<span class="inline-flex items-center rounded-full border border-transparent bg-secondary dark:bg-secondary-dark text-secondary-foreground dark:text-secondary-dark-foreground text-[10px] px-1.5 py-0 h-4">${item.category}</span>
+						</div>`
+								: ''
+						}
+					</div>
+					${item.views > 0 ? `<span class="text-[10px] text-muted-foreground dark:text-muted-dark-foreground tabular-nums shrink-0 mt-0.5">${formatViews(item.views)} views</span>` : ''}
+				</a>`
+			})
+		}
+
+		if (active.categories && results.categories.length > 0) {
+			if (html) html += `<div class="h-px bg-border dark:bg-border-dark -mx-1 my-1"></div>`
+			html += `<div class="px-2 py-1.5 text-xs font-medium text-muted-foreground dark:text-muted-dark-foreground">Categories</div>`
+			results.categories.forEach((item) => {
+				html += `
+				<a href="${item.url}" class="result-item flex items-center gap-3 px-2 py-2 cursor-pointer rounded-sm text-sm hover:bg-accent dark:hover:bg-accent-dark transition-colors" data-type="category">
+					<span class="i-lucide-folder-open w-4 h-4 shrink-0 text-warning"></span>
+					<div class="min-w-0 flex-1">
+						<div class="text-sm font-medium text-foreground dark:text-foreground-dark">${item.name}</div>
+						${item.description ? `<div class="text-xs text-muted-foreground dark:text-muted-dark-foreground line-clamp-1">${item.description}</div>` : ''}
+					</div>
+					<span class="text-[10px] text-muted-foreground dark:text-muted-dark-foreground tabular-nums shrink-0">${item.articleCount} articles</span>
+				</a>`
+			})
+		}
+
+		if (active.tags && results.tags.length > 0) {
+			if (html) html += `<div class="h-px bg-border dark:bg-border-dark -mx-1 my-1"></div>`
+			html += `<div class="px-2 py-1.5 text-xs font-medium text-muted-foreground dark:text-muted-dark-foreground">Tags</div>`
+			results.tags.forEach((item) => {
+				html += `
+				<a href="${item.url}" class="result-item flex items-center gap-3 px-2 py-2 cursor-pointer rounded-sm text-sm hover:bg-accent dark:hover:bg-accent-dark transition-colors" data-type="tag">
+					<span class="i-lucide-tag w-4 h-4 shrink-0 text-success"></span>
+					<div class="min-w-0 flex-1">
+						<div class="text-sm font-medium text-foreground dark:text-foreground-dark">#${item.slug}</div>
+						${item.description ? `<div class="text-xs text-muted-foreground dark:text-muted-dark-foreground line-clamp-1">${item.description}</div>` : ''}
+					</div>
+					<span class="text-[10px] text-muted-foreground dark:text-muted-dark-foreground tabular-nums shrink-0">${item.articleCount} articles</span>
+				</a>`
+			})
+		}
+
+		if (!html) {
+			html = `<div class="px-4 py-8 text-center text-sm text-muted-foreground dark:text-muted-dark-foreground">No results found</div>`
+		}
+
+		container.innerHTML = html
+		selectedIndex = -1
+	}
+
+	function formatViews(n) {
+		if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
+		return n.toString()
+	}
+
+	function getAllResultItems() {
+		return Array.from(document.querySelectorAll('.result-item'))
+	}
+
+	function updateSelection() {
+		const items = getAllResultItems()
+		items.forEach((item, i) => {
+			if (i === selectedIndex) {
+				item.classList.add(
+					'bg-accent',
+					'dark:bg-accent-dark',
+					'text-accent-foreground',
+					'dark:text-accent-dark-foreground',
+				)
+			} else {
+				item.classList.remove(
+					'bg-accent',
+					'dark:bg-accent-dark',
+					'text-accent-foreground',
+					'dark:text-accent-dark-foreground',
+				)
+			}
+		})
+		if (selectedIndex >= 0 && items[selectedIndex]) {
+			items[selectedIndex].scrollIntoView({ block: 'nearest' })
+		}
+	}
+
+	function navigate(direction) {
+		const items = getAllResultItems()
+		if (items.length === 0) return
+
+		selectedIndex += direction
+		if (selectedIndex < 0) selectedIndex = items.length - 1
+		if (selectedIndex >= items.length) selectedIndex = 0
+
+		updateSelection()
+	}
+
+	function selectCurrent() {
+		const items = getAllResultItems()
+		if (selectedIndex >= 0 && items[selectedIndex]) {
+			const link = items[selectedIndex].closest('a')
+			if (link) link.click()
+		}
+	}
+
+	let debounceTimer
+	function handleInput(e) {
+		clearTimeout(debounceTimer)
+		debounceTimer = setTimeout(() => {
+			renderResults(e.target.value)
+		}, 150)
+	}
+
+	document.addEventListener('DOMContentLoaded', initSearchModal)
+</script>

@@ -47,6 +47,8 @@ export default defineConfig({
 			'input-dark': '#3f3f46',
 			ring: '#3b82f6',
 			'ring-dark': '#60a5fa',
+			warning: '#f59e0b',
+			success: '#22c55e',
 			card: '#ffffff',
 			'card-foreground': '#030712',
 			'card-dark': '#1c1c1e',
