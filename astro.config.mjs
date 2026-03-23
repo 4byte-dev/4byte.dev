@@ -6,15 +6,17 @@ import partytown from '@astrojs/partytown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import mdx from '@astrojs/mdx'
+import { SITE } from './src/config.mjs'
+import { getSitemapOptions } from './src/sitemap.mjs'
 
 export default defineConfig({
-	site: 'https://4byte.dev',
+	site: SITE.origin,
 	output: 'static',
 	integrations: [
 		UnoCSS(),
 		mdx(),
 		icon(),
-		sitemap(),
+		sitemap(getSitemapOptions()),
 		partytown({
 			config: {
 				forward: ['dataLayer.push'],
