@@ -1,0 +1,161 @@
+---
+interface Props {
+	headings: Array<{ depth: number; slug: string; text: string }>
+	label: string
+}
+
+const { headings, label } = Astro.props
+
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3)
+---
+
+{
+	tocHeadings.length > 0 && (
+		<aside class="w-56 shrink-0 py-12 pr-8 hidden xl:block">
+			<div class="sticky top-20">
+				<h4 class="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground dark:text-muted-dark-foreground mb-4">
+					{label}
+				</h4>
+				<nav class="relative">
+					<div
+						id="toc-indicator"
+						class="absolute -left-[9px] w-[2px] h-6 bg-primary dark:bg-primary-dark rounded-full transition-[top,left] duration-300 ease-out pointer-events-none"
+						style="top: 0; left: -9px;"
+					/>
+					<ul id="toc-list" class="space-y-1 text-sm border-l border-transparent">
+						{tocHeadings.map((h) => (
+							<li data-depth={h.depth}>
+								<a
+									href={`#${h.slug}`}
+									data-slug={h.slug}
+									class={`toc-link block py-1 transition-colors duration-200 text-muted-foreground dark:text-muted-dark-foreground hover:text-foreground dark:hover:text-foreground-dark ${
+										h.depth === 3 ? 'pl-3 text-[13px]' : 'text-sm font-medium'
+									}`}
+								>
+									{h.text}
+								</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+			</div>
+		</aside>
+	)
+}
+
+<script>
+	import { onHydration } from '../utils/hydration'
+
+	function initTableOfContents() {
+		const indicator = document.getElementById('toc-indicator')
+		const list = document.getElementById('toc-list')
+		if (!indicator || !list) return
+
+		const links = list.querySelectorAll<HTMLAnchorElement>('.toc-link')
+		if (links.length === 0) return
+
+		const offsets = new Map<string, number>()
+		const depths = new Map<string, number>()
+
+		links.forEach((link) => {
+			const slug = link.dataset.slug
+			if (slug) {
+				offsets.set(slug, link.offsetTop)
+				depths.set(slug, parseInt(link.closest('li')?.dataset.depth || '2'))
+			}
+		})
+
+		function updateIndicator(slug: string) {
+			const top = offsets.get(slug)
+			if (top === undefined) return
+
+			const depth = depths.get(slug) || 2
+			const indent = depth === 3 ? 12 : 0
+
+			indicator.style.top = `${top}px`
+			indicator.style.left = `${-9 + indent}px`
+		}
+
+		function setActive(slug: string) {
+			links.forEach((link) => {
+				if (link.dataset.slug === slug) {
+					link.classList.add('text-foreground', 'dark:text-foreground-dark')
+					link.classList.remove('text-muted-foreground', 'dark:text-muted-dark-foreground')
+				} else {
+					link.classList.remove('text-foreground', 'dark:text-foreground-dark')
+					link.classList.add('text-muted-foreground', 'dark:text-muted-dark-foreground')
+				}
+			})
+		}
+
+		let currentActive: string | null = null
+		let ticking = false
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						const slug = entry.target.id
+						if (slug !== currentActive) {
+							currentActive = slug
+							setActive(slug)
+							updateIndicator(slug)
+						}
+						break
+					}
+				}
+			},
+			{
+				rootMargin: '0px 0px -75% 0px',
+				threshold: 0,
+			},
+		)
+
+		const slugs = Array.from(links)
+			.map((l) => l.dataset.slug!)
+			.filter(Boolean)
+
+		slugs.forEach((slug) => {
+			const el = document.getElementById(slug)
+			if (el) observer.observe(el)
+		})
+
+		function handleScroll() {
+			if (ticking) return
+			ticking = true
+
+			requestAnimationFrame(() => {
+				ticking = false
+
+				const scrollY = window.scrollY
+				let active = slugs[0]
+
+				for (const slug of slugs) {
+					const el = document.getElementById(slug)
+					if (!el) continue
+					const rect = el.getBoundingClientRect()
+					if (rect.top <= 120) {
+						active = slug
+					}
+				}
+
+				if (active !== currentActive) {
+					currentActive = active
+					setActive(active)
+					updateIndicator(active)
+				}
+			})
+		}
+
+		window.addEventListener('scroll', handleScroll, { passive: true })
+
+		handleScroll()
+
+		return () => {
+			observer.disconnect()
+			window.removeEventListener('scroll', handleScroll)
+		}
+	}
+
+	onHydration(initTableOfContents)
+</script>

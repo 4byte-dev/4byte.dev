@@ -3,6 +3,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro'
 import ShareButtons from '../../../components/ShareButtons.astro'
 import GitHubUserCard from '../../../components/GitHubUserCard.astro'
 import ReadingProgress from '../../../components/ReadingProgress.astro'
+import TableOfContents from '../../../components/TableOfContents.astro'
 import { getCollection, render } from 'astro:content'
 import { SITE } from '../../../config.mjs'
 import { t } from '../../../i18n/index.ts'
@@ -35,7 +36,7 @@ const ogImageUrl = `/og/${article.data.slug}.png`
 const publishedDate = new Date(article.data.date)
 const isoDate = publishedDate.toISOString()
 
-const sections = headings.filter((h) => h.depth === 2).map((h) => h.text)
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3)
 
 const jsonLdArticle = {
 	'@context': 'https://schema.org',
@@ -151,28 +152,6 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 			<ShareButtons title={article.data.title} url={articleUrl} labels={labels} />
 		</div>
 
-		<aside class="w-56 shrink-0 py-12 pr-8 hidden xl:block">
-			<div class="sticky top-20">
-				<h4
-					class="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground dark:text-muted-dark-foreground mb-4"
-				>
-					{onThisPageLabel}
-				</h4>
-				<ul class="space-y-2.5 text-sm text-muted-foreground dark:text-muted-dark-foreground">
-					{
-						sections.map((s) => (
-							<li>
-								<a
-									href={`#${s.toLowerCase().replace(/\s+/g, '-')}`}
-									class="hover:text-foreground dark:hover:text-foreground-dark transition-colors"
-								>
-									{s}
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</div>
-		</aside>
+		<TableOfContents headings={tocHeadings} label={onThisPageLabel} />
 	</div>
 </DocsLayout>
