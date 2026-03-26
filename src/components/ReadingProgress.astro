@@ -1,0 +1,52 @@
+<div id="reading-progress" class="fixed top-14 z-20 h-[3px] pointer-events-none" style="left:0;right:0">
+	<div
+		id="reading-progress-bar"
+		class="h-full bg-primary dark:bg-primary-dark w-0 transition-[width] duration-100 ease-out"
+	>
+	</div>
+</div>
+
+<script>
+	import { onHydration } from '../utils/hydration'
+
+	function initReadingProgress() {
+		const barEl = document.getElementById('reading-progress-bar')
+		const container = document.getElementById('reading-progress')
+		if (!barEl || !container) return
+
+		const contentCol = container.closest('.flex-1.min-w-0')
+		const articleEl = contentCol?.querySelector('article')
+		if (!(articleEl instanceof HTMLElement) || !(contentCol instanceof HTMLElement)) return
+
+		const bar = barEl
+		const article = articleEl
+
+		function updateLayout() {
+			const rect = contentCol.getBoundingClientRect()
+			container.style.left = rect.left + 'px'
+			container.style.width = rect.width + 'px'
+		}
+
+		function updateProgress() {
+			const rect = article.getBoundingClientRect()
+			const articleTop = rect.top + window.scrollY
+			const articleHeight = rect.height
+			const windowHeight = window.innerHeight
+			const scrolled = window.scrollY - articleTop + windowHeight
+			const total = articleHeight
+
+			let progress = (scrolled / total) * 100
+			progress = Math.max(0, Math.min(100, progress))
+
+			bar.style.width = `${progress}%`
+		}
+
+		updateLayout()
+		updateProgress()
+
+		window.addEventListener('scroll', updateProgress, { passive: true })
+		window.addEventListener('resize', updateLayout, { passive: true })
+	}
+
+	onHydration(initReadingProgress)
+</script>

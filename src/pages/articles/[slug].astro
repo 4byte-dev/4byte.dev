@@ -2,6 +2,7 @@
 import DocsLayout from '../../layouts/DocsLayout.astro'
 import ShareButtons from '../../components/ShareButtons.astro'
 import GitHubUserCard from '../../components/GitHubUserCard.astro'
+import ReadingProgress from '../../components/ReadingProgress.astro'
 import { getCollection, render } from 'astro:content'
 import { SITE } from '../../config.mjs'
 import { getLangFromUrl, t } from '../../i18n/index.ts'
@@ -82,6 +83,7 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 	<script type="application/ld+json" set:html={JSON.stringify(jsonLdArticle)} slot="head" />
 
 	<div class="flex">
+		<ReadingProgress />
 		<div class="flex-1 px-8 py-12 max-w-4xl mx-auto min-w-0">
 			<nav
 				aria-label="Breadcrumb"
