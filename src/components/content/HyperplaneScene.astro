@@ -1,0 +1,318 @@
+---
+interface Vector3 {
+	x: number
+	y: number
+	z: number
+}
+interface AxisRange {
+	min: number
+	max: number
+}
+interface PointInput {
+	position: Vector3
+	color?: string
+	label?: string
+}
+interface LineInput {
+	from: Vector3
+	to: Vector3
+	color?: string
+	dashed?: boolean
+}
+
+interface Props {
+	id?: string
+	height?: number
+	points?: PointInput[]
+	planeNormal: Vector3
+	planePoint: Vector3
+	planeColor?: string
+	planeOpacity?: number
+	showResiduals?: boolean
+	residualColor?: string
+	residualDashed?: boolean
+	lines?: LineInput[]
+	showGrid?: boolean
+	xRange?: AxisRange
+	yRange?: AxisRange
+	zRange?: AxisRange
+	title?: string
+	xAxisLabel?: string
+	yAxisLabel?: string
+	zAxisLabel?: string
+}
+
+const {
+	id = '',
+	height = 400,
+	points = [],
+	planeNormal,
+	planePoint,
+	planeColor = '#3b82f6',
+	planeOpacity = 0.3,
+	showResiduals = true,
+	residualColor = '#ef4444',
+	residualDashed = true,
+	lines = [],
+	showGrid = true,
+	xRange,
+	yRange,
+	zRange,
+	title = '',
+	xAxisLabel = 'X₁',
+	yAxisLabel = 'Y',
+	zAxisLabel = 'X₂',
+} = Astro.props
+
+const chartId = `hyperplane-${id || Math.random().toString(36).slice(2, 9)}`
+---
+
+<div
+	class="hyperplane-wrapper"
+	data-chart-id={chartId}
+	data-chart-points={JSON.stringify(points)}
+	data-chart-plane-normal={JSON.stringify(planeNormal)}
+	data-chart-plane-point={JSON.stringify(planePoint)}
+	data-chart-plane-color={planeColor}
+	data-chart-plane-opacity={planeOpacity}
+	data-chart-show-residuals={String(showResiduals)}
+	data-chart-residual-color={residualColor}
+	data-chart-residual-dashed={String(residualDashed)}
+	data-chart-lines={JSON.stringify(lines)}
+	data-chart-show-grid={String(showGrid)}
+	data-chart-x-range={JSON.stringify(xRange || null)}
+	data-chart-y-range={JSON.stringify(yRange || null)}
+	data-chart-z-range={JSON.stringify(zRange || null)}
+	data-chart-title={title}
+	data-chart-x-label={xAxisLabel}
+	data-chart-y-label={yAxisLabel}
+	data-chart-z-label={zAxisLabel}
+	data-chart-height={height}
+	style="position: relative;"
+>
+	<div id={chartId} style={`min-height: ${height}px; width: 100%; position: relative;`}></div>
+	<div
+		class="chart-controls mt-9"
+		style="display: flex; gap: 8px; justify-content: flex-end; position: relative; z-index: 10;"
+	>
+		<button
+			class="chart-btn zoom-in"
+			title="Zoom In"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg
+			>
+		</button>
+		<button
+			class="chart-btn zoom-out"
+			title="Zoom Out"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><line x1="5" y1="12" x2="19" y2="12"></line></svg
+			>
+		</button>
+		<button
+			class="chart-btn reset"
+			title="Reset View"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg
+			>
+		</button>
+	</div>
+</div>
+
+<script>
+	import * as THREE from 'three'
+	import { onHydration } from '../../utils/hydration'
+	import {
+		createBaseScene,
+		createCamera,
+		createRenderer,
+		createControls,
+		createAxisArrows,
+		createGridLines,
+		renderPoint,
+		renderLine,
+		renderPlane,
+		projectPointOnPlane,
+		makeLabel,
+		getThemeColors3D,
+		setupZoomControls,
+	} from '../../utils/scene3d'
+
+	function hexToNum(hex: string): number {
+		if (hex.startsWith('#')) return parseInt(hex.slice(1), 16)
+		return parseInt(hex, 16)
+	}
+
+	function initHyperplaneComponents() {
+		const wrappers = document.querySelectorAll('.hyperplane-wrapper[data-chart-id^="hyperplane"]')
+
+		wrappers.forEach((wrapper) => {
+			const container = wrapper.querySelector('div') as HTMLElement
+			if (!container) return
+
+			const el = wrapper as HTMLElement
+			const chartHeight = parseInt(el.dataset.chartHeight || '400')
+			const showGrid = el.dataset.chartShowGrid !== 'false'
+			const chartTitle = el.dataset.chartTitle || ''
+			const xLabel = el.dataset.chartXLabel || 'X₁'
+			const yLabel = el.dataset.chartYLabel || 'Y'
+			const zLabel = el.dataset.chartZLabel || 'X₂'
+
+			const rawPoints = JSON.parse(el.dataset.chartPoints || '[]')
+			const rawPlaneNormal = JSON.parse(el.dataset.chartPlaneNormal || '{"x":0,"y":-1,"z":0}')
+			const rawPlanePoint = JSON.parse(el.dataset.chartPlanePoint || '{"x":0,"y":0,"z":0}')
+			const planeColorVal = hexToNum(el.dataset.chartPlaneColor || '#3b82f6')
+			const planeOpacityVal = parseFloat(el.dataset.chartPlaneOpacity || '0.3')
+			const showResiduals = el.dataset.chartShowResiduals !== 'false'
+			const residualColorVal = hexToNum(el.dataset.chartResidualColor || '#ef4444')
+			const residualDashed = el.dataset.chartResidualDashed !== 'false'
+			const rawLines = JSON.parse(el.dataset.chartLines || '[]')
+
+			const rawXRange = JSON.parse(el.dataset.chartXRange || 'null')
+			const rawYRange = JSON.parse(el.dataset.chartYRange || 'null')
+			const rawZRange = JSON.parse(el.dataset.chartZRange || 'null')
+
+			function getBounds(items: any[], key: string, fallback: { min: number; max: number }) {
+				let min = Infinity,
+					max = -Infinity
+				items.forEach((p: any) => {
+					const val = p.position ? p.position[key] : p[key]
+					if (val < min) min = val
+					if (val > max) max = val
+				})
+				if (!isFinite(min)) return fallback
+				const pad = (max - min) * 0.15 || 1
+				return { min: min - pad, max: max + pad }
+			}
+
+			const allPositions = [...rawPoints.map((p: any) => p.position), rawPlanePoint]
+
+			const xR = rawXRange || getBounds(allPositions, 'x', { min: 0, max: 10 })
+			const yR = rawYRange || getBounds(allPositions, 'y', { min: 0, max: 10 })
+			const zR = rawZRange || getBounds(allPositions, 'z', { min: 0, max: 10 })
+
+			const CUBE = 4.0
+			const HALF = CUBE / 2
+			const DEFAULT_EYE = new THREE.Vector3(CUBE * 0.5, CUBE * 0.6, CUBE * 2.5)
+			const CENTER = new THREE.Vector3(HALF, HALF, HALF)
+
+			let scene: THREE.Scene
+			let camera: THREE.PerspectiveCamera
+			let renderer: THREE.WebGLRenderer
+			let controls: any
+
+			function scaleX(v: number) {
+				return ((v - xR.min) / (xR.max - xR.min)) * CUBE
+			}
+			function scaleY(v: number) {
+				return ((v - yR.min) / (yR.max - yR.min)) * CUBE
+			}
+			function scaleZ(v: number) {
+				return ((v - zR.min) / (zR.max - zR.min)) * CUBE
+			}
+
+			function toWorld(v: { x: number; y: number; z: number }): THREE.Vector3 {
+				return new THREE.Vector3(scaleX(v.x), scaleY(v.y), scaleZ(v.z))
+			}
+
+			function initChart() {
+				container.innerHTML = ''
+				const theme = getThemeColors3D()
+
+				if (chartTitle) {
+					const titleEl = document.createElement('div')
+					titleEl.textContent = chartTitle
+					titleEl.style.cssText = `font-size: 15px; font-weight: 600; text-align: center; color: ${theme.darkText}; margin-bottom: 4px;`
+					container.prepend(titleEl)
+				}
+
+				const width = Math.max(container.clientWidth, 100)
+				scene = createBaseScene()
+				camera = createCamera(width, chartHeight, DEFAULT_EYE, CENTER)
+				renderer = createRenderer(container, width, chartHeight)
+				controls = createControls(camera, renderer.domElement, CENTER, CUBE)
+
+				if (showGrid) createGridLines(CUBE, theme, scene)
+
+				const TICKS = 5
+				const tickLabels = {
+					x: Array.from({ length: TICKS + 1 }, (_, i) =>
+						(xR.min + (i / TICKS) * (xR.max - xR.min)).toFixed(1),
+					),
+					y: Array.from({ length: TICKS + 1 }, (_, i) =>
+						(yR.min + (i / TICKS) * (yR.max - yR.min)).toFixed(1),
+					),
+					z: Array.from({ length: TICKS + 1 }, (_, i) =>
+						(zR.min + (i / TICKS) * (zR.max - zR.min)).toFixed(1),
+					),
+				}
+				createAxisArrows(CUBE, theme, scene, { x: xLabel, y: yLabel, z: zLabel }, tickLabels)
+
+				const planeNormalVec = new THREE.Vector3(
+					rawPlaneNormal.x / (xR.max - xR.min),
+					rawPlaneNormal.y / (yR.max - yR.min),
+					rawPlaneNormal.z / (zR.max - zR.min),
+				).normalize()
+				const planePointVec = toWorld(rawPlanePoint)
+				renderPlane(scene, planePointVec, planeNormalVec, CUBE * 1.0, planeColorVal, planeOpacityVal)
+
+				const pointsData: THREE.Vector3[] = []
+				rawPoints.forEach((p: any) => {
+					const color = p.color ? hexToNum(p.color) : 0x3b82f6
+					const pos = toWorld(p.position)
+					pointsData.push(pos)
+					renderPoint(scene, pos, color, 10, 1)
+					if (p.label) {
+						scene.add(
+							makeLabel(p.label, pos.clone().add(new THREE.Vector3(0, 0.15, 0)), color, 0.2, 0.08, 22),
+						)
+					}
+				})
+
+				if (showResiduals) {
+					pointsData.forEach((pos) => {
+						const projected = projectPointOnPlane(pos, planeNormalVec, planePointVec)
+						renderLine(scene, pos, projected, residualColorVal, residualDashed)
+					})
+				}
+
+				rawLines.forEach((l: any) => {
+					const color = l.color ? hexToNum(l.color) : 0x71717a
+					renderLine(scene, toWorld(l.from), toWorld(l.to), color, l.dashed ?? false)
+				})
+
+				setupZoomControls(wrapper as HTMLElement, camera, controls, DEFAULT_EYE, CENTER)
+
+				let rafId: number
+				function animate() {
+					rafId = requestAnimationFrame(animate)
+					controls.update()
+					renderer.render(scene, camera)
+				}
+				animate()
+				;(container as any).__cleanup = () => {
+					cancelAnimationFrame(rafId)
+					renderer.dispose()
+				}
+			}
+
+			new ResizeObserver(() => {
+				if (!renderer || !camera) return
+				const w = Math.max(container.clientWidth, 100)
+				camera.aspect = w / chartHeight
+				camera.updateProjectionMatrix()
+				renderer.setSize(w, chartHeight)
+			}).observe(container)
+
+			initChart()
+		})
+	}
+
+	onHydration(initHyperplaneComponents)
+</script>

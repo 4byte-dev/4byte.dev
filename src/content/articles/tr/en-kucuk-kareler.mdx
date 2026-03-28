@@ -1,0 +1,267 @@
+---
+lang: 'tr'
+slug: 'en-kucuk-kareler'
+title: 'Least Squares Nedir?'
+excerpt: 'Linear regression etiketlenmiş veri setlerinden doğrusal ilişkiyi modellemek için kullanılan supervised makine öğrenmesi algoritmasıdır'
+category: 'machine-learning'
+tags: ['linear-regression', 'supervised-learning', 'İmplementasyon']
+author: '@omerfdmrl'
+date: '2026-03-26'
+views: 0
+status: 'Published'
+---
+
+import HyperplaneScene from '../../../components/content/HyperplaneScene.astro'
+import GradientVectorScene from '../../../components/content/GradientVectorScene.astro'
+
+Lineer modeller hem istatistik hem makine öğrenmesinde son 30 yıldır çok önemli bir alana sahip.
+Verilen input vektörü ile $X^T = (X_1, X_2, X_3 ...)$ output değeri $Y$'yi tahmin etmeye çalışırız.
+
+$$
+\hat{Y} = \hat{\beta}_0 + \sum_{j=1}^p X_j \hat{\beta}_j
+$$
+
+$\hat{\beta}_0$ **bias (intercept)** değeridir. Bu formülü $X$'i vektör olarak yazarsak:
+
+$$
+\hat{Y} = X^{\top} \hat{\beta}
+$$
+
+olarak kullanabiliriz.
+
+## Dot Product Anlamak
+
+Bunu daha iyi anlamak için formülü tek tek açalım:
+
+$$
+\hat{Y}=\hat{\beta}_0 + X_1\hat{\beta}_1 + X_2\hat{\beta}_2 + \cdots + X_p\hat{\beta}_p
+$$
+
+Burada her $X_j$ tek bir feature değeridir ve tek sayıdır:
+
+$$
+X_j \in \mathbb{R}
+$$
+
+Aynı şekilde her katsayı da tek sayıdır:
+
+$$
+\hat{\beta}_j \in \mathbb{R}
+$$
+
+Dolayısıyla iki reel sayının çarpımı yine tek bir reel sayı verir:
+
+$$
+X_j \hat{\beta}_j \in \mathbb{R}
+$$
+
+Yani örneğin:
+
+$$
+X_1=3,\quad \hat{\beta}_1=4
+$$
+
+ise:
+
+$$
+X_1\hat{\beta}_1 = 12
+$$
+
+elde edilir.
+
+Bu 12 artık bir **skaler**dir; yani vektör veya matris değil, yalnızca tek bir sayıdır.
+
+Aynı durum tüm terimler için geçerlidir:
+
+$$
+X_2\hat{\beta}_2,\; X_3\hat{\beta}_3,\; \ldots,\; X_p\hat{\beta}_p
+$$
+
+hepsi tek tek skaler değerler üretir.
+
+Sonuçta bunların toplamı da yine tek bir sayı olur:
+
+$$
+\hat{Y}\in \mathbb{R}
+$$
+
+Bu nedenle lineer modelin çıktısı tek bir skaler tahmindir.
+Dolayısıyla her çarpım da skaler olur, ve buna **dot product (inner product)** nedir.
+
+## Hiperdüzlem (Hyperplane)
+
+Lineer modelin geometrik anlamı bir **hiperdüzlem**dir. İki feature ($X_1, X_2$) ve bir output ($Y$) ile düşünelim.
+Modelin tahmin ettiği değerler bir düzlem üzerinde yer alır. Noktaların düzleme olan dik uzaklıkları **residual (artık)** değerleridir
+ve en küçük kareler yöntemi bu residual'ların karelerinin toplamını minimize eder.
+
+Aşağıdaki görselleştirmede mavi düzlem öğrenilen hiperdüzlemi, noktalar gerçek veri noktalarını ve kırmızı kesikli çizgiler residual'ları gösterir:
+
+<HyperplaneScene
+	title="En Küçük Kareler Hiperdüzlemi"
+	height={420}
+	xAxisLabel="X₁"
+	yAxisLabel="Y"
+	zAxisLabel="X₂"
+	xRange={{ min: 0, max: 11 }}
+	yRange={{ min: 10, max: 90 }}
+	zRange={{ min: 4, max: 15 }}
+	planeNormal={{ x: 0.5, y: -1, z: 0.8 }}
+	planePoint={{ x: 5.5, y: 50, z: 9 }}
+	planeColor="#3b82f6"
+	planeOpacity={0.3}
+	showResiduals={true}
+	residualColor="#ef4444"
+	residualDashed={true}
+	points={[
+		{ position: { x: 1, y: 18, z: 5 }, color: '#3b82f6' },
+		{ position: { x: 2, y: 25, z: 7 }, color: '#3b82f6' },
+		{ position: { x: 3, y: 29, z: 6 }, color: '#3b82f6' },
+		{ position: { x: 4, y: 38, z: 8 }, color: '#22c55e' },
+		{ position: { x: 5, y: 46, z: 10 }, color: '#22c55e' },
+		{ position: { x: 6, y: 50, z: 9 }, color: '#22c55e' },
+		{ position: { x: 7, y: 61, z: 12 }, color: '#f59e0b' },
+		{ position: { x: 8, y: 66, z: 11 }, color: '#f59e0b' },
+		{ position: { x: 9, y: 78, z: 14 }, color: '#8b5cf6' },
+		{ position: { x: 10, y: 82, z: 13 }, color: '#8b5cf6' },
+	]}
+/>
+
+Her nokta, hiperdüzleme dikey olarak projekte edilir. Bu dik uzaklık residual'dür:
+$e_i = Y_i - \hat{Y}_i$. En küçük kareler, $\sum e_i^2$'yi minimize eden $\hat{\beta}$ katsayılarını bulur.
+
+### Gradient Vektörü
+
+Optimizasyon sürecinde **gradient** kavramı çok önemlidir. Bir fonksiyonun gradyanı, o noktada fonksiyonun en dik artış yönünü gösterir:
+
+$$f'(X) = \nabla f(X) = \beta$$
+
+Bu vektör, input uzayında en dik yokuş yukarı yönü gösterir. Gradient descent algoritması bu vektörün tersi yönde ilerleyerek minimumu bulur:
+
+<GradientVectorScene
+	title="∇f — En Dik Yokuş Yukarı Yön"
+	height={380}
+	axisRange={6}
+	gradientDirection={{ x: 3, y: 4, z: 0 }}
+	gradientOrigin={{ x: 1, y: 1, z: 0 }}
+	gradientColor="#22c55e"
+	gradientLabel="∇f"
+	showPlane={true}
+	planeCenter={{ x: 3, y: 0, z: 3 }}
+	planeNormal={{ x: 0, y: 1, z: 0 }}
+	planeColor="#71717a"
+	planeOpacity={0.15}
+	points={[{ position: { x: 1, y: 1, z: 0 }, color: '#f59e0b', label: 'X' }]}
+	lines={[{ from: { x: 1, y: 1, z: 0 }, to: { x: 1, y: 0, z: 0 }, dashed: true, color: '#71717a' }]}
+/>
+
+Yukarıdaki görselleştirmede yeşil ok $\nabla f$ vektörünü, turuncu nokta ise mevcut konum $X$'i temsil eder.
+Gradient, bu noktada fonksiyonun en hızlı arttığı yönü gösterir.
+
+### Bias'ı Dahil Etmek
+
+Bias' ayrı yazmak yerine feature vektörünü genişletebiliriz:
+
+$$
+X =
+\begin{bmatrix}
+1 \\ X_1 \\ X_2 \\ \vdots \\ X_p
+\end{bmatrix},
+\quad
+\hat{\beta} =
+\begin{bmatrix}
+\hat{\beta}_0 \\ \hat{\beta}_1 \\ \hat{\beta}_2 \\ \vdots \\ \hat{\beta}_p
+\end{bmatrix}
+$$
+
+Burada 1 ile başlatma sebebimiz, formüldeki $\hat{\beta}_0$ değerini de ekleyebilmek için.
+
+### Neden Transpose Gerekiyor?
+
+İki sütun vektörünü doğrudan çarpamayız.
+
+$$
+X =
+\begin{bmatrix}
+1 \\ X_1 \\ X_2 \\ \vdots \\ X_p
+\end{bmatrix}
+=
+(p + 1)\times1,
+\quad
+\hat{\beta} =
+\begin{bmatrix}
+\hat{\beta}_0 \\ \hat{\beta}_1 \\ \hat{\beta}_2 \\ \vdots \\ \hat{\beta}_p
+\end{bmatrix} =
+(p + 1)\times1
+$$
+
+Dot product çarpımında içerikde boyutların aynı olması gerekir. Bu yüzden de birini satır olarak yazmamız gerekir.
+
+$$
+((p + 1)\times1) \times ((p + 1)\times1) \rightarrow (1\times(p + 1)) \times ((p + 1)\times1)
+$$
+
+$$
+= 1\times1
+$$
+
+Yani artık:
+
+$$
+X =
+\begin{bmatrix}
+1 & X_1 & X_2 & \ldots & X_p
+\end{bmatrix}
+=
+1\times(p + 1),
+\quad
+\hat{\beta} =
+\begin{bmatrix}
+\hat{\beta}_0 \\ \hat{\beta}_1 \\ \hat{\beta}_2 \\ \vdots \\ \hat{\beta}_p
+\end{bmatrix} =
+(p + 1)\times1
+$$
+
+### Örnek Çözüm
+
+İki feature olsun:
+
+$$
+X=
+\begin{bmatrix}
+1\\
+3\\
+5
+\end{bmatrix}
+,\quad
+\hat{\beta}=
+\begin{bmatrix}
+2\\
+4\\
+6
+\end{bmatrix}
+$$
+
+O zaman:
+
+$$
+X^\top \hat{\beta}
+=
+\begin{bmatrix}
+1 & 3 & 5
+\end{bmatrix}
+\begin{bmatrix}
+2\\
+4\\
+6
+\end{bmatrix}
+$$
+
+Sonuç:
+
+$$
+=1\cdot2 + 3\cdot4 + 5\cdot6
+$$
+
+$$
+=44
+$$
