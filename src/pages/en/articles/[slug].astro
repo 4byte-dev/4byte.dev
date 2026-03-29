@@ -117,7 +117,10 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 						{article.data.category}
 					</a>
 				</div>
-				<h1 class="text-3xl font-bold tracking-tight text-foreground dark:text-foreground-dark mb-4">
+				<h1
+					id="title"
+					class="text-3xl font-bold tracking-tight text-foreground dark:text-foreground-dark mb-4 scroll-mt-60"
+				>
 					{article.data.title}
 				</h1>
 				<div
@@ -152,6 +155,6 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 			<ShareButtons title={article.data.title} url={articleUrl} labels={labels} />
 		</div>
 
-		<TableOfContents headings={tocHeadings} label={onThisPageLabel} />
+		<TableOfContents headings={tocHeadings} label={onThisPageLabel} title={article.data.title} />
 	</div>
 </DocsLayout>
