@@ -35,12 +35,7 @@ const tagArticles = allArticles.filter(
 )
 ---
 
-<DocsLayout
-	title={`#${tag.name}`}
-	description={`Articles tagged with ${tag.name} on 4byte.dev`}
-	image="/og/index.png"
-	lang={tagLang}
->
+<DocsLayout title={`#${tag.name}`} description={tag.description} image="/og/index.png" lang={tagLang}>
 	<div class="px-8 py-12 max-w-5xl mx-auto">
 		<a
 			href={`${langPrefix}/tags`}
@@ -53,9 +48,7 @@ const tagArticles = allArticles.filter(
 			#{tag.slug}
 		</h1>
 		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-8">
-			{tagArticles.length}
-			{t(labels, 'tags.articlesTagged')}
-			<span class="font-mono text-foreground dark:text-foreground-dark">#{tag.slug}</span>.
+			{tag.description}
 		</p>
 
 		<div class="bg-background dark:bg-background-dark rounded-lg shadow-flat-sm overflow-hidden">
@@ -76,9 +69,12 @@ const tagArticles = allArticles.filter(
 										{article.data.category}
 									</span>
 								</div>
-								<h3 class="font-medium text-foreground dark:text-foreground-dark text-sm">
+								<h3 class="font-medium text-foreground dark:text-foreground-dark text-sm mb-1">
 									{article.data.title}
 								</h3>
+								<p class="text-xs text-muted-foreground dark:text-muted-dark-foreground line-clamp-1">
+									{article.data.excerpt}
+								</p>
 							</div>
 							<div class="flex items-center gap-4 ml-4 text-xs text-muted-foreground dark:text-muted-dark-foreground shrink-0">
 								<span class="flex items-center gap-1 tabular-nums">
