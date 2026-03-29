@@ -1,0 +1,92 @@
+---
+import { getCollection } from 'astro:content'
+
+interface Props {
+	slug: string
+	category: string
+	lang: string
+}
+
+const { slug, category, lang } = Astro.props
+
+const allArticles = await getCollection('articles')
+
+const categoryArticles = allArticles
+	.filter((a) => a.data.lang === lang && a.data.category === category && a.data.status === 'Published')
+	.map((a) => ({ slug: a.data.slug, title: a.data.title, order: a.data.order ?? 0 }))
+	.sort((a, b) => {
+		if (a.order === 0 && b.order === 0) return 0
+		if (a.order === 0) return 1
+		if (b.order === 0) return -1
+		if (a.order === b.order) return Math.random() - 0.5
+		return a.order - b.order
+	})
+
+const currentIndex = categoryArticles.findIndex((a) => a.slug === slug)
+
+const prevArticle = currentIndex > 0 ? categoryArticles[currentIndex - 1] : null
+const nextArticle = currentIndex < categoryArticles.length - 1 ? categoryArticles[currentIndex + 1] : null
+
+const langPrefix = lang === 'en' ? '/en' : ''
+const isOnlyPrev = prevArticle && !nextArticle
+const isOnlyNext = nextArticle && !prevArticle
+---
+
+{
+	(prevArticle || nextArticle) && (
+		<nav
+			class={`flex flex-col md:flex-row items-stretch gap-4 mb-12 ${isOnlyPrev || isOnlyNext ? (isOnlyPrev ? 'md:justify-start md:w-1/2' : 'md:justify-end md:w-1/2 md:ml-auto') : ''}`}
+		>
+			{prevArticle && (
+				<a
+					class={`w-full md:flex-1 group flex items-center gap-3 p-4 rounded-lg border border-border dark:border-border-dark bg-muted dark:bg-muted-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10 hover:text-primary dark:hover:text-primary-dark text-muted-foreground dark:text-muted-dark-foreground transition-all duration-200`}
+					href={`${langPrefix}/articles/${prevArticle.slug}`}
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="lucide lucide-chevron-left h-5 w-5 shrink-0 transition-colors"
+					>
+						<path d="m15 18-6-6 6-6" />
+					</svg>
+					<div class="text-right flex-1 min-w-0">
+						<span class="text-xs block">Previous</span>
+						<span class="text-sm font-medium truncate block">{prevArticle.title}</span>
+					</div>
+				</a>
+			)}
+			{nextArticle && (
+				<a
+					class={`w-full md:flex-1 group flex items-center gap-3 p-4 rounded-lg border border-border dark:border-border-dark bg-muted dark:bg-muted-dark hover:bg-primary/10 dark:hover:bg-primary-dark/10 hover:text-primary dark:hover:text-primary-dark text-muted-foreground dark:text-muted-dark-foreground transition-all duration-200`}
+					href={`${langPrefix}/articles/${nextArticle.slug}`}
+				>
+					<div class="flex-1 min-w-0">
+						<span class="text-xs block">Next</span>
+						<span class="text-sm font-medium truncate block">{nextArticle.title}</span>
+					</div>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="lucide lucide-chevron-right h-5 w-5 shrink-0 transition-colors"
+					>
+						<path d="m9 18 6-6-6-6" />
+					</svg>
+				</a>
+			)}
+		</nav>
+	)
+}

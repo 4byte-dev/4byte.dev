@@ -26,6 +26,7 @@ const articles = defineCollection({
 		author: z.string(),
 		date: z.union([z.string(), z.date()]),
 		views: z.number().default(0),
+		order: z.number().default(0),
 		status: z.enum(['Published', 'Draft']).default('Published'),
 	}),
 })

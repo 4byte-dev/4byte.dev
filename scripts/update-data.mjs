@@ -89,7 +89,7 @@ const writeJSON = async (file, data) => await fs.writeFile(file, JSON.stringify(
 				}
 			}
 
-			articles.push({ title, slug, category: data.category?.trim() ?? '' })
+			articles.push({ title, slug, category: data.category?.trim() ?? '', order: data.order ?? 0 })
 		}
 
 		const filteredTags = tags.filter((t) => (t.articleCount ?? 0) > 0)
