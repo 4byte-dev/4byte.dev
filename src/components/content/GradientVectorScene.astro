@@ -1,0 +1,325 @@
+---
+interface Vector3 {
+	x: number
+	y: number
+	z: number
+}
+interface PointInput {
+	position: Vector3
+	color?: string
+	label?: string
+	size?: number
+}
+interface VectorInput {
+	origin?: Vector3
+	direction: Vector3
+	color?: string
+	length?: number
+	label?: string
+}
+interface LineInput {
+	from: Vector3
+	to: Vector3
+	color?: string
+	dashed?: boolean
+}
+
+interface Props {
+	id?: string
+	height?: number
+	gradientDirection: Vector3
+	gradientOrigin?: Vector3
+	gradientColor?: string
+	gradientLength?: number
+	gradientLabel?: string
+	showPlane?: boolean
+	planeCenter?: Vector3
+	planeNormal?: Vector3
+	planeColor?: string
+	planeOpacity?: number
+	planeSize?: number
+	points?: PointInput[]
+	vectors?: VectorInput[]
+	lines?: LineInput[]
+	showGrid?: boolean
+	showAxes?: boolean
+	axisRange?: number
+	title?: string
+	xAxisLabel?: string
+	yAxisLabel?: string
+	zAxisLabel?: string
+}
+
+const {
+	id = '',
+	height = 400,
+	gradientDirection,
+	gradientOrigin = { x: 0, y: 0, z: 0 },
+	gradientColor = '#22c55e',
+	gradientLength,
+	gradientLabel = '∇f',
+	showPlane = false,
+	planeCenter = { x: 0, y: 0, z: 0 },
+	planeNormal = { x: 0, y: 1, z: 0 },
+	planeColor = '#71717a',
+	planeOpacity = 0.2,
+	planeSize,
+	points = [],
+	vectors = [],
+	lines = [],
+	showGrid = true,
+	showAxes = true,
+	axisRange = 5,
+	title = '',
+	xAxisLabel = 'X₁',
+	yAxisLabel = 'Y',
+	zAxisLabel = 'X₂',
+} = Astro.props
+
+const chartId = `gradient-${id || Math.random().toString(36).slice(2, 9)}`
+---
+
+<div
+	class="gradient-wrapper"
+	data-chart-id={chartId}
+	data-chart-gradient-dir={JSON.stringify(gradientDirection)}
+	data-chart-gradient-origin={JSON.stringify(gradientOrigin)}
+	data-chart-gradient-color={gradientColor}
+	data-chart-gradient-length={gradientLength || ''}
+	data-chart-gradient-label={gradientLabel}
+	data-chart-show-plane={showPlane}
+	data-chart-plane-center={JSON.stringify(planeCenter)}
+	data-chart-plane-normal={JSON.stringify(planeNormal)}
+	data-chart-plane-color={planeColor}
+	data-chart-plane-opacity={planeOpacity}
+	data-chart-plane-size={planeSize || ''}
+	data-chart-points={JSON.stringify(points)}
+	data-chart-vectors={JSON.stringify(vectors)}
+	data-chart-lines={JSON.stringify(lines)}
+	data-chart-show-grid={showGrid}
+	data-chart-show-axes={showAxes}
+	data-chart-axis-range={axisRange}
+	data-chart-title={title}
+	data-chart-x-label={xAxisLabel}
+	data-chart-y-label={yAxisLabel}
+	data-chart-z-label={zAxisLabel}
+	data-chart-height={height}
+	style="position: relative;"
+>
+	<div id={chartId} style={`min-height: ${height}px; width: 100%; position: relative;`}></div>
+	<div
+		class="chart-controls mt-9"
+		style="display: flex; gap: 8px; justify-content: flex-end; position: relative; z-index: 10;"
+	>
+		<button
+			class="chart-btn zoom-in"
+			title="Zoom In"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg
+			>
+		</button>
+		<button
+			class="chart-btn zoom-out"
+			title="Zoom Out"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><line x1="5" y1="12" x2="19" y2="12"></line></svg
+			>
+		</button>
+		<button
+			class="chart-btn reset"
+			title="Reset View"
+			style="background: oklch(0.9 0 0); border: 1px solid oklch(0.85 0 0); border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; color: oklch(0.2 0 0);"
+		>
+			<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg
+			>
+		</button>
+	</div>
+</div>
+
+<script>
+	import * as THREE from 'three'
+	import { onHydration } from '../../utils/hydration'
+	import {
+		createBaseScene,
+		createCamera,
+		createRenderer,
+		createControls,
+		createAxisArrows,
+		createGridLines,
+		renderPoint,
+		renderVector,
+		renderLine,
+		renderPlane,
+		makeLabel,
+		getThemeColors3D,
+		setupZoomControls,
+	} from '../../utils/scene3d'
+
+	function hexToNum(hex: string): number {
+		if (hex.startsWith('#')) return parseInt(hex.slice(1), 16)
+		if (hex.startsWith('0x')) return parseInt(hex, 16)
+		return parseInt(hex, 16)
+	}
+
+	function initGradientComponents() {
+		const wrappers = document.querySelectorAll('.gradient-wrapper[data-chart-id^="gradient"]')
+
+		wrappers.forEach((wrapper) => {
+			const container = wrapper.querySelector('div') as HTMLElement
+			if (!container) return
+
+			const el = wrapper as HTMLElement
+			const chartHeight = parseInt(el.dataset.chartHeight || '400')
+			const showGrid = el.dataset.chartShowGrid !== 'false'
+			const showAxes = el.dataset.chartShowAxes !== 'false'
+			const axisRange = parseFloat(el.dataset.chartAxisRange || '5')
+			const chartTitle = el.dataset.chartTitle || ''
+
+			const rawGradDir = JSON.parse(el.dataset.chartGradientDir || '{"x":1,"y":0,"z":0}')
+			const rawGradOrigin = JSON.parse(el.dataset.chartGradientOrigin || '{"x":0,"y":0,"z":0}')
+			const gradColor = hexToNum(el.dataset.chartGradientColor || '#22c55e')
+			const gradLengthVal = el.dataset.chartGradientLength ? parseFloat(el.dataset.chartGradientLength) : null
+			const gradLabel = el.dataset.chartGradientLabel || '∇f'
+
+			const showPlane = el.dataset.chartShowPlane === 'true'
+			const rawPlaneCenter = JSON.parse(el.dataset.chartPlaneCenter || '{"x":0,"y":0,"z":0}')
+			const rawPlaneNormal = JSON.parse(el.dataset.chartPlaneNormal || '{"x":0,"y":1,"z":0}')
+			const planeColor = hexToNum(el.dataset.chartPlaneColor || '#71717a')
+			const planeOpacity = parseFloat(el.dataset.chartPlaneOpacity || '0.2')
+			const planeSizeVal = el.dataset.chartPlaneSize ? parseFloat(el.dataset.chartPlaneSize) : null
+
+			const rawPoints = JSON.parse(el.dataset.chartPoints || '[]')
+			const rawVectors = JSON.parse(el.dataset.chartVectors || '[]')
+			const rawLines = JSON.parse(el.dataset.chartLines || '[]')
+			const xLabel = el.dataset.chartXLabel || 'X₁'
+			const yLabel = el.dataset.chartYLabel || 'Y'
+			const zLabel = el.dataset.chartZLabel || 'X₂'
+
+			const CUBE = axisRange * 0.36
+			const HALF = CUBE / 2
+			const DEFAULT_EYE = new THREE.Vector3(CUBE * 0.5, CUBE * 0.6, CUBE * 2.5)
+			const CENTER = new THREE.Vector3(HALF, HALF, HALF)
+
+			let scene: THREE.Scene
+			let camera: THREE.PerspectiveCamera
+			let renderer: THREE.WebGLRenderer
+			let controls: any
+
+			function toWorld(v: { x: number; y: number; z: number }): THREE.Vector3 {
+				return new THREE.Vector3((v.x / axisRange) * CUBE, (v.y / axisRange) * CUBE, (v.z / axisRange) * CUBE)
+			}
+
+			function initChart() {
+				container.innerHTML = ''
+				const theme = getThemeColors3D()
+
+				if (chartTitle) {
+					const titleEl = document.createElement('div')
+					titleEl.textContent = chartTitle
+					titleEl.style.cssText = `font-size: 15px; font-weight: 600; text-align: center; color: ${theme.darkText}; margin-bottom: 4px;`
+					container.prepend(titleEl)
+				}
+
+				const width = container.clientWidth
+				scene = createBaseScene()
+				camera = createCamera(width, chartHeight, DEFAULT_EYE, CENTER)
+				renderer = createRenderer(container, width, chartHeight)
+				controls = createControls(camera, renderer.domElement, CENTER, CUBE)
+
+				if (showGrid) createGridLines(CUBE, theme, scene)
+				if (showAxes) {
+					const TICKS = 5
+					const tickLabels = {
+						x: Array.from({ length: TICKS + 1 }, (_, i) => ((i / TICKS) * axisRange).toFixed(1)),
+						y: Array.from({ length: TICKS + 1 }, (_, i) => ((i / TICKS) * axisRange).toFixed(1)),
+						z: Array.from({ length: TICKS + 1 }, (_, i) => ((i / TICKS) * axisRange).toFixed(1)),
+					}
+					createAxisArrows(CUBE, theme, scene, { x: xLabel, y: yLabel, z: zLabel }, tickLabels)
+				}
+
+				if (showPlane) {
+					const pCenter = toWorld(rawPlaneCenter)
+					const pNormal = new THREE.Vector3(rawPlaneNormal.x, rawPlaneNormal.y, rawPlaneNormal.z)
+					const pSize = planeSizeVal ? (planeSizeVal / axisRange) * CUBE : CUBE * 1.2
+					renderPlane(scene, pCenter, pNormal, pSize, planeColor, planeOpacity)
+				}
+
+				const origin = toWorld(rawGradOrigin)
+				const dir = toWorld(rawGradDir)
+				renderVector(
+					scene,
+					origin,
+					dir,
+					gradColor,
+					gradLengthVal ? (gradLengthVal / axisRange) * CUBE : undefined,
+				)
+				const tipLabel = origin
+					.clone()
+					.add(dir)
+					.add(new THREE.Vector3(0, 0.15, 0))
+				scene.add(makeLabel(gradLabel, tipLabel, gradColor, 0.25, 0.1, 28))
+
+				rawPoints.forEach((p: any) => {
+					const color = p.color ? hexToNum(p.color) : 0xf59e0b
+					const pos = toWorld(p.position)
+					renderPoint(scene, pos, color, p.size || 10, 1)
+					if (p.label) {
+						scene.add(
+							makeLabel(p.label, pos.clone().add(new THREE.Vector3(0, 0.18, 0)), color, 0.22, 0.09, 26),
+						)
+					}
+				})
+
+				rawVectors.forEach((v: any) => {
+					const color = v.color ? hexToNum(v.color) : 0x3b82f6
+					const vOrigin = v.origin ? toWorld(v.origin) : new THREE.Vector3(0, 0, 0)
+					const vDir = toWorld(v.direction)
+					renderVector(scene, vOrigin, vDir, color, v.length)
+					if (v.label) {
+						const vTip = vOrigin.clone().add(vDir)
+						scene.add(
+							makeLabel(v.label, vTip.clone().add(new THREE.Vector3(0, 0.15, 0)), color, 0.22, 0.09, 26),
+						)
+					}
+				})
+
+				rawLines.forEach((l: any) => {
+					const color = l.color ? hexToNum(l.color) : 0x71717a
+					renderLine(scene, toWorld(l.from), toWorld(l.to), color, l.dashed ?? false)
+				})
+
+				setupZoomControls(wrapper as HTMLElement, camera, controls, DEFAULT_EYE, CENTER)
+
+				let rafId: number
+				function animate() {
+					rafId = requestAnimationFrame(animate)
+					controls.update()
+					renderer.render(scene, camera)
+				}
+				animate()
+				;(container as any).__cleanup = () => {
+					cancelAnimationFrame(rafId)
+					renderer.dispose()
+				}
+			}
+
+			const resizeObs = new ResizeObserver(() => {
+				if (!renderer || !camera) return
+				const w = container.clientWidth
+				camera.aspect = w / chartHeight
+				camera.updateProjectionMatrix()
+				renderer.setSize(w, chartHeight)
+			})
+			resizeObs.observe(container)
+
+			initChart()
+		})
+	}
+
+	onHydration(initGradientComponents)
+</script>
