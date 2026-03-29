@@ -154,7 +154,12 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 				<Content />
 			</article>
 
-			<ArticleNav slug={article.data.slug} category={article.data.category} lang={article.data.lang} />
+			<ArticleNav
+				slug={article.data.slug}
+				category={article.data.category}
+				lang={article.data.lang}
+				labels={labels}
+			/>
 
 			<ShareButtons title={article.data.title} url={articleUrl} labels={labels} />
 		</div>

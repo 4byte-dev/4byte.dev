@@ -39,7 +39,9 @@
 		"home": "Home",
 		"by": "By",
 		"onThisPage": "On this page",
-		"share": "Share"
+		"share": "Share",
+		"previous": "Previous",
+		"next": "Next"
 	},
 	"share": {
 		"label": "Share"
