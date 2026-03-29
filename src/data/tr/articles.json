@@ -2,16 +2,19 @@
 	{
 		"title": "Linear Model Nedir?",
 		"slug": "linear-model-nedir",
-		"category": "machine-learning"
+		"category": "machine-learning",
+		"order": 3
 	},
 	{
 		"title": "Linear Regression Nedir?",
 		"slug": "linear-regression-nedir",
-		"category": "machine-learning"
+		"category": "machine-learning",
+		"order": 2
 	},
 	{
 		"title": "Supervised Learning Nedir?",
 		"slug": "supervised-learning-nedir",
-		"category": "machine-learning"
+		"category": "machine-learning",
+		"order": 1
 	}
 ]

@@ -4,6 +4,7 @@ import ShareButtons from '../../../components/ShareButtons.astro'
 import GitHubUserCard from '../../../components/GitHubUserCard.astro'
 import ReadingProgress from '../../../components/ReadingProgress.astro'
 import TableOfContents from '../../../components/TableOfContents.astro'
+import ArticleNav from '../../../components/ArticleNav.astro'
 import { getCollection, render } from 'astro:content'
 import { SITE } from '../../../config.mjs'
 import { t } from '../../../i18n/index.ts'
@@ -151,6 +152,8 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 			<article class="mb-12 prose dark:prose-invert max-w-none">
 				<Content />
 			</article>
+
+			<ArticleNav slug={article.data.slug} category={article.data.category} lang="en" labels={labels} />
 
 			<ShareButtons title={article.data.title} url={articleUrl} labels={labels} />
 		</div>

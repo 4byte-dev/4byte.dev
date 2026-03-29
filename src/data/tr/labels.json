@@ -39,7 +39,9 @@
 		"home": "Ana Sayfa",
 		"by": "Yazar",
 		"onThisPage": "Sayfada",
-		"share": "Paylaş"
+		"share": "Paylaş",
+		"previous": "Önceki",
+		"next": "Sonraki"
 	},
 	"share": {
 		"label": "Paylaş"
