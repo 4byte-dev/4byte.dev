@@ -416,3 +416,49 @@ export function createControlsHTML(): string {
 		</button>
 	</div>`
 }
+
+export function createTooltip(container: HTMLElement): HTMLElement {
+	const tooltip = document.createElement('div')
+	tooltip.className = 'chart-tooltip'
+	tooltip.style.cssText = `
+		position: absolute;
+		pointer-events: none;
+		background: oklch(0.15 0 0);
+		color: oklch(0.95 0 0);
+		padding: 8px 12px;
+		border-radius: 6px;
+		font-size: 13px;
+		font-weight: 500;
+		opacity: 0;
+		transition: opacity 0.15s ease;
+		box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+		z-index: 9999;
+		white-space: nowrap;
+	`
+	container.style.position = 'relative'
+	container.appendChild(tooltip)
+	return tooltip
+}
+
+export function showTooltip(tooltip: HTMLElement, x: number, y: number, content: string, containerRect: DOMRect) {
+	tooltip.innerHTML = content
+	tooltip.style.opacity = '1'
+
+	const tooltipRect = tooltip.getBoundingClientRect()
+	let left = x + 12
+	let top = y - 12
+
+	if (left + tooltipRect.width > containerRect.width) {
+		left = x - tooltipRect.width - 12
+	}
+	if (top < 0) {
+		top = y + 12
+	}
+
+	tooltip.style.left = `${left}px`
+	tooltip.style.top = `${top}px`
+}
+
+export function hideTooltip(tooltip: HTMLElement) {
+	tooltip.style.opacity = '0'
+}
