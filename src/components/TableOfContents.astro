@@ -2,9 +2,10 @@
 interface Props {
 	headings: Array<{ depth: number; slug: string; text: string }>
 	label: string
+	title?: string
 }
 
-const { headings, label } = Astro.props
+const { headings, label, title } = Astro.props
 
 const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3)
 ---
@@ -23,6 +24,17 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3)
 						style="top: 0; left: -9px;"
 					/>
 					<ul id="toc-list" class="space-y-1 text-sm border-l border-transparent">
+						{title && (
+							<li data-depth={1}>
+								<a
+									href="#title"
+									data-slug="title"
+									class="toc-link block py-1 transition-colors duration-200 text-foreground dark:text-foreground-dark font-medium"
+								>
+									{title}
+								</a>
+							</li>
+						)}
 						{tocHeadings.map((h) => (
 							<li data-depth={h.depth}>
 								<a
@@ -70,7 +82,7 @@ const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3)
 			if (top === undefined) return
 
 			const depth = depths.get(slug) || 2
-			const indent = depth === 3 ? 12 : 0
+			const indent = depth >= 3 ? 12 : 0
 
 			indicator.style.top = `${top}px`
 			indicator.style.left = `${-9 + indent}px`

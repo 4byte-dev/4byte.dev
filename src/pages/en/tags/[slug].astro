@@ -23,12 +23,7 @@ const tagArticles = allArticles.filter(
 )
 ---
 
-<DocsLayout
-	title={`#${tag.name}`}
-	description={`Articles tagged with ${tag.name} on 4byte.dev`}
-	image="/og/en/index.png"
-	lang="en"
->
+<DocsLayout title={`#${tag.name}`} description={tag.description} image="/og/en/index.png" lang="en">
 	<div class="px-8 py-12 max-w-5xl mx-auto">
 		<a
 			href="/en/tags"
@@ -40,45 +35,47 @@ const tagArticles = allArticles.filter(
 		<h1 class="text-3xl font-bold tracking-tight text-foreground dark:text-foreground-dark mb-2 font-mono">
 			#{tag.slug}
 		</h1>
-		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-8">
-			{tagArticles.length}
-			{t(labels, 'tags.articlesTagged')}
-			<span class="font-mono text-foreground dark:text-foreground-dark">#{tag.slug}</span>.
-		</p>
+		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-8">{tag.description}</p>
+		{tagArticles.length}
+		{t(labels, 'tags.articlesTagged')}
+		<span class="font-mono text-foreground dark:text-foreground-dark">#{tag.slug}</span>.
+	</div>
 
-		<div class="bg-background dark:bg-background-dark rounded-lg shadow-flat-sm overflow-hidden">
-			{
-				tagArticles.length === 0 ? (
-					<div class="px-5 py-8 text-center text-sm text-muted-foreground dark:text-muted-dark-foreground">
-						{t(labels, 'tags.noArticles')}
-					</div>
-				) : (
-					tagArticles.map((article) => (
-						<a
-							href={`/en/articles/${article.data.slug}`}
-							class="flex items-center justify-between px-5 py-4 hover:bg-muted/30 dark:hover:bg-muted-dark/30 transition-colors border-b border-border/50 dark:border-border-dark/50 last:border-0"
-						>
-							<div class="min-w-0 flex-1">
-								<div class="flex items-center gap-2 mb-1">
-									<span class="text-xs font-medium text-primary dark:text-primary-dark">
-										{article.data.category}
-									</span>
-								</div>
-								<h3 class="font-medium text-foreground dark:text-foreground-dark text-sm">
-									{article.data.title}
-								</h3>
-							</div>
-							<div class="flex items-center gap-4 ml-4 text-xs text-muted-foreground dark:text-muted-dark-foreground shrink-0">
-								<span class="flex items-center gap-1 tabular-nums">
-									<span class="i-lucide-eye w-3 h-3" />
-									{article.data.views.toLocaleString()}
+	<div class="bg-background dark:bg-background-dark rounded-lg shadow-flat-sm overflow-hidden">
+		{
+			tagArticles.length === 0 ? (
+				<div class="px-5 py-8 text-center text-sm text-muted-foreground dark:text-muted-dark-foreground">
+					{t(labels, 'tags.noArticles')}
+				</div>
+			) : (
+				tagArticles.map((article) => (
+					<a
+						href={`/en/articles/${article.data.slug}`}
+						class="flex items-center justify-between px-5 py-4 hover:bg-muted/30 dark:hover:bg-muted-dark/30 transition-colors border-b border-border/50 dark:border-border-dark/50 last:border-0"
+					>
+						<div class="min-w-0 flex-1">
+							<div class="flex items-center gap-2 mb-1">
+								<span class="text-xs font-medium text-primary dark:text-primary-dark">
+									{article.data.category}
 								</span>
-								<span class="i-lucide-arrow-right w-3.5 h-3.5" />
 							</div>
-						</a>
-					))
-				)
-			}
-		</div>
+							<h3 class="font-medium text-foreground dark:text-foreground-dark text-sm mb-1">
+								{article.data.title}
+							</h3>
+							<p class="text-xs text-muted-foreground dark:text-muted-dark-foreground line-clamp-1">
+								{article.data.excerpt}
+							</p>
+						</div>
+						<div class="flex items-center gap-4 ml-4 text-xs text-muted-foreground dark:text-muted-dark-foreground shrink-0">
+							<span class="flex items-center gap-1 tabular-nums">
+								<span class="i-lucide-eye w-3 h-3" />
+								{article.data.views.toLocaleString()}
+							</span>
+							<span class="i-lucide-arrow-right w-3.5 h-3.5" />
+						</div>
+					</a>
+				))
+			)
+		}
 	</div>
 </DocsLayout>

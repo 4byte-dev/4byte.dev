@@ -122,6 +122,7 @@ const chartId = `scene3d-${id || Math.random().toString(36).slice(2, 9)}`
 
 <script>
 	import * as THREE from 'three'
+	import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 	import { onHydration } from '../../utils/hydration'
 	import {
 		createBaseScene,
@@ -137,6 +138,9 @@ const chartId = `scene3d-${id || Math.random().toString(36).slice(2, 9)}`
 		makeLabel,
 		getThemeColors3D,
 		setupZoomControls,
+		createTooltip,
+		showTooltip,
+		hideTooltip,
 	} from '../../utils/scene3d'
 
 	function hexToNum(hex: string): number {
@@ -175,7 +179,11 @@ const chartId = `scene3d-${id || Math.random().toString(36).slice(2, 9)}`
 			let scene: THREE.Scene
 			let camera: THREE.PerspectiveCamera
 			let renderer: THREE.WebGLRenderer
-			let controls: any
+			let controls: OrbitControls
+			let pointsGroup: THREE.Group
+			let raycaster: THREE.Raycaster
+			let mouse: THREE.Vector2
+			let hoveredMesh: THREE.Mesh | null = null
 
 			function toWorld(v: { x: number; y: number; z: number }): THREE.Vector3 {
 				return new THREE.Vector3((v.x / axisRange) * CUBE, (v.y / axisRange) * CUBE, (v.z / axisRange) * CUBE)
@@ -212,13 +220,22 @@ const chartId = `scene3d-${id || Math.random().toString(36).slice(2, 9)}`
 				rawPoints.forEach((p: any) => {
 					const color = p.color ? hexToNum(p.color) : 0x3b82f6
 					const pos = toWorld(p.position)
-					renderPoint(scene, pos, color, p.size || 8, p.opacity ?? 1)
+					const mesh = renderPoint(scene, pos, color, p.size || 8, p.opacity ?? 1)
+					mesh.userData = { index: rawPoints.indexOf(p), originalColor: new THREE.Color(color), data: p }
 					if (p.label) {
 						scene.add(
 							makeLabel(p.label, pos.clone().add(new THREE.Vector3(0, 0.15, 0)), color, 0.2, 0.08, 22),
 						)
 					}
 				})
+
+				pointsGroup = new THREE.Group()
+				scene.children.forEach((child) => {
+					if (child instanceof THREE.Mesh && child.geometry instanceof THREE.SphereGeometry) {
+						pointsGroup.add(child)
+					}
+				})
+				scene.add(pointsGroup)
 
 				rawVectors.forEach((v: any) => {
 					const color = v.color ? hexToNum(v.color) : 0x22c55e
@@ -254,6 +271,73 @@ const chartId = `scene3d-${id || Math.random().toString(36).slice(2, 9)}`
 				})
 
 				setupZoomControls(wrapper as HTMLElement, camera, controls, DEFAULT_EYE, CENTER)
+
+				const tooltip = createTooltip(container)
+
+				raycaster = new THREE.Raycaster()
+				raycaster.params.Points = { threshold: 0.02 }
+				mouse = new THREE.Vector2()
+
+				renderer.domElement.addEventListener('mousemove', (e: MouseEvent) => {
+					const rect = renderer.domElement.getBoundingClientRect()
+					mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
+					mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+
+					raycaster.setFromCamera(mouse, camera)
+					const hits = raycaster.intersectObjects(pointsGroup.children, false)
+
+					if (hoveredMesh && (!hits.length || hits[0].object !== hoveredMesh)) {
+						;(hoveredMesh.material as THREE.MeshStandardMaterial).color.copy(
+							hoveredMesh.userData.originalColor,
+						)
+						;(hoveredMesh.material as THREE.MeshStandardMaterial).emissive.set(0x000000)
+						hoveredMesh = null
+						hideTooltip(tooltip)
+					}
+
+					renderer.domElement.style.cursor = hits.length ? 'pointer' : 'grab'
+
+					if (hits.length) {
+						const mesh = hits[0].object as THREE.Mesh
+						if (mesh !== hoveredMesh) {
+							hoveredMesh = mesh
+							;(mesh.material as THREE.MeshStandardMaterial).color.set(0xffffff)
+							;(mesh.material as THREE.MeshStandardMaterial).emissive.set(0x444444)
+						}
+						const d = mesh.userData.data
+						const lbl = d.label ? `<strong>${d.label}</strong><br/>` : ''
+						showTooltip(
+							tooltip,
+							e.offsetX,
+							e.offsetY,
+							`${lbl}x: ${d.position.x.toFixed(2)}<br/>y: ${d.position.y.toFixed(2)}<br/>z: ${d.position.z.toFixed(2)}`,
+							container.getBoundingClientRect(),
+						)
+					}
+				})
+
+				renderer.domElement.addEventListener('click', (e: MouseEvent) => {
+					const rect = renderer.domElement.getBoundingClientRect()
+					mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
+					mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+					raycaster.setFromCamera(mouse, camera)
+					const hits = raycaster.intersectObjects(pointsGroup.children, false)
+					if (hits.length) {
+						const d = (hits[0].object as THREE.Mesh).userData.data
+						container.dispatchEvent(
+							new CustomEvent('chart:click', {
+								bubbles: true,
+								detail: {
+									type: 'scene3d',
+									x: d.position.x,
+									y: d.position.y,
+									z: d.position.z,
+									label: d.label,
+								},
+							}),
+						)
+					}
+				})
 
 				let rafId: number
 				function animate() {
