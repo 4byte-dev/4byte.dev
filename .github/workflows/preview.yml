@@ -1,63 +1,61 @@
 name: Preview Deployment
 
 on:
-    pull_request:
-        types: [opened, synchronize, reopened]
-        branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
 
 jobs:
-    deploy-preview:
-        runs-on: ubuntu-latest
-        environment: production
-        permissions:
-            contents: read
-            deployments: write
-            pull-requests: write
+  deploy-preview:
+    runs-on: ubuntu-latest
+    environment: production
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
 
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: '22'
-                  cache: pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
 
-            - name: Generate and Build
-              run: |
-                  pnpm generate:data
-                  pnpm generate:og
-                  pnpm build
-              env:
-                  NODE_VERSION: '22'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Deploy Preview to Cloudflare Pages
-              id: preview
-              uses: cloudflare/wrangler-action@v3
-              with:
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  command: pages deploy dist --project-name=4byte-dev --branch=${{ github.head_ref }}
-                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-                  wranglerVersion: '3'
+      - name: Install Wrangler
+        run: pnpm add -D wrangler@4
 
-            - name: Add or Update PR Comment
-              uses: marocchino/sticky-pull-request-comment@v2
-              with:
-                  header: preview-url
-                  message: |
-                      **Preview Deployment is Ready!**
+      - name: Build Astro
+        run: |
+          pnpm generate:data
+          pnpm generate:og
+          pnpm build
 
-                      You can test the updates in this PR in a live environment by clicking the link below:
-                      [View Preview](${{ steps.preview.outputs.deployment-url }})
+      - name: Deploy Preview Worker
+        id: deploy
+        run: |
+          cd dist/server
+          npx wrangler deploy --config wrangler.json --name 4byte-dev-pr-${{ github.event.pull_request.number }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-                      *(This environment is specific to this PR and does not affect the `main` branch. The content at this link will update automatically when you push new commits to the PR.)*
+      - name: Add PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview-url
+          message: |
+            **Preview Deployment is Ready!**
+
+            https://4byte-dev-pr-${{ github.event.pull_request.number }}.4byte-development.workers.dev
