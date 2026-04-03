@@ -12,10 +12,11 @@ import {
 	type GitHubTokens,
 } from '../../../lib/auth'
 
-export const GET: APIRoute = async ({ url, redirect, cookies }) => {
-	const clientId = import.meta.env.GITHUB_CLIENT_ID
-	const clientSecret = import.meta.env.GITHUB_CLIENT_SECRET
-	const callbackUrl = import.meta.env.GITHUB_CALLBACK_URL
+export const GET: APIRoute = async ({ url, redirect, cookies, locals }) => {
+	const env = locals.runtime.env
+	const clientId = env.GITHUB_CLIENT_ID
+	const clientSecret = env.GITHUB_CLIENT_SECRET
+	const callbackUrl = env.GITHUB_CALLBACK_URL
 
 	if (!clientId || !clientSecret || !callbackUrl) {
 		return new Response('GitHub OAuth not configured', { status: 500 })
@@ -67,8 +68,8 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
 			name: githubUser.name,
 		}
 
-		const userToken = await createToken(sessionUser)
-		cookies.set(getCookieName(), userToken, getCookieOptions())
+		const userToken = await createToken(sessionUser, env)
+		cookies.set(getCookieName(), userToken, getCookieOptions(env))
 
 		if (refreshToken) {
 			const tokens: GitHubTokens = {
@@ -77,8 +78,8 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
 				expires_at: Date.now() + (tokenData.expires_in || 3600) * 1000,
 				scope: tokenData.scope || '',
 			}
-			const tokensCookie = await createTokensCookie(tokens)
-			cookies.set(getTokensCookieName(), tokensCookie, getTokensCookieOptions())
+			const tokensCookie = await createTokensCookie(tokens, env)
+			cookies.set(getTokensCookieName(), tokensCookie, getTokensCookieOptions(env))
 		}
 
 		return redirect('/')

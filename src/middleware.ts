@@ -4,9 +4,10 @@ import { verifyToken, getCookieName, type SessionUser } from './lib/auth'
 export const onRequest = defineMiddleware(async (context, next) => {
 	const cookieName = getCookieName()
 	const token = context.cookies.get(cookieName)?.value
+	const env = context.locals.runtime?.env
 
-	if (token) {
-		const user = await verifyToken(token)
+	if (token && env) {
+		const user = await verifyToken(token, env)
 		if (user) {
 			context.locals.user = user
 		}
