@@ -1,46 +1,51 @@
-name: Deploy to Cloudflare Pages
+name: Deploy to Cloudflare Workers
 
 on:
-    pull_request:
-        types: [closed]
-        branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 jobs:
-    deploy:
-        if: github.event.pull_request.merged == true
-        runs-on: ubuntu-latest
-        environment: production
-        permissions:
-            contents: read
-            deployments: write
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment: production
+    
+    permissions:
+      contents: read
+      deployments: write
 
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: '22'
-                  cache: pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
 
-            - name: Build
-              run: pnpm build
-              env:
-                  NODE_VERSION: '22'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: Deploy to Cloudflare Pages
-              uses: cloudflare/wrangler-action@v3
-              with:
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  command: pages deploy dist --project-name=4byte-dev
-                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-                  wranglerVersion: '3'
+      - name: Install Wrangler
+        run: pnpm add -D wrangler@4
+
+      - name: Build Astro
+        run: |
+          pnpm generate:data
+          pnpm generate:og
+          pnpm build
+
+      - name: Deploy Production Worker
+        run: |
+          cd dist/server
+          npx wrangler deploy --config wrangler.json --name 4byte-dev
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
