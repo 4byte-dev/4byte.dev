@@ -1,5 +1,10 @@
 [
 	{
+		"title": "Least Squares Nedir?",
+		"slug": "en-kucuk-kareler",
+		"category": "machine-learning"
+	},
+	{
 		"title": "Linear Regression Nedir?",
 		"slug": "linear-regression-nedir",
 		"category": "machine-learning"
