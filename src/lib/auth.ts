@@ -1,15 +1,17 @@
 import * as jose from 'jose'
 
-const getSecret = () => {
-	const secret = import.meta.env.JWT_SECRET
+type Env = Record<string, any>
+
+const getSecret = (env: Env) => {
+	const secret = env.JWT_SECRET
 	if (!secret) {
 		throw new Error('JWT_SECRET is not set')
 	}
 	return new TextEncoder().encode(secret)
 }
 
-const getTokenSecret = () => {
-	const secret = import.meta.env.JWT_SECRET
+const getTokenSecret = (env: Env) => {
+	const secret = env.JWT_SECRET
 	if (!secret) {
 		throw new Error('JWT_SECRET is not set')
 	}
@@ -32,8 +34,8 @@ export interface GitHubTokens {
 	scope: string
 }
 
-export async function createToken(user: SessionUser): Promise<string> {
-	const secret = getSecret()
+export async function createToken(user: SessionUser, env: Env): Promise<string> {
+	const secret = getSecret(env)
 	return await new jose.SignJWT({ ...user })
 		.setProtectedHeader({ alg: 'HS256' })
 		.setIssuedAt()
@@ -41,9 +43,9 @@ export async function createToken(user: SessionUser): Promise<string> {
 		.sign(secret)
 }
 
-export async function verifyToken(token: string): Promise<SessionUser | null> {
+export async function verifyToken(token: string, env: Env): Promise<SessionUser | null> {
 	try {
-		const secret = getSecret()
+		const secret = getSecret(env)
 		const { payload } = await jose.jwtVerify(token, secret)
 		return payload as unknown as SessionUser
 	} catch {
@@ -51,8 +53,8 @@ export async function verifyToken(token: string): Promise<SessionUser | null> {
 	}
 }
 
-export async function createTokensCookie(tokens: GitHubTokens): Promise<string> {
-	const secret = getTokenSecret()
+export async function createTokensCookie(tokens: GitHubTokens, env: Env): Promise<string> {
+	const secret = getTokenSecret(env)
 	return await new jose.SignJWT({ ...tokens })
 		.setProtectedHeader({ alg: 'HS256' })
 		.setIssuedAt()
@@ -60,9 +62,9 @@ export async function createTokensCookie(tokens: GitHubTokens): Promise<string> 
 		.sign(secret)
 }
 
-export async function verifyTokensCookie(token: string): Promise<GitHubTokens | null> {
+export async function verifyTokensCookie(token: string, env: Env): Promise<GitHubTokens | null> {
 	try {
-		const secret = getTokenSecret()
+		const secret = getTokenSecret(env)
 		const { payload } = await jose.jwtVerify(token, secret)
 		return payload as unknown as GitHubTokens
 	} catch {
@@ -70,9 +72,9 @@ export async function verifyTokensCookie(token: string): Promise<GitHubTokens | 
 	}
 }
 
-export async function refreshAccessToken(refreshToken: string): Promise<GitHubTokens | null> {
-	const clientId = import.meta.env.GITHUB_CLIENT_ID
-	const clientSecret = import.meta.env.GITHUB_CLIENT_SECRET
+export async function refreshAccessToken(refreshToken: string, env: Env): Promise<GitHubTokens | null> {
+	const clientId = env.GITHUB_CLIENT_ID
+	const clientSecret = env.GITHUB_CLIENT_SECRET
 
 	if (!clientId || !clientSecret) {
 		return null
@@ -123,8 +125,8 @@ export function getTokensCookieName(): string {
 	return TOKEN_COOKIE_NAME
 }
 
-export function getCookieOptions() {
-	const isDev = import.meta.env.DEV
+export function getCookieOptions(env: Env) {
+	const isDev = env.DEV
 	return {
 		httpOnly: true,
 		secure: !isDev,
@@ -134,8 +136,8 @@ export function getCookieOptions() {
 	}
 }
 
-export function getTokensCookieOptions() {
-	const isDev = import.meta.env.DEV
+export function getTokensCookieOptions(env: Env) {
+	const isDev = env.DEV
 	return {
 		httpOnly: true,
 		secure: !isDev,

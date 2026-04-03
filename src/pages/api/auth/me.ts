@@ -11,7 +11,8 @@ import {
 	getTokensCookieOptions,
 } from '../../../lib/auth'
 
-export const GET: APIRoute = async ({ cookies }) => {
+export const GET: APIRoute = async ({ cookies, locals }) => {
+	const env = locals.runtime.env
 	const sessionToken = cookies.get(getCookieName())?.value
 	const tokensToken = cookies.get(getTokensCookieName())?.value
 
@@ -22,7 +23,7 @@ export const GET: APIRoute = async ({ cookies }) => {
 		})
 	}
 
-	const user = await verifyToken(sessionToken)
+	const user = await verifyToken(sessionToken, env)
 	if (!user) {
 		return new Response(JSON.stringify({ user: null, accessToken: null }), {
 			status: 200,
@@ -30,18 +31,18 @@ export const GET: APIRoute = async ({ cookies }) => {
 		})
 	}
 
-	let tokens = await verifyTokensCookie(tokensToken)
+	let tokens = await verifyTokensCookie(tokensToken, env)
 
 	if (tokens) {
 		const isExpired = Date.now() >= tokens.expires_at
 		const shouldRefresh = tokens.refresh_token && isExpired
 
 		if (shouldRefresh) {
-			const newTokens = await refreshAccessToken(tokens.refresh_token)
+			const newTokens = await refreshAccessToken(tokens.refresh_token, env)
 			if (newTokens) {
 				tokens = newTokens
-				const newTokensCookie = await createTokensCookie(newTokens)
-				cookies.set(getTokensCookieName(), newTokensCookie, getTokensCookieOptions())
+				const newTokensCookie = await createTokensCookie(newTokens, env)
+				cookies.set(getTokensCookieName(), newTokensCookie, getTokensCookieOptions(env))
 			}
 		}
 	}
