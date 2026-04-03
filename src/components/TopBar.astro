@@ -1,5 +1,6 @@
 ---
 import LanguageSelector from './LanguageSelector.astro'
+import GitHubAuth from './GitHubAuth.astro'
 import { t } from '../i18n/index.ts'
 
 interface Props {
@@ -64,6 +65,7 @@ const { lang, currentPath, labels } = Astro.props
 		>
 			<span class="desktop-theme-icon i-lucide-moon w-4 h-4"></span>
 		</button>
+		<GitHubAuth labels={labels} />
 	</div>
 </header>
 

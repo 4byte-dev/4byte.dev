@@ -1,0 +1,90 @@
+---
+import { t } from '../i18n/index.ts'
+
+interface Props {
+	labels: Record<string, unknown>
+}
+
+const { labels } = Astro.props
+---
+
+<div id="github-auth" class="hidden">
+	<a
+		href="/api/auth/login"
+		class="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground dark:text-muted-dark-foreground rounded-md hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark transition-colors"
+	>
+		<span class="i-lucide-github w-4 h-4"></span>
+		<span data-i18n="login">{t(labels, 'auth.login')}</span>
+	</a>
+</div>
+
+<div id="github-user" class="hidden relative">
+	<button
+		class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted dark:hover:bg-muted-dark transition-colors"
+		id="user-menu-btn"
+	>
+		<img src="" alt="" class="w-7 h-7 rounded-full border border-border dark:border-border-dark" id="user-avatar" />
+		<span class="text-sm text-foreground dark:text-foreground-dark hidden lg:block" id="user-name"></span>
+		<span class="i-lucide-chevron-down w-3 h-3 text-muted-foreground dark:text-muted-dark-foreground"></span>
+	</button>
+
+	<div
+		id="user-dropdown"
+		class="absolute right-0 top-full mt-1 w-48 py-1 rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark shadow-lg hidden"
+	>
+		<a
+			href="/api/auth/logout"
+			class="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground dark:text-muted-dark-foreground hover:bg-muted dark:hover:bg-muted-dark hover:text-foreground dark:hover:text-foreground-dark transition-colors"
+		>
+			<span class="i-lucide-log-out w-4 h-4"></span>
+			<span data-i18n="logout">{t(labels, 'auth.logout')}</span>
+		</a>
+	</div>
+</div>
+
+<script>
+	import { onHydration } from '../utils/hydration'
+
+	async function initAuth() {
+		const authContainer = document.getElementById('github-auth')
+		const userContainer = document.getElementById('github-user')
+		const userMenuBtn = document.getElementById('user-menu-btn')
+		const userDropdown = document.getElementById('user-dropdown')
+		const userAvatar = document.getElementById('user-avatar')
+		const userName = document.getElementById('user-name')
+
+		try {
+			const response = await fetch('/api/auth/me')
+			const data = await response.json()
+
+			if (data.user) {
+				if (authContainer) authContainer.classList.add('hidden')
+				if (userContainer) userContainer.classList.remove('hidden')
+				if (userAvatar) {
+					userAvatar.src = data.user.avatar_url
+					userAvatar.alt = data.user.name || data.user.login
+				}
+				if (userName) {
+					userName.textContent = data.user.name || data.user.login
+				}
+			} else {
+				if (authContainer) authContainer.classList.remove('hidden')
+				if (userContainer) userContainer.classList.add('hidden')
+			}
+		} catch {
+			if (authContainer) authContainer.classList.remove('hidden')
+			if (userContainer) userContainer.classList.add('hidden')
+		}
+
+		userMenuBtn?.addEventListener('click', (e) => {
+			e.stopPropagation()
+			userDropdown?.classList.toggle('hidden')
+		})
+
+		document.addEventListener('click', () => {
+			userDropdown?.classList.add('hidden')
+		})
+	}
+
+	onHydration(initAuth)
+</script>

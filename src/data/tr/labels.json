@@ -5,6 +5,10 @@
 		"categories": "Kategoriler",
 		"tags": "Etiketler"
 	},
+	"auth": {
+		"login": "Giriş Yap",
+		"logout": "Çıkış Yap"
+	},
 	"home": {
 		"title": "Makine Öğrenimi Dokümantasyonu",
 		"description": "Temel ML kavramları, mimarileri ve uygulama kalıpları için teknik bir referans. Uygulamacılar için hazırlandı.",

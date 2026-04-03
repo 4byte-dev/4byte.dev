@@ -5,6 +5,10 @@
 		"categories": "Categories",
 		"tags": "Tags"
 	},
+	"auth": {
+		"login": "Sign in",
+		"logout": "Sign out"
+	},
 	"home": {
 		"title": "Machine Learning Documentation",
 		"description": "A technical reference for core ML concepts, architectures, and implementation patterns. Built for practitioners.",
