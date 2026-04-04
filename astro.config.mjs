@@ -7,6 +7,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import mdx from '@astrojs/mdx'
 import cloudflare from '@astrojs/cloudflare'
+import react from '@astrojs/react'
 
 export default defineConfig({
 	site: 'https://4byte.dev',
@@ -25,6 +26,7 @@ export default defineConfig({
 		},
 	],
 	integrations: [
+		react(),
 		UnoCSS(),
 		mdx(),
 		icon(),

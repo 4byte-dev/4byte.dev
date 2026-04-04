@@ -1,0 +1,31 @@
+name: Sync Article Discussions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/content/articles/**'
+  workflow_dispatch:
+
+jobs:
+  sync_discussions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci || npm install --legacy-peer-deps
+
+      - name: Run script
+        env:
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO_NAME: ${{ github.event.repository.name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/create-discussion.mjs

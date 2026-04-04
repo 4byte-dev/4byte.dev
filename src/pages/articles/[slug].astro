@@ -6,6 +6,7 @@ import ReadingProgress from '../../components/ReadingProgress.astro'
 import TableOfContents from '../../components/TableOfContents.astro'
 import ArticleNav from '../../components/ArticleNav.astro'
 import ArticleViews from '../../components/ArticleViews.astro'
+import Discussion from '../../components/discussion/Discussion.tsx'
 import { getCollection, render } from 'astro:content'
 import { SITE } from '../../config.mjs'
 import { getLangFromUrl, t } from '../../i18n/index.ts'
@@ -161,6 +162,8 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 			/>
 
 			<ShareButtons title={article.data.title} url={articleUrl} labels={labels} />
+
+			<Discussion client:visible slug={article.data.slug} />
 		</div>
 
 		<TableOfContents headings={tocHeadings} label={onThisPageLabel} title={article.data.title} />
