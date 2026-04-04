@@ -13,7 +13,7 @@ export const GET: APIRoute = async ({ redirect }) => {
 	}
 
 	const state = crypto.randomUUID()
-	const scope = 'read:user'
+	const scope = 'read:user,repo'
 
 	const githubAuthUrl = new URL('https://github.com/login/oauth/authorize')
 	githubAuthUrl.searchParams.set('client_id', clientId)

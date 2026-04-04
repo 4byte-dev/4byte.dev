@@ -18,6 +18,8 @@ const CONFIG = {
 	social: {
 		twitter: '@4bytedev',
 	},
+
+	discussionCategory: 'Makale Yorumları',
 }
 
 export const SITE = CONFIG
