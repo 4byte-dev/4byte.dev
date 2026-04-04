@@ -1,9 +1,9 @@
 export const prerender = false
 
 import type { APIRoute } from 'astro'
+import { env } from 'cloudflare:workers'
 
-export const GET: APIRoute = async ({ redirect, locals }) => {
-	const env = locals.runtime.env
+export const GET: APIRoute = async ({ redirect }) => {
 	const clientId = env.GITHUB_CLIENT_ID
 	const clientSecret = env.GITHUB_CLIENT_SECRET
 	const callbackUrl = env.GITHUB_CALLBACK_URL

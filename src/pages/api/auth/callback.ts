@@ -1,6 +1,7 @@
 export const prerender = false
 
 import type { APIRoute } from 'astro'
+import { env } from 'cloudflare:workers'
 import {
 	createToken,
 	createTokensCookie,
@@ -12,8 +13,7 @@ import {
 	type GitHubTokens,
 } from '../../../lib/auth'
 
-export const GET: APIRoute = async ({ url, redirect, cookies, locals }) => {
-	const env = locals.runtime.env
+export const GET: APIRoute = async ({ url, redirect, cookies }) => {
 	const clientId = env.GITHUB_CLIENT_ID
 	const clientSecret = env.GITHUB_CLIENT_SECRET
 	const callbackUrl = env.GITHUB_CALLBACK_URL
@@ -68,8 +68,8 @@ export const GET: APIRoute = async ({ url, redirect, cookies, locals }) => {
 			name: githubUser.name,
 		}
 
-		const userToken = await createToken(sessionUser, env)
-		cookies.set(getCookieName(), userToken, getCookieOptions(env))
+		const userToken = await createToken(sessionUser, env as any)
+		cookies.set(getCookieName(), userToken, getCookieOptions(env as any))
 
 		if (refreshToken) {
 			const tokens: GitHubTokens = {
@@ -78,8 +78,8 @@ export const GET: APIRoute = async ({ url, redirect, cookies, locals }) => {
 				expires_at: Date.now() + (tokenData.expires_in || 3600) * 1000,
 				scope: tokenData.scope || '',
 			}
-			const tokensCookie = await createTokensCookie(tokens, env)
-			cookies.set(getTokensCookieName(), tokensCookie, getTokensCookieOptions(env))
+			const tokensCookie = await createTokensCookie(tokens, env as any)
+			cookies.set(getTokensCookieName(), tokensCookie, getTokensCookieOptions(env as any))
 		}
 
 		return redirect('/')
