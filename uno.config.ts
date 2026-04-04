@@ -65,4 +65,5 @@ export default defineConfig({
 			exclude: ['node_modules', 'dist', '.git'],
 		},
 	},
+	safelist: ['i-lucide-sun', 'i-lucide-moon'],
 })

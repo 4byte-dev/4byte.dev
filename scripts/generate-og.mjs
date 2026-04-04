@@ -13,7 +13,7 @@ const fontBold = await fetch(
 ).then((res) => res.arrayBuffer())
 
 const repoRoot = path.join(process.cwd())
-const logoDark = fs.readFileSync(path.join(repoRoot, 'src/assets/logo-dark.png')).toString('base64')
+const logoDark = fs.readFileSync(path.join(repoRoot, 'public/logo-dark.png')).toString('base64')
 
 const DEFAULT_COLORS = { bg: '#18181b', text: '#e5e7eb' }
 
