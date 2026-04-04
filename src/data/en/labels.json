@@ -70,5 +70,24 @@
 	"lang": {
 		"tr": "TR",
 		"en": "EN"
+	},
+	"discussion": {
+		"title": "Discussion",
+		"signIn": "Sign in with GitHub",
+		"upvotes": "Upvotes",
+		"write": "Write",
+		"leaveComment": "Leave a comment...",
+		"signInToComment": "Sign in to leave a comment",
+		"markdownSupported": "Styling with Markdown is supported",
+		"comment": "Comment",
+		"posting": "Posting...",
+		"notFound": "Discussion not found.",
+		"noComments": "No comments yet. Be the first to start the discussion!",
+		"loading": "Loading discussion...",
+		"reply": "Reply",
+		"cancel": "Cancel",
+		"replying": "Replying...",
+		"replyTo": "Reply to {user}...",
+		"on": "on"
 	}
 }
