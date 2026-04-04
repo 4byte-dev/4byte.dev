@@ -5,6 +5,7 @@ import GitHubUserCard from '../../components/GitHubUserCard.astro'
 import ReadingProgress from '../../components/ReadingProgress.astro'
 import TableOfContents from '../../components/TableOfContents.astro'
 import ArticleNav from '../../components/ArticleNav.astro'
+import ArticleViews from '../../components/ArticleViews.astro'
 import { getCollection, render } from 'astro:content'
 import { SITE } from '../../config.mjs'
 import { getLangFromUrl, t } from '../../i18n/index.ts'
@@ -132,9 +133,7 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 					<span class="text-muted-foreground/50 dark:text-muted-dark-foreground/50">·</span>
 					<span>{article.data.date}</span>
 					<span class="text-muted-foreground/50 dark:text-muted-dark-foreground/50">·</span>
-					<span class="flex items-center gap-1"
-						><span class="i-lucide-eye w-3.5 h-3.5"></span>{article.data.views.toLocaleString()}</span
-					>
+					<ArticleViews slug={article.data.slug} initialViews={article.data.views} />
 				</div>
 				<div class="flex gap-2 flex-wrap">
 					{
