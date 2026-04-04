@@ -1,0 +1,65 @@
+---
+interface Props {
+	slug: string
+	initialViews?: number
+}
+
+const { slug, initialViews = 0 } = Astro.props
+---
+
+<span
+	class="article-views flex items-center gap-1 text-sm text-muted-foreground dark:text-muted-dark-foreground"
+	data-slug={slug}
+	data-initial={initialViews}
+>
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width="16"
+		height="16"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="lucide lucide-eye"
+	>
+		<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+		<circle cx="12" cy="12" r="3"></circle>
+	</svg>
+	<span class="view-count">{initialViews.toLocaleString()}</span>
+</span>
+
+<script>
+	import { onHydration } from '../utils/hydration'
+
+	async function updateViews(element: HTMLElement) {
+		const slug = element.dataset.slug
+		const initial = parseInt(element.dataset.initial || '0', 10)
+
+		try {
+			const response = await fetch(`/api/views/${slug}`)
+			if (!response.ok) return
+			const data = await response.json()
+			const countSpan = element.querySelector('.view-count') as HTMLElement
+			if (countSpan && data.views !== undefined) {
+				countSpan.textContent = data.views.toLocaleString()
+			}
+		} catch (e) {
+			console.error('Failed to fetch views:', e)
+		}
+
+		const cookieName = `view_tracked_${slug}`
+		if (!document.cookie.includes(cookieName)) {
+			try {
+				await fetch(`/api/views/${slug}`, { method: 'POST' })
+			} catch (e) {
+				console.error('Failed to track view:', e)
+			}
+		}
+	}
+
+	onHydration(() => {
+		document.querySelectorAll('.article-views[data-slug]').forEach(updateViews)
+	})
+</script>

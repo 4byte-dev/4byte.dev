@@ -1,0 +1,6 @@
+name = "4byte-astro"
+compatibility_date = "2024-04-04"
+
+[[kv_namespaces]]
+binding = "ARTICLE_VIEWS"
+id = "0c407860ba17425581796410dbce9e19"

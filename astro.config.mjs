@@ -13,7 +13,17 @@ export default defineConfig({
 	output: 'static',
 	adapter: cloudflare({
 		imageService: 'cloudflare',
+		routes: {
+			pattern: '/**',
+			exclude: ['/_image/**'],
+		},
 	}),
+	kvNamespaces: [
+		{
+			binding: 'ARTICLE_VIEWS',
+			id: '4byte-article-views',
+		},
+	],
 	integrations: [
 		UnoCSS(),
 		mdx(),
