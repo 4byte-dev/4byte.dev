@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import type { Comment } from './types'
+import { t } from '../../i18n/index.ts'
 
 export interface CommentItemProps {
 	comment: Comment
 	onReply?: (commentId: string) => void
 	isReply?: boolean
 	loggedIn?: boolean
+	labels: any
 }
 
 const REACTION_EMOJIS: Record<string, string> = {
@@ -19,7 +21,7 @@ const REACTION_EMOJIS: Record<string, string> = {
 	EYES: '👀',
 }
 
-export default function CommentItem({ comment: initialComment, onReply, isReply = false, loggedIn = false }: CommentItemProps) {
+export default function CommentItem({ comment: initialComment, onReply, isReply = false, loggedIn = false, labels }: CommentItemProps) {
 	const [comment, setComment] = useState(initialComment)
 	const [replyBoxOpen, setReplyBoxOpen] = useState(false)
 	const [replyText, setReplyText] = useState('')
@@ -109,11 +111,11 @@ export default function CommentItem({ comment: initialComment, onReply, isReply 
 				<div className="border border-border dark:border-border-dark rounded-md bg-card dark:bg-card-dark overflow-hidden">
 					<div className="bg-muted/50 dark:bg-muted-dark/50 px-4 py-2 border-b border-border dark:border-border-dark flex items-center justify-between">
 						<div className="flex items-center gap-2 text-sm">
-							<a href={comment.author.url} className="font-semibold text-foreground dark:text-foreground-dark hover:text-primary dark:hover:text-primary-dark transition-colors">
+							<a href={comment.author.url} target="_blank" rel="noreferrer" className="font-semibold text-foreground dark:text-foreground-dark hover:text-primary dark:hover:text-primary-dark transition-colors">
 								{comment.author.login}
 							</a>
 							<span className="text-muted-foreground dark:text-muted-dark-foreground text-xs">
-								on {date}
+								{t(labels, 'discussion.on')} {date}
 							</span>
 						</div>
 					</div>
@@ -121,7 +123,7 @@ export default function CommentItem({ comment: initialComment, onReply, isReply 
 				</div>
 
 				<div className="mt-2 flex items-center gap-2 flex-wrap">
-					{['THUMBS_UP', 'HEART', 'ROCKET'].map(content => {
+					{Object.keys(REACTION_EMOJIS).map(content => {
 						const reaction = comment.reactionGroups?.find(r => r.content === content)
 						const count = reaction?.users.totalCount || 0
 						const userReacted = reaction?.viewerHasReacted || false
@@ -150,7 +152,7 @@ export default function CommentItem({ comment: initialComment, onReply, isReply 
 							className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-transparent text-muted-foreground dark:text-muted-dark-foreground hover:text-foreground dark:hover:text-foreground-dark transition-colors ml-auto"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
-							Reply
+							{t(labels, 'discussion.reply')}
 						</button>
 					)}
 				</div>
@@ -162,21 +164,21 @@ export default function CommentItem({ comment: initialComment, onReply, isReply 
 								value={replyText}
 								onChange={e => setReplyText(e.target.value)}
 								className="w-full bg-background dark:bg-background-dark border border-border dark:border-border-dark rounded-md p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark min-h-[80px] mb-2 text-foreground dark:text-foreground-dark"
-								placeholder={`Reply to ${comment.author.login}...`}
+								placeholder={t(labels, 'discussion.replyTo').replace('{user}', comment.author.login)}
 							/>
 							<div className="flex justify-end gap-2">
 								<button
 									onClick={() => setReplyBoxOpen(false)}
 									className="px-3 py-1.5 rounded-md font-medium text-xs text-muted-foreground hover:bg-muted dark:text-muted-dark-foreground dark:hover:bg-muted-dark transition-colors"
 								>
-									Cancel
+									{t(labels, 'discussion.cancel')}
 								</button>
 								<button
 									onClick={submitReply}
 									disabled={replying || !replyText.trim()}
 									className="bg-primary dark:bg-primary-dark text-primary-foreground dark:text-primary-dark-foreground px-3 py-1.5 rounded-md font-medium text-xs transition-colors hover:brightness-110 disabled:opacity-50"
 								>
-									{replying ? 'Replying...' : 'Reply'}
+									{replying ? t(labels, 'discussion.replying') : t(labels, 'discussion.reply')}
 								</button>
 							</div>
 						</div>
@@ -186,7 +188,7 @@ export default function CommentItem({ comment: initialComment, onReply, isReply 
 				{(comment.replies?.nodes.length || 0) > 0 && (
 					<div className="mt-4 pl-4 border-l-2 border-border/50 dark:border-border-dark/50">
 						{comment.replies!.nodes.map((reply) => (
-							<CommentItem key={reply.id} comment={reply} isReply={true} loggedIn={loggedIn} />
+							<CommentItem key={reply.id} comment={reply} isReply={true} loggedIn={loggedIn} labels={labels} />
 						))}
 					</div>
 				)}

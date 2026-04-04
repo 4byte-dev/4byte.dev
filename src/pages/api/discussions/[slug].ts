@@ -41,6 +41,15 @@ export const GET: APIRoute = async ({ params }) => {
 			id
 			title
 			url
+			upvoteCount
+			viewerHasUpvoted
+			reactionGroups {
+				content
+				viewerHasReacted
+				users {
+					totalCount
+				}
+			}
 			comments(first: 100) {
 				totalCount
 				nodes {

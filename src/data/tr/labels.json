@@ -70,5 +70,24 @@
 	"lang": {
 		"tr": "TR",
 		"en": "EN"
+	},
+	"discussion": {
+		"title": "Tartışma",
+		"signIn": "GitHub ile Giriş Yap",
+		"upvotes": "Beğeni",
+		"write": "Yaz",
+		"leaveComment": "Bir yorum bırakın...",
+		"signInToComment": "Yorum yapmak için giriş yapın",
+		"markdownSupported": "Markdown biçimlendirmesi desteklenmektedir",
+		"comment": "Yorum Yap",
+		"posting": "Gönderiliyor...",
+		"notFound": "Tartışma bulunamadı.",
+		"noComments": "Henüz yorum yok. Tartışmayı başlatan ilk siz olun!",
+		"loading": "Tartışma yükleniyor...",
+		"reply": "Yanıtla",
+		"cancel": "İptal",
+		"replying": "Yanıtlanıyor...",
+		"replyTo": "{user} adlı kullanıcıyı yanıtla...",
+		"on": "tarihinde"
 	}
 }

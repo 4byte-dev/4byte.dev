@@ -163,7 +163,7 @@ const onThisPageLabel = t(labels, 'article.onThisPage')
 
 			<ShareButtons title={article.data.title} url={articleUrl} labels={labels} />
 
-			<Discussion client:visible slug={article.data.slug} />
+			<Discussion client:visible slug={article.data.slug} labels={labels} />
 		</div>
 
 		<TableOfContents headings={tocHeadings} label={onThisPageLabel} title={article.data.title} />
