@@ -1,6 +1,7 @@
 export const prerender = false
 
 import type { APIRoute } from 'astro'
+import { env } from 'cloudflare:workers'
 import {
 	verifyToken,
 	verifyTokensCookie,
@@ -11,8 +12,7 @@ import {
 	getTokensCookieOptions,
 } from '../../../lib/auth'
 
-export const GET: APIRoute = async ({ cookies, locals }) => {
-	const env = locals.runtime.env
+export const GET: APIRoute = async ({ cookies }) => {
 	const sessionToken = cookies.get(getCookieName())?.value
 	const tokensToken = cookies.get(getTokensCookieName())?.value
 
@@ -23,7 +23,7 @@ export const GET: APIRoute = async ({ cookies, locals }) => {
 		})
 	}
 
-	const user = await verifyToken(sessionToken, env)
+	const user = await verifyToken(sessionToken, env as any)
 	if (!user) {
 		return new Response(JSON.stringify({ user: null, accessToken: null }), {
 			status: 200,
@@ -31,18 +31,18 @@ export const GET: APIRoute = async ({ cookies, locals }) => {
 		})
 	}
 
-	let tokens = await verifyTokensCookie(tokensToken, env)
+	let tokens = await verifyTokensCookie(tokensToken, env as any)
 
 	if (tokens) {
 		const isExpired = Date.now() >= tokens.expires_at
 		const shouldRefresh = tokens.refresh_token && isExpired
 
 		if (shouldRefresh) {
-			const newTokens = await refreshAccessToken(tokens.refresh_token, env)
+			const newTokens = await refreshAccessToken(tokens.refresh_token, env as any)
 			if (newTokens) {
 				tokens = newTokens
-				const newTokensCookie = await createTokensCookie(newTokens, env)
-				cookies.set(getTokensCookieName(), newTokensCookie, getTokensCookieOptions(env))
+				const newTokensCookie = await createTokensCookie(newTokens, env as any)
+				cookies.set(getTokensCookieName(), newTokensCookie, getTokensCookieOptions(env as any))
 			}
 		}
 	}
