@@ -1,0 +1,119 @@
+---
+lang: 'en'
+slug: 'what-is-supervised-learning'
+title: 'What is Supervised Learning?'
+excerpt: 'Supervised Learning is a machine learning technique that understands the relationship between input and output data using a labeled dataset'
+category: 'machine-learning'
+tags: ['supervised-learning', 'teori']
+author: '@omerfdmrl'
+date: '2026-03-21'
+views: 0
+order: 1
+status: 'Published'
+---
+
+import CsvViewer from '../../../components/content/CsvViewer.astro'
+
+Supervised Learning is a machine learning technique that understands the relationship between input and output data using a labeled dataset.
+The input data and its corresponding output are prepared in advance, and the model attempts to predict the result for unseen data.
+
+During training, the model's algorithm processes the datasets to discover potential correlations between the input and output data.
+Then, Cross-Validation is applied with a separate test dataset to evaluate the model's success and determine whether it has been trained effectively.
+
+A sample dataset looks like the following.
+
+<CsvViewer
+	data="Study Hours,Exam Score, Type
+	1,42,training
+	2,48,training
+	4,61,training
+	5,67,training
+	6,74,training
+	8,86,training,
+	3,58,test,
+	9,95,test,
+	1,30,test,
+	7,82,test"
+	title="Student Study and Exam Score Data"
+	pageSize={5}
+/>
+
+In the table above, we can see the relationship between study hours (input) and exam score (output). Our model examines this training data to learn the mathematical relationship between them. Then, when we ask the model about a case in the test data (e.g., studying for 7 hours), it produces a predicted exam score (e.g., a value close to 82) based on what it has learned.
+
+## Types of Supervised Learning Based on Output
+
+In supervised learning, the method we use also changes depending on the output we are trying to predict. There are fundamentally two main problem types:
+
+### Regression
+
+If the output we are trying to predict is quantitative, meaning a continuous numerical value, this process is called regression.
+
+**For example:** Predicting the exam score (a value like 82.5, 90.1) by looking at study hours in the table above is a regression problem.
+Or predicting tomorrow's ozone level based on atmospheric measurements is also a quantitative measurement.
+
+### Classification
+
+If the output we are trying to predict is qualitative, meaning one of specific classes or categories, this is called classification.
+There is no mathematical magnitude relationship between the classes.
+
+**For example:** The famous _MNIST_ dataset, where you look at a handwritten digit image and determine which digit (0,1...8,9) it is.
+
+To show an example data:
+
+<CsvViewer
+	data="Sepal Length (cm),Petal Length (cm),Species
+	5.1,1.4,Setosa
+	4.9,1.4,Setosa
+	7.0,4.7,Versicolor
+	6.4,4.5,Versicolor
+	6.3,6.0,Virginica
+	5.8,5.1,Virginica"
+	title="Iris Flower Classification Data (Fisher's Iris)"
+	pageSize={6}
+/>
+
+In the table above, the Sepal and Petal lengths, which are the physical measurements of a flower, are our inputs (X). The Species (Setosa, Versicolor, Virginica) that we are trying to predict based on these inputs is our categorical output (Y).
+By learning the pattern between these measurements and flower species, the model can classify which species a newly found flower in nature belongs to when we measure its petals.
+
+### Ensemble Learning
+
+We don't always have to rely on a single model when solving regression or classification problems. This is where Ensemble Learning comes into play. This approach involves training multiple models for the same task and combining their results. By aggregating the predictions of all models in the pool (e.g., by averaging or voting), the strongest overall result is obtained to solve the problem.
+
+Each individual algorithm working within this large ensemble structure is called a weak learner or base model.
+
+So why do we need multiple weak learners?
+
+Some weak learners may have high bias (they oversimplify the data).
+
+Others may have high variance (they overfit the training data and fail on new data).
+
+Theoretically, Ensemble Learning alleviates this famous bias-variance tradeoff by bringing together the best aspects of each base model. It's like getting a collective decision from a council of doctors with different specializations (a concilium) instead of trusting a single doctor's opinion for diagnosing a difficult disease. Even if one is wrong, the majority's decision usually yields the closest result to the truth.
+
+## Notation
+
+While researching in literature or different sources, you will see that these input and output values are always expressed with specific mathematical symbols:
+
+- X (Input): Represents the features we provide to the model. The observed values are usually denoted with lowercase `x`, while matrices (the entire dataset) are denoted with uppercase bold letters.
+- Y (Quantitative Output) / G (Qualitative Output): These are the actual results we are targeting. For categorical (Group) outputs, the letter `G` is also commonly used.
+- $\hat{Y}$ (Prediction): Represents the predicted value produced by our model. Our main goal is to find the rules that will make the $\hat{Y}$ value as close as possible to the actual $Y$ value using the training data we have.
+
+## Encoding Categorical Data for Computers
+
+So what if our output value is not a number but textual (qualitative) data like "Success/Failure" or "Cat/Dog"? How does a computer understand this?
+
+Since models work with mathematical equations, we need to convert (encode) these categories into numbers:
+
+- Binary Classes: This is the simplest method. Binary values are assigned, such as `1` for "Survived" and `0` for "Died" (or `-1` and `1`). The model can use the `.5` threshold as a basis when making predictions (e.g., if $\hat{Y} > 0.5$, it belongs to class 1).
+- Multiple Classes (Dummy Variables): If there are more than two categories (e.g., Red, Blue, Green), a method called Dummy Variables is used. A separate column is opened for each color, and vectors are created where the column corresponding to the current data's color is `1` (on) and the others are `0` (off).
+
+<CsvViewer
+	data="Vehicle,Price (TL),Color_Red,Color_Blue,Color_Green
+	Vehicle A,850000,1,0,0
+	Vehicle B,820000,0,1,0
+	Vehicle C,790000,0,0,1
+	Vehicle D,860000,1,0,0"
+	title="Dataset with Dummy Variables Applied"
+	pageSize={4}
+/>
+
+If you notice, "Vehicle A" only received a value of 1 in the Color_Red column because it is red. Now our model is ready to work not with text, but entirely with mathematical matrices consisting of 1s and 0s!

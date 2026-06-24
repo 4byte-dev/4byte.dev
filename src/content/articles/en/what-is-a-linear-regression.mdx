@@ -1,0 +1,218 @@
+---
+lang: 'en'
+slug: 'what-is-a-linear-regression'
+title: 'What is Linear Regression?'
+excerpt: 'Linear regression is a supervised machine learning algorithm used to model linear relationships from labeled datasets'
+category: 'machine-learning'
+tags: ['linear-regression', 'supervised-learning', 'teori']
+author: '@omerfdmrl'
+date: '2026-03-22'
+views: 0
+order: 2
+status: 'Published'
+---
+
+import ScatterChart3D from '../../../components/content/ScatterChart3D.astro'
+import ScatterChart from '../../../components/content/ScatterChart.astro'
+import CsvViewer from '../../../components/content/CsvViewer.astro'
+import JsonViewer from '../../../components/content/JsonViewer.astro'
+import Grid from '../../../components/content/Grid.astro'
+
+Linear regression is a supervised machine learning algorithm used to model linear relationships from labeled datasets.
+The model created allows us to make predictions on a different dataset.
+To use it, there must be a linear relationship between input and output, meaning the output must change at a constant rate as the input changes.
+This way, we can separate the data with a straight line.
+
+<Grid columns={2} >
+	<ScatterChart
+		title={"Linear"}
+		height={350}
+		showTrendline={true}
+		xAxis={{
+			min: 0,
+			max: 11,
+			tickInterval: 1,
+		}}
+		yAxis={{
+			min: 0,
+			max: 120,
+		}}
+		data={[
+			{ x: 1, y: 12 },
+			{ x: 2, y: 24 },
+			{ x: 3, y: 35 },
+			{ x: 4, y: 48 },
+			{ x: 5, y: 55 },
+			{ x: 6, y: 68 },
+			{ x: 7, y: 74 },
+			{ x: 8, y: 89 },
+			{ x: 9, y: 95 },
+			{ x: 10, y: 108 },
+		]}
+	/>
+
+    <ScatterChart
+    	title={"Non-Linear"}
+    	height={350}
+    	showTrendline={true}
+    	xAxis={{
+    		min: -6,
+    		max: 6,
+    		tickInterval: 1,
+    	}}
+    	yAxis={{
+    		min: 0,
+    		max: 40,
+    	}}
+    	data={[
+    		{ x: -5, y: 29 },
+    		{ x: -4, y: 20 },
+    		{ x: -3, y: 13 },
+    		{ x: -2, y: 8 },
+    		{ x: -1, y: 5 },
+    		{ x: 0, y: 4 },
+    		{ x: 1, y: 5 },
+    		{ x: 2, y: 8 },
+    		{ x: 3, y: 13 },
+    		{ x: 4, y: 20 },
+    		{ x: 5, y: 29 },
+    	]}
+    />
+
+</Grid>
+
+In the first graph here, we can separate our dataset because it is linear, but we cannot separate the $y = x^2 + 4$ parabola in the second example.
+
+## Variables and Terminology
+
+In statistics literature, input values are called predictors or more commonly, independent variables.
+Outputs are used as dependent variables.
+
+**For example:** Let's say we have a dataset that records how many hours students studied and their exam scores.
+
+<CsvViewer
+	data="Study Hours,Exam Score
+	1,42
+	2,48
+	3,55
+	4,61
+	5,67
+	6,74
+	7,81
+	8,86"
+	title="Student Study and Exam Score Data"
+	pageSize={5}
+/>
+
+From the data, we can see that as study hours increase, the score also rises.
+In this example, the exam score prediction is made based on study hours.
+
+- **Independent Variable:** Study hours because we can control and observe it.
+- **Dependent Variable:** Exam score because it depends on how many hours were studied.
+
+We use the independent variable (input) to predict the dependent variable (output).
+If there is one dependent and one independent variable as in this example, it is called **simple linear regression**.
+
+<Grid columns={2} >
+	<ScatterChart
+		title={"Simple Linear Regression"}
+		height={350}
+		xAxis={{
+			min: 0,
+			max: 11,
+			tickInterval: 1,
+		}}
+		yAxis={{
+			min: 0,
+			max: 120,
+		}}
+		data={[
+			{ x: 1, y: 12 },
+			{ x: 2, y: 24 },
+			{ x: 3, y: 35 },
+			{ x: 4, y: 48 },
+			{ x: 5, y: 55 },
+			{ x: 6, y: 68 },
+			{ x: 7, y: 74 },
+			{ x: 8, y: 89 },
+			{ x: 9, y: 95 },
+			{ x: 10, y: 108 },
+		]}
+	/>
+
+    <ScatterChart3D
+    	title={"Multiple Linear Regression"}
+    	height={350}
+    	xAxis={{
+    		min: 0,
+    		max: 11,
+    		tickInterval: 1,
+    	}}
+    	yAxis={{
+    		min: 0,
+    		max: 120,
+    	}}
+    	data={[
+    		{ x: 1, z: 5, y: 18, color: "red" },
+    		{ x: 2, z: 7, y: 25, color: "red" },
+    		{ x: 3, z: 6, y: 29, color: "blue" },
+    		{ x: 4, z: 8, y: 38, color: "blue" },
+    		{ x: 5, z: 10, y: 46, color: "green" },
+    		{ x: 6, z: 9, y: 50, color: "green" },
+    		{ x: 7, z: 12, y: 61, color: "orange" },
+    		{ x: 8, z: 11, y: 66, color: "orange" },
+    		{ x: 9, z: 14, y: 78, color: "purple" },
+    		{ x: 10, z: 13, y: 82, color: "purple" }
+    	]}
+    />
+
+</Grid>
+
+In our first example, $y = a + bx$ is a simple regression example. Because our independent variable is only `x`.
+In the second example, in the formula $y ≈ 5 + 4x + 2z$, `x` and `z` are independent variables, so there are 2 independent variables in total.
+Therefore, the first example is simple, and the second is **multiple linear regression**.
+
+If there are multiple independent variables (input) and we are trying to predict multiple dependent (output) variables, it is called **Multivariate Linear Regression**.
+For example, let's say we have the following dataset:
+
+<CsvViewer
+	data="Study Hours,Practice Tests Taken,Math Exam Score,Physics Exam Score
+	1,0,42,40
+	2,1,48,45
+	3,2,55,52
+	4,3,61,58
+	5,4,67,65
+	6,5,74,72
+	7,7,81,80
+	8,8,86,85"
+	title="Student Study and Exam Score Data"
+	pageSize={5}
+/>
+
+Here we are trying to predict math and physics exam results based on study hours and the number of practice tests taken.
+
+- $$y_1 = \beta_{01} + \beta_{11}x_1 + \beta_{21}x_2 + \epsilon_1$$
+- $$y_2 = \beta_{02} + \beta_{12}x_1 + \beta_{22}x_2 + \epsilon_2$$
+
+This gives us two different equations, and this is called multivariate linear regression.
+
+## How It Works
+
+In Linear Regression, relationships are modeled using **linear predictor functions** from known data, as we have shown in previous examples.
+The model answers the question "What is the expected output under these conditions?" by looking at the inputs we have, rather than the probability distribution of all variables.
+
+Linear regression is historically the first type of regression analysis that has been rigorously studied in statistics and widely used in practical applications.
+The main reason for this is that models that are linearly dependent on their unknown parameters are much easier to mathematically solve and fit compared to non-linear models.
+
+## Its Place in Machine Learning
+
+Linear regression is not just a classic statistical method, but also a fundamental **machine learning** algorithm. More specifically, it falls under the category of **supervised learning**.
+
+As in our student score examples, we provide the model with both the inputs (study hours) and the correct answers, i.e., labels (exam scores). The algorithm learns from this labeled dataset and maps the data points to the most optimized linear function that can be used to make predictions on new, previously unseen data.
+
+## Key Use Cases
+
+The practical applications of linear regression are generally divided into two main categories:
+
+- **Prediction and Forecasting:** If our goal is to predict a future or unavailable value by minimizing error, linear regression is an excellent tool. A predictive model is trained with existing data. Then, for a new situation where we only have input values (e.g., study hours), the output (exam score) is predicted.
+- **Explaining Relationships and Understanding Variance:** Sometimes the purpose is not just to make predictions, but to numerically measure the strength of the relationship between variables. For example, it is used to find how much change in independent variables leads to change in the dependent variable, to prove that some variables have no relevance to the result, or to identify which variables contain redundant/duplicate information with each other.
