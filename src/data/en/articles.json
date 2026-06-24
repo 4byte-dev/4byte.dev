@@ -1,1 +1,20 @@
-[]
+[
+	{
+		"title": "What is a Linear Model?",
+		"slug": "what-is-a-linear-model",
+		"category": "machine-learning",
+		"order": 3
+	},
+	{
+		"title": "What is Linear Regression?",
+		"slug": "what-is-a-linear-regression",
+		"category": "machine-learning",
+		"order": 2
+	},
+	{
+		"title": "What is Supervised Learning?",
+		"slug": "what-is-supervised-learning",
+		"category": "machine-learning",
+		"order": 1
+	}
+]

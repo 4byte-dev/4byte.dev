@@ -1,0 +1,272 @@
+---
+lang: 'en'
+slug: 'what-is-a-linear-model'
+title: 'What is a Linear Model?'
+excerpt: 'A linear model is a fundamental supervised machine learning algorithm used to mathematically model the linear relationship between input and output variables in labeled datasets.'
+category: 'machine-learning'
+tags: ['linear-regression', 'supervised-learning', 'teori']
+author: '@omerfdmrl'
+date: '2026-03-29'
+views: 0
+order: 3
+status: 'Published'
+---
+
+import HyperplaneScene from '../../../components/content/HyperplaneScene.astro'
+import GradientVectorScene from '../../../components/content/GradientVectorScene.astro'
+
+The first step into the world of machine learning and statistics usually begins with **Linear Models**.
+This approach, which has been the most fundamental building block of data science for decades, allows us to express seemingly complex relationships in data with a simple and linear equation.
+At its core, what it does is very clear: It tries to predict the output value $Y$ given the input vector $X^T = (X_1, X_2, X_3 ...)$:
+
+$$
+\hat{Y} = \hat{\beta}_0 + \sum_{j=1}^p X_j \hat{\beta}_j
+$$
+
+$\hat{\beta}_0$ is the **bias (intercept)** value. If we write this formula with $X$ as a vector:
+
+$$
+\hat{Y} = X^{\top} \hat{\beta}
+$$
+
+## Understanding Dot Product
+
+Let's break down the formula step by step to better understand it:
+
+$$
+\hat{Y}=\hat{\beta}_0 + X_1\hat{\beta}_1 + X_2\hat{\beta}_2 + \cdots + X_p\hat{\beta}_p
+$$
+
+Here, each $X_j$ is a single feature value and is a scalar:
+
+$$
+X_j \in \mathbb{R}
+$$
+
+Similarly, each coefficient is also a scalar:
+
+$$
+\hat{\beta}_j \in \mathbb{R}
+$$
+
+Therefore, the product of two real numbers yields a single real number:
+
+$$
+X_j \hat{\beta}_j \in \mathbb{R}
+$$
+
+For example:
+
+$$
+X_1=3,\quad \hat{\beta}_1=4
+$$
+
+then:
+
+$$
+X_1\hat{\beta}_1 = 12
+$$
+
+is obtained.
+
+This 12 is now a **scalar**; it is not a vector or matrix, but just a single number.
+
+The same applies to all terms:
+
+$$
+X_2\hat{\beta}_2,\; X_3\hat{\beta}_3,\; \ldots,\; X_p\hat{\beta}_p
+$$
+
+each produces scalar values individually.
+
+As a result, their sum is also a single number:
+
+$$
+\hat{Y}\in \mathbb{R}
+$$
+
+Therefore, the output of a linear model is a single scalar prediction.
+Each product is also a scalar, and this is called the **dot product (inner product)**.
+
+### Including the Bias
+
+Instead of writing the bias separately, we can extend the feature vector:
+
+$$
+X =
+\begin{bmatrix}
+1 \\ X_1 \\ X_2 \\ \vdots \\ X_p
+\end{bmatrix},
+\quad
+\hat{\beta} =
+\begin{bmatrix}
+\hat{\beta}_0 \\ \hat{\beta}_1 \\ \hat{\beta}_2 \\ \vdots \\ \hat{\beta}_p
+\end{bmatrix}
+$$
+
+The reason we start with 1 is to be able to include the $\hat{\beta}_0$ value in the formula as well.
+
+### Why is Transpose Needed?
+
+We cannot directly multiply two column vectors.
+
+$$
+X =
+\begin{bmatrix}
+1 \\ X_1 \\ X_2 \\ \vdots \\ X_p
+\end{bmatrix}
+=
+(p + 1)\times1,
+\quad
+\hat{\beta} =
+\begin{bmatrix}
+\hat{\beta}_0 \\ \hat{\beta}_1 \\ \hat{\beta}_2 \\ \vdots \\ \hat{\beta}_p
+\end{bmatrix} =
+(p + 1)\times1
+$$
+
+In dot product multiplication, the inner dimensions must be the same. Therefore, we need to write one of them as a row.
+
+$$
+((p + 1)\times1) \times ((p + 1)\times1) \rightarrow (1\times(p + 1)) \times ((p + 1)\times1)
+$$
+
+$$
+= 1\times1
+$$
+
+So now:
+
+$$
+X =
+\begin{bmatrix}
+1 & X_1 & X_2 & \ldots & X_p
+\end{bmatrix}
+=
+1\times(p + 1),
+\quad
+\hat{\beta} =
+\begin{bmatrix}
+\hat{\beta}_0 \\ \hat{\beta}_1 \\ \hat{\beta}_2 \\ \vdots \\ \hat{\beta}_p
+\end{bmatrix} =
+(p + 1)\times1
+$$
+
+### Example Solution
+
+Let there be two features:
+
+$$
+X=
+\begin{bmatrix}
+1\\
+3\\
+5
+\end{bmatrix}
+,\quad
+\hat{\beta}=
+\begin{bmatrix}
+2\\
+4\\
+6
+\end{bmatrix}
+$$
+
+Then:
+
+$$
+X^\top \hat{\beta}
+=
+\begin{bmatrix}
+1 & 3 & 5
+\end{bmatrix}
+\begin{bmatrix}
+2\\
+4\\
+6
+\end{bmatrix}
+$$
+
+Result:
+
+$$
+=1\cdot2 + 3\cdot4 + 5\cdot6
+$$
+
+$$
+=44
+$$
+
+## Hyperplane
+
+The geometric meaning of a linear model is a **hyperplane**. Let's think with two features ($X_1, X_2$) and one output ($Y$).
+The predictions produced by our model ($\hat{Y}$) form a flat surface, i.e., a plane (or a hyperplane in higher dimensions), extending along the $X_1$ and $X_2$ axes.
+
+In the visualization below; the blue plane represents the hyperplane created by our linear model in space, the points represent actual data points, and the red dashed lines represent the distances of the actual data to our model (plane):
+
+<HyperplaneScene
+	title="Linear Model Hyperplane"
+	height={420}
+	xAxisLabel="X₁"
+	yAxisLabel="Y"
+	zAxisLabel="X₂"
+	xRange={{ min: 0, max: 11 }}
+	yRange={{ min: 10, max: 90 }}
+	zRange={{ min: 4, max: 15 }}
+	planeNormal={{ x: 0.5, y: -1, z: 0.8 }}
+	planePoint={{ x: 5.5, y: 50, z: 9 }}
+	planeColor="#3b82f6"
+	planeOpacity={0.3}
+	showResiduals={true}
+	residualColor="#ef4444"
+	residualDashed={true}
+	points={[
+		{ position: { x: 1, y: 18, z: 5 }, color: '#3b82f6' },
+		{ position: { x: 2, y: 25, z: 7 }, color: '#3b82f6' },
+		{ position: { x: 3, y: 29, z: 6 }, color: '#3b82f6' },
+		{ position: { x: 4, y: 38, z: 8 }, color: '#22c55e' },
+		{ position: { x: 5, y: 46, z: 10 }, color: '#22c55e' },
+		{ position: { x: 6, y: 50, z: 9 }, color: '#22c55e' },
+		{ position: { x: 7, y: 61, z: 12 }, color: '#f59e0b' },
+		{ position: { x: 8, y: 66, z: 11 }, color: '#f59e0b' },
+		{ position: { x: 9, y: 78, z: 14 }, color: '#8b5cf6' },
+		{ position: { x: 10, y: 82, z: 13 }, color: '#8b5cf6' },
+	]}
+/>
+
+Each point is orthogonally projected onto the hyperplane. The difference between the actual value ($Y$) and the model's prediction on the plane ($\hat{Y}$) is called the **residual**:
+$e_i = Y_i - \hat{Y}_i$.
+
+> **Note:** How this plane is placed in space and how these residual errors are minimized is the subject of optimization methods. The linear model is simply the mathematical definition of this plane.
+
+### Coefficients and the Gradient Vector
+
+When we think of the linear model's equation as a function, $f(X) = X^\top \beta$, what determines the model's slope in space is the $\beta$ coefficients. Mathematically, the **gradient** of a function indicates the direction of steepest ascent at that point.
+
+For a linear model, this gradient is directly equal to the coefficient vector:
+
+$$
+f'(X) = \nabla f(X) = \beta
+$$
+
+So the $\beta$ vector indicates the direction in which the model's output ($\hat{Y}$) increases fastest in the input space.
+
+<GradientVectorScene
+	title="∇f — Direction of Steepest Ascent"
+	height={380}
+	axisRange={6}
+	gradientDirection={{ x: 3, y: 4, z: 0 }}
+	gradientOrigin={{ x: 1, y: 1, z: 0 }}
+	gradientColor="#22c55e"
+	gradientLabel="∇f (β)"
+	showPlane={true}
+	planeCenter={{ x: 3, y: 0, z: 3 }}
+	planeNormal={{ x: 0, y: 1, z: 0 }}
+	planeColor="#71717a"
+	planeOpacity={0.15}
+	points={[{ position: { x: 1, y: 1, z: 0 }, color: '#f59e0b', label: 'X' }]}
+	lines={[{ from: { x: 1, y: 1, z: 0 }, to: { x: 1, y: 0, z: 0 }, dashed: true, color: '#71717a' }]}
+/>
+
+In the visualization above, the green arrow represents the $\nabla f$ (i.e., $\beta$) vector, and the orange dot represents the current position $X$.
+Since the slope of the plane is constant in a linear model, this direction is the same everywhere. The algorithms we use when training models (e.g., Gradient Descent) use these vectorial properties to bring the model to the most accurate position.
