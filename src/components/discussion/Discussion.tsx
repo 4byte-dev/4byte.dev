@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react'
-import { t } from '../../i18n/index.ts'
 
 export interface DiscussionProps {
-	slug: string
-	labels: any
 	lang: string
 }
 
-export default function Discussion({ labels, lang }: DiscussionProps) {
+export default function Discussion({ lang }: DiscussionProps) {
 	const containerRef = useRef<HTMLDivElement>(null)
+
+	const getGiscusTheme = () => {
+		return document.documentElement.classList.contains('dark') ? 'dark_dimmed' : 'light_dimmed'
+	}
 
 	useEffect(() => {
 		if (!containerRef.current) return
@@ -24,19 +25,29 @@ export default function Discussion({ labels, lang }: DiscussionProps) {
 		script.setAttribute('data-reactions-enabled', '1')
 		script.setAttribute('data-emit-metadata', '0')
 		script.setAttribute('data-input-position', 'bottom')
-		script.setAttribute('data-theme', 'preferred_color_scheme')
+		script.setAttribute('data-theme', getGiscusTheme())
 		script.setAttribute('data-lang', lang === 'tr' ? 'tr' : 'en')
 		script.crossOrigin = 'anonymous'
 		script.async = true
 
 		containerRef.current.appendChild(script)
+
+		const observer = new MutationObserver(() => {
+			const iframe = document.querySelector('iframe.giscus-frame') as HTMLIFrameElement
+			if (iframe) {
+				iframe.contentWindow?.postMessage(
+					{ giscus: { setConfig: { theme: getGiscusTheme() } } },
+					'https://giscus.app'
+				)
+			}
+		})
+		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
+		return () => observer.disconnect()
 	}, [lang])
 
 	return (
 		<div className="mt-16 pt-8 border-t border-border dark:border-border-dark" id="discussion">
-			<h2 className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-6">
-				{t(labels, 'discussion.title')}
-			</h2>
 			<div ref={containerRef} className="giscus-wrapper" />
 		</div>
 	)
