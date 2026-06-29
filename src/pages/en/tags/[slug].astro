@@ -37,12 +37,8 @@ const tagArticles = allArticles.filter(
 			#{tag.slug}
 		</h1>
 		<p class="text-muted-foreground dark:text-muted-dark-foreground mb-8">{tag.description}</p>
-		{tagArticles.length}
-		{t(labels, 'tags.articlesTagged')}
-		<span class="font-mono text-foreground dark:text-foreground-dark">#{tag.slug}</span>.
-	</div>
 
-	<div class="bg-background dark:bg-background-dark rounded-lg shadow-flat-sm overflow-hidden">
+		<div class="bg-background dark:bg-background-dark rounded-lg shadow-flat-sm overflow-hidden">
 		{
 			tagArticles.length === 0 ? (
 				<div class="px-5 py-8 text-center text-sm text-muted-foreground dark:text-muted-dark-foreground">
@@ -75,5 +71,6 @@ const tagArticles = allArticles.filter(
 				))
 			)
 		}
+	</div>
 	</div>
 </DocsLayout>
